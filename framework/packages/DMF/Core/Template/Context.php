@@ -1,6 +1,6 @@
 <?php
 
-    namespace DMF\Core\Template\Context;
+    namespace DMF\Core\Template;
 
     use DMF\Core\Template\Exception\ContextElementExists;
 
