@@ -6,7 +6,7 @@
      * будут переданы во все шаблоны автоматически
      */
 
-    use DMF\Core\Template\Context\Context;
+    use DMF\Core\Template\Context;
 
     /** Загрузка и инициализация списка шаблонного контекста */
 

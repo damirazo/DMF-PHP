@@ -43,6 +43,12 @@
             return self::parse_namespace($namespace)[0];
         }
 
+        /**
+         * Возвращает корневой путь для указанного пространства имен
+         * @param string $namespace Пространство имен
+         * @return string
+         * @throws Exception\ClassNotFound
+         */
         public static function get_root_path($namespace)
         {
             $root_namespace = self::get_root_namespace($namespace);
@@ -59,7 +65,7 @@
         }
 
         /**
-         * Возвращает корневой путь для указанного пространства имен
+         * Возвращает полный путь для указанного пространства имен
          * @param string $namespace Пространство имен
          * @return string
          * @throws Exception\ClassNotFound

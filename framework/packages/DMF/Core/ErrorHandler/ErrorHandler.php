@@ -2,6 +2,8 @@
 
     namespace DMF\Core\ErrorHandler;
 
+    use Exception;
+
     /**
      * Перехват и вывод ошибок
      */
@@ -55,6 +57,39 @@
         }
 
         /**
+         * Создание стека вызова
+         * @param array $trace Стек
+         * @return array
+         */
+        protected static function backtrace($trace)
+        {
+            $backtrace = [];
+            foreach (array_reverse($trace) as $data) {
+                $args = [];
+                if (isset($data['args']) && is_array($data['args']) && count($data['args']) > 0) {
+                    $arguments = $data['args'];
+                    foreach ($arguments as $argument) {
+                        if ($argument instanceof \Exception) {
+                            $bt = self::backtrace($argument->getTrace());
+                            foreach ($bt as $b) {
+                                $backtrace[] = $b;
+                            }
+                        }
+                    }
+                }
+                $backtrace[] = [
+                    'file'     => isset($data['file']) ? $data['file'] : '-',
+                    'line'     => isset($data['line']) ? $data['line'] : '-',
+                    'class'    => isset($data['class']) ? $data['class'] : '-',
+                    'function' => isset($data['function']) ? $data['function'] : '-',
+                    'type'     => isset($data['type']) ? ($data['type'] == '::' ? 'статический' : 'обычный') : '-',
+                    'args'     => $args
+                ];
+            }
+            return $backtrace;
+        }
+
+        /**
          * Вывод информации о перехваченной ошибке
          * @param string   $message   Текст ошибки
          * @param string   $file      Название файла
@@ -67,6 +102,7 @@
                 ob_end_clean();
             }
             http_response_code($http_code);
+            $error_stack = self::backtrace(debug_backtrace());
             $error_file = str_replace(PROJECT_PATH, '{PROJECT_PATH}' . _SEP, $file);
             $error_data = (DEBUG) ? $error_file . ':' . $line : 'скрыто';
             require_once CORE_PATH . 'ErrorHandler' . _SEP . 'templates' . _SEP . 'error.php';

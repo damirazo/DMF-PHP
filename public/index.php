@@ -15,16 +15,27 @@
     session_start();
 
     /** Переключение рабочего окружения */
-    define('ENVIRONMENT', 'dev');
-    if (ENVIRONMENT == 'dev' || ENVIRONMENT == 'test') {
-        define('DEBUG', true);
-        error_reporting(E_ALL);
-        ini_set('display_errors', 1);
-    }
-    else {
-        define('DEBUG', false);
-        error_reporting(E_ALL | ~E_NOTICE);
-        ini_set('display_errors', 0);
+    define('ENVIRONMENT', 'prod');
+    /** Определения рабочих окружений */
+    switch(ENVIRONMENT) {
+        /** Окружение для разработки */
+        case 'dev':
+            define('DEBUG', true);
+            error_reporting(E_ALL);
+            ini_set('display_errors', 1);
+            break;
+        /** Окружение для развертывания и тестирования */
+        case 'test':
+            define('DEBUG', true);
+            error_reporting(E_ALL | ~E_NOTICE);
+            ini_set('display_errors', 1);
+            break;
+        /** Рабочее окружение */
+        case 'prod':
+            define('DEBUG', false);
+            error_reporting(E_ALL | ~E_NOTICE);
+            ini_set('display_errors', 0);
+            break;
     }
 
     /******************************
