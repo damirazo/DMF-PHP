@@ -7,7 +7,13 @@
      */
 
     use DMF\Core\Template\Context;
+    use DMF\Core\Http\Request;
 
     /** Загрузка и инициализация списка шаблонного контекста */
 
+    /** Активирован ли режим дебага */
     Context::add('debug', DEBUG);
+    /** Базовый URL сайта */
+    Context::add('base_url', Request::get_instance()->base_url());
+    /** Путь до папки статичных файлов */
+    Context::add('static_url', Request::get_instance()->base_url() . '/static/');

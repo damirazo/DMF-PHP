@@ -2,13 +2,13 @@
 
     namespace DMF\Core\Template;
 
-    use DMF\Core\Component\Component;
+    use DMF\Core\Application\Application;
     use DMF\Core\Http\Response;
 
     /**
      * Базовый класс для реализации шаблонов
      */
-    class Template extends Component
+    class Template
     {
 
         /** @var string Имя шаблона */
@@ -40,10 +40,10 @@
          */
         public function render()
         {
-            $debug = $this->config('debug');
+            $debug = DEBUG;
             // Объект загрузчика
             $loader = new \Twig_Loader_Filesystem(
-                APP_PATH . $this->get_module_name() . _SEP . 'View'
+                APP_PATH . Application::get_instance()->module->name . _SEP . 'View'
             );
             // Объект окружения
             $twig = new \Twig_Environment($loader, [

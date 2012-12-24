@@ -12,7 +12,6 @@
 
         /**
          * Главная страница
-         * @return \DMF\Core\Http\Response
          */
         public function index()
         {

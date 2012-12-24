@@ -1,0 +1,14 @@
+{% extends 'base.twig' %}
+
+{% block title %}Список примеров{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="span3">sidebar</div>
+            <div class="span9">
+                {% block data %}defaul{% endblock %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

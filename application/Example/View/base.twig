@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>DMF &bull; {% block title %}Главная страница{% endblock %}</title>
+    <link rel="stylesheet" href="{{ static_url }}styles/bootstrap.min.css">
+</head>
+<body>
+
+<div class="container">&nbsp;</div>
+
+<div class="container">
+    <div class="navbar navbar-inverse">
+        <div class="navbar-inner">
+            <a href="{{ base_url }}" class="brand">DMF</a>
+            <ul class="nav">
+                <li><a href="{{ base_url }}#">Диагностика</a></li>
+                <li><a href="{{ base_url }}#">Примеры</a></li>
+                <li><a href="{{ base_url }}#">Документация</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+{% block content %}{% endblock %}
+
+<script type="text/javascript" src="//code.jquery.com/jquery.min.js"></script>
+<script type="text/javascript" src="{{ static_url }}scripts/bootstrap.min.js"></script>
+</body>
+</html>

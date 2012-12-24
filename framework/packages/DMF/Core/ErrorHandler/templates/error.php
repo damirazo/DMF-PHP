@@ -54,7 +54,7 @@
 
         .error-stack-element p strong {
             display: inline-block;
-            width: 100px;
+            width: 200px;
         }
     </style>
 </head>
@@ -78,8 +78,8 @@
             <p><strong>Файл:</strong><?php echo $element['file']; ?></p>
             <p><strong>Строка:</strong><?php echo $element['line'];?></p>
             <p><strong>Класс:</strong><?php echo $element['class']; ?></p>
-            <p><strong>Тип класса:</strong><?php echo $element['type']; ?></p>
-            <p><strong>Функция:</strong><?php echo $element['function']; ?></p>
+            <p><strong>Функция/Метод:</strong><?php echo $element['function']; ?></p>
+            <p><strong>Тип функции/метода:</strong><?php echo $element['type']; ?></p>
         </div>
         <?php endforeach; ?>
     <?php else: ?>

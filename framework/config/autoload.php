@@ -25,9 +25,11 @@
     Autoloader::register_namespaces(
         [
             // Дефолтное пространство для приложений
-            'App' => APP_PATH,
+            'App'  => APP_PATH,
             // Дефолтное пространство фреймворка
-            'DMF' => DMF_PATH
+            'DMF'  => DMF_PATH,
+            // Пространство имен шаблонизатора Twig (PSR-0 формат)
+            'Twig' => PACKAGES_PATH . 'Twig' . _SEP . 'lib' . _SEP . 'Twig'
         ]
     );
 
