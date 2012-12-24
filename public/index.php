@@ -15,7 +15,7 @@
     session_start();
 
     /** Переключение рабочего окружения */
-    define('ENVIRONMENT', 'prod');
+    define('ENVIRONMENT', 'dev');
     /** Определения рабочих окружений */
     switch(ENVIRONMENT) {
         /** Окружение для разработки */

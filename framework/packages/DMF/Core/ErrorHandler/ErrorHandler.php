@@ -78,7 +78,8 @@
                     }
                 }
                 $backtrace[] = [
-                    'file'     => isset($data['file']) ? $data['file'] : '-',
+                    'file'     => isset($data['file']) ?
+                            str_replace(PROJECT_PATH, '{PROJECT_PATH}' . _SEP, $data['file']) : '-',
                     'line'     => isset($data['line']) ? $data['line'] : '-',
                     'class'    => isset($data['class']) ? $data['class'] : '-',
                     'function' => isset($data['function']) ? $data['function'] : '-',

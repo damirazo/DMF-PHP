@@ -16,7 +16,7 @@
          */
         public function index()
         {
-            return $this->string('Привет, Мир!');
+            return $this->render('index');
         }
 
     }
