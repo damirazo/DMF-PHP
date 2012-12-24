@@ -1,0 +1,444 @@
+<?php
+
+    /**
+     * Этот файл часть фреймворка DM Framework
+     *
+     * (c) damirazo <damirazo.kazan@gmail.com> 2012
+     * Model.php
+     * 19.11.12, 22:46
+     */
+
+    namespace DMF\Core\Model;
+
+    use DMF\Core\Component\Component;
+    use DMF\Core\Storage\Config;
+
+    /**
+     * Базовая модель
+     */
+    class Model extends Component
+    {
+
+        /** @var null|string Имя таблицы в БД */
+        public $table_name = null;
+
+        /**
+         * Возвращает текущую схему БД
+         * @return array
+         */
+        public function _scheme()
+        {
+            return [];
+        }
+
+        /**
+         * Возвращает строку с префиксом к имени таблицы
+         * Возможно переопределить в дочернем классе для использования собственных префиксов
+         * @return mixed
+         */
+        protected function _get_table_prefix()
+        {
+            return $this->config('database')['prefix'];
+        }
+
+        /**
+         * Возвращает строку с именем таблицы БД
+         * @return string
+         */
+        public function _get_table_name()
+        {
+            if (is_null($this->table_name)) {
+                return $this->_get_table_prefix() . strtolower($this->get_class_name()) . 's';
+            }
+
+            return $this->_get_table_prefix() . $this->table_name;
+        }
+
+        /**
+         * Возвращает массив полей в таблице
+         * @return array
+         */
+        protected function _generate_sql_for_model_fields()
+        {
+            $scheme = $this->_scheme();
+            $fields = [];
+            /**
+             * @var $field_object \DMF\Core\Model\Field\BaseField
+             */
+            foreach ($scheme as $field_name => $field_object) {
+                $fields[] = trim($field_object->create_sql($field_name));
+            }
+
+            return $fields;
+        }
+
+        /**
+         * Обновление структуры таблицы в БД
+         */
+        public function _update_table()
+        {
+            $check_table = self::$db->query('SHOW TABLES LIKE :table', ['table' => $this->_get_table_name()]);
+            if ($check_table->num_rows() == 1) {
+                $this->_drop_table();
+            }
+            $this->_create_table();
+        }
+
+        /**
+         * Создание новой таблицы
+         * @return bool
+         */
+        public function _create_table()
+        {
+            self::$db->exec($this->_generate_sql_for_table());
+        }
+
+        /**
+         * Удаление таблицы
+         * @return bool
+         */
+        public function _drop_table()
+        {
+            self::$db->exec('DROP TABLE IF EXISTS ' . $this->_get_table_name());
+        }
+
+        /**
+         * Возвращает SQL код, необходимый для создания текущей схемы таблицы
+         */
+        public function _generate_sql_for_table()
+        {
+            $query = 'CREATE TABLE IF NOT EXISTS `' . $this->_get_table_name() . '` (' . PHP_EOL;
+            $fields = $this->_generate_sql_for_model_fields();
+            $query .= implode(',' . PHP_EOL, $fields) . PHP_EOL . ')';
+
+            return $query;
+        }
+
+        /**
+         * Возвращает имя первичного ключа таблицы
+         * @return bool|int|string
+         */
+        protected function _get_primary_key_field_name()
+        {
+            foreach ($this->_scheme() as $field_name => $field_object) {
+                if ($field_object instanceof \DMF\Core\Model\Field\PrimaryKeyField) {
+                    return $field_name;
+                }
+            }
+
+            return 'id';
+        }
+
+        /**
+         * Генерация параметризированного SQL кода
+         *
+         * @param array $condition Список параметров для выборки
+         *
+         * @return array
+         */
+        protected function _get_sql_from_condition($condition)
+        {
+            if (count($condition) <= 0) {
+                return '';
+            }
+            $result = [
+                'queries' => [],
+                'params'  => []
+            ];
+            $i = 0;
+            foreach ($condition as $field_cond => $value) {
+                $data = explode('__', $field_cond);
+                $field_name = $data[0];
+                /** Обработка логического условия */
+                if ($i == 0) {
+                    $precond = '';
+                } elseif (substr($data[0], 0, 1) == '~') {
+                    $precond = ' OR ';
+                    $field_name = substr($data[0], 1);
+                } else {
+                    $precond = ' AND ';
+                }
+                /** Создание массива значений для выборки */
+                if (count($data) == 1) {
+                    $result['queries'][] = $precond . $field_name . '=:' . $field_name;
+                    $result['params'][$field_name] = $value;
+                } else {
+                    $cond = $data[1];
+                    switch ($cond) {
+                        /** Проверка на точное совпадение */
+                        case 'equal':
+                            $result['queries'][] = $precond . $field_name . '=:' . $field_name;
+                            $result['params'][$field_name] = $value;
+                            break;
+                        /** Проверка на точное различие */
+                        case 'not_equal':
+                            $result['queries'][] = $precond . $field_name . '!=:' . $field_name;
+                            $result['params'][$field_name] = $value;
+                            break;
+                        /** Проверка на больше */
+                        case 'gt':
+                            $result['queries'][] = $precond . $field_name . '>:' . $field_name;
+                            $result['params'][$field_name] = $value;
+                            break;
+                        /** Проверка на больше или равно */
+                        case 'gte':
+                            $result['queries'][] = $precond . $field_name . '>=:' . $field_name;
+                            $result['params'][$field_name] = $value;
+                            break;
+                        /** Проверка на меньше */
+                        case 'lt':
+                            $result['queries'][] = $precond . $field_name . '<:' . $field_name;
+                            $result['params'][$field_name] = $value;
+                            break;
+                        /** Проверка на меньше или равно */
+                        case 'lte':
+                            $result['queries'][] = $precond . $field_name . '<=:' . $field_name;
+                            $result['params'][$field_name] = $value;
+                            break;
+                        /** Проверка на то, что значение начинается с нужной подстроки */
+                        case 'startswith':
+                            $result['queries'][] = $precond . $field_name . ' LIKE :' . $field_name;
+                            $result['params'][$field_name] = $value . '%';
+                            break;
+                        /** Проверка на то, что значение заканчивается нужной подстрокой */
+                        case 'endswith':
+                            $result['queries'][] = $precond . $field_name . ' LIKE :' . $field_name;
+                            $result['params'][$field_name] = '%' . $value;
+                            break;
+                        /** Проверка на то, что значение содержит нужную подстроку */
+                        case 'contains':
+                            $result['queries'][] = $precond . $field_name . ' LIKE :' . $field_name;
+                            $result['params'][$field_name] = '%' . $value . '%';
+                            break;
+                        /** Проверка на то, что значение есть в списке */
+                        case 'in':
+                            if (is_array($value)) {
+                                $value = implode(', ', $value);
+                            }
+                            $result['queries'][] = $precond . $field_name . ' IN(:' . $field_name . ')';
+                            $result['params'][$field_name] = implode(', ', $value);
+                            break;
+                        /** Проверка на то, что значение равно или не равно нулю */
+                        case 'is_null':
+                            if ($value === true) {
+                                $result['queries'][] = $precond . $field_name . ' IS NULL ';
+                            } else {
+                                $result['queries'][] = $precond . $field_name . ' IS NOT NULL ';
+                            }
+                            break;
+                        default:
+                            $result['queries'][] = $precond . $field_name . '=:' . $field_name;
+                            $result['params'][$field_name] = $value;
+                            break;
+                    }
+                }
+                $i++;
+            }
+
+            return [
+                'query'  => ' WHERE ' . implode('', $result['queries']),
+                'params' => $result['params']
+            ];
+        }
+
+        /**
+         * Генерация SQL кода для сортировки вывода
+         *
+         * @param string|array $order_by
+         *
+         * @return string
+         */
+        protected function _get_sql_from_order_by($order_by)
+        {
+            if (count($order_by) <= 0) {
+                return '';
+            }
+            if (is_string($order_by)) {
+                if (substr($order_by, 0, 1) == '~') {
+                    $order_direction = 'DESC';
+                    $order_by = substr($order_by, 1);
+                } else {
+                    $order_direction = 'ASC';
+                }
+
+                return ' ORDER BY ' . $order_by . ' ' . $order_direction;
+            } else {
+                $data = [];
+                foreach ($order_by as $field) {
+                    if (substr($field, 0, 1) == '~') {
+                        $order_direction = 'DESC';
+                        $field = substr($field, 1);
+                    } else {
+                        $order_direction = 'ASC';
+                    }
+                    $data[] = $field . ' ' . $order_direction;
+                }
+
+                return ' ORDER BY ' . implode(', ', $data);
+            }
+        }
+
+        /**
+         * Генерация SQL кода для реализации лимита выборки
+         *
+         * @param string|int $limit Лимит выборки
+         *
+         * @return string
+         */
+        protected function _get_sql_from_limit($limit)
+        {
+            if (is_null($limit)) {
+                return '';
+            }
+
+            return ' LIMIT ' . $limit;
+        }
+
+        /**
+         * Возвращает массив, содержащий имена полей БД
+         * @return array
+         */
+        protected function _get_table_fields()
+        {
+            return array_keys($this->_scheme());
+        }
+
+        /**
+         * Выбор связанных полем ForeignKey объектов
+         *
+         * @param array $data Массив выбранных данных
+         *
+         * @return array
+         */
+        protected function _get_chained_object($data)
+        {
+            $chained_fields = [];
+            foreach ($data as $field_name => $value) {
+                if (isset($this->_scheme()[$field_name])) {
+                    $field_object = $this->_scheme()[$field_name];
+                    if ($field_object instanceof \DMF\Core\Model\Field\ForeignKeyField) {
+                        $c_module = $field_object->chained_module;
+                        $c_model = $field_object->chained_model;
+                        $chained_model_namespace = 'Application\\' . $c_module . '\\Model\\' . $c_model;
+                        /** @var $chained_model \DMF\Core\Model\Model  */
+                        $chained_model = new $chained_model_namespace();
+                        $chained_fields[$field_name] = $chained_model->get_by_pk((int)$value);
+                    }
+                }
+            }
+
+            return $chained_fields;
+        }
+
+        /**
+         * Возвращает один объект, выбранный по первичному ключу
+         * @param int   $pk     Первичный ключ
+         * @param array $fields Список выбираемых из таблицы полей
+         *
+         * @return array
+         */
+        public function get_by_pk($pk, $fields = [])
+        {
+            $select_fields = (count($fields) > 0) ? $fields : $this->_get_table_fields();
+            $data = self::$db->query(
+                'SELECT ' . implode(', ', $select_fields) . ' FROM ' . $this->_get_table_name() . ' WHERE '
+                    . $this->_get_primary_key_field_name() . '=:pk LIMIT 1',
+                ['pk' => (int)$pk]
+            );
+            if ($data->num_rows() == 1) {
+                return $data->fetch_one();
+            }
+
+            return [];
+        }
+
+        /**
+         * Выборка массива объектов для определенной страницы
+         * @param array $order_by  Поле для сортировки
+         * @param array $condition Условия для выборки
+         * @param int   $limit     Количество объектов
+         * @param array $fields    Список выбираемых полей
+         *
+         * @return array|string
+         */
+        public function get_by_condition($condition = [], $order_by = [], $limit = null, $fields = [])
+        {
+            $select_fields = (count($fields) > 0) ? $fields : $this->_get_table_fields();
+            $sql_condition = $this->_get_sql_from_condition($condition);
+            $sql = 'SELECT ' . implode(', ', $select_fields) . ' FROM ' . $this->_get_table_name()
+                . $sql_condition['query']
+                . $this->_get_sql_from_order_by($order_by)
+                . $this->_get_sql_from_limit($limit);
+
+            $data = self::$db->query($sql, $sql_condition['params']);
+            if ($data->num_rows() > 0) {
+                return $data->fetch_all();
+            }
+
+            return [];
+        }
+
+        /**
+         * Обновление объекта по его первичному ключу
+         * @param array $data Данные для обновления
+         * @param int   $pk   Первичный ключ
+         */
+        public function update_by_pk($data, $pk)
+        {
+            $fields = $this->_get_table_fields();
+            $sql = [];
+            $params = [];
+            foreach ($data as $key => $value) {
+                if (in_array($key, $fields)) {
+                    $sql[] = $key . '=:u_' . $key;
+                    $params['u_' . $key] = $value;
+                }
+            }
+            $params['pk'] = $pk;
+            $result_code = 'UPDATE ' . $this->_get_table_name() . ' SET ' . implode(', ', $sql)
+                . ' WHERE ' . $this->_get_primary_key_field_name() . '=:pk';
+            self::$db->query($result_code, $params);
+        }
+
+        /**
+         * Обновление объектов по определенному условию
+         * @param array $data      Данные для обновления
+         * @param array $condition Условия для выборки
+         */
+        public function update_by_condition($data, $condition)
+        {
+            $cond = $this->_get_sql_from_condition($condition);
+            $fields = $this->_get_table_fields();
+            $sql = [];
+            $params = [];
+            foreach ($data as $key => $value) {
+                if (in_array($key, $fields)) {
+                    $sql[] = $key . '=:u_' . $key;
+                    $params['u_' . $key] = $value;
+                }
+            }
+            $result_params = array_merge($params, $cond['params']);
+            $result_code = 'UPDATE ' . $this->_get_table_name() . ' SET ' . implode(', ', $sql) . $cond['query'];
+            self::$db->query($result_code, $result_params);
+        }
+
+        /**
+         * Создание нового объекта в БД
+         * @param array $data Данные для создания объекта
+         */
+        public function create($data)
+        {
+            $fields = $this->_get_table_fields();
+            $sql = [];
+            $params = [];
+            foreach ($data as $key => $value) {
+                if (in_array($key, $fields)) {
+                    $sql[] = $key . '=:u_' . $key;
+                    $params['u_' . $key] = $value;
+                }
+            }
+            $result_code = 'INSERT INTO ' . $this->_get_table_name() . ' SET ' . implode(', ', $sql);
+            self::$db->query($result_code, $params);
+        }
+
+    }

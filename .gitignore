@@ -1,0 +1,15 @@
+.idea/*
+
+application/*
+!Example
+
+framework/config/config.local.php
+
+framework/data/cache/templates/*
+!.gitkeep
+
+framework/data/migrations/*
+!.gitkeep
+
+framework/data/fixtures/*
+!.gitkeep
