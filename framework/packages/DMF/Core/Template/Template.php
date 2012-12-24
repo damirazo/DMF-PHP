@@ -47,7 +47,7 @@
             );
             // Объект окружения
             $twig = new \Twig_Environment($loader, [
-                'cache' => DATA_PATH . 'templates_cache',
+                'cache' => DATA_PATH . 'cache' . _SEP . 'templates',
                 'debug' => $debug
             ]);
             // Глобальные переменные
