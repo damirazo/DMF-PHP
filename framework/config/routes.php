@@ -17,6 +17,8 @@
     Router::routes(
         [
             # Пример типичного маршрута (редактирование статьи)
-            '/post/(@int)/edit/' => 'Blog.Post.edit',
+            #'/post/(@int)/edit/' => 'Blog.Post.edit',
+
+            '/' => 'Example.Base.index',
         ]
     );

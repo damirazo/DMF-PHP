@@ -21,7 +21,7 @@
      */
     Application::get_instance()->register_modules(
         [
-            #'Example' => 'App\\Example',
+            'Example' => 'App\\Example',
         ]
     );
 
