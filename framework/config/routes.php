@@ -19,7 +19,10 @@
             # Пример типичного маршрута (редактирование статьи)
             #'/post/(@int)/edit/' => 'Blog.Post.edit',
 
-            '/'          => 'Example.Base.index',
-            '/examples/' => 'Example.Base.examples'
+            '/'                               => 'Example.Base.index',
+            '/examples/'                      => 'Example.Base.examples',
+            '/examples/hello/'                => 'Example.Base.example_hello',
+            '/examples/var/'                  => 'Example.Base.example_var',
+            '/examples/params/(@int)/(@int)/' => 'Example.Base.example_params'
         ]
     );
