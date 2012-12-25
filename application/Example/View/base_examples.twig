@@ -5,9 +5,14 @@
 {% block content %}
     <div class="container">
         <div class="row">
-            <div class="span3">sidebar</div>
+            <div class="span3">
+                <ul class="nav nav-tabs nav-stacked">
+                    <li><a href="{{ base_url }}/examples/hello/">Приветствие</a></li>
+                    <li><a href="{{ base_url }}/examples/params/5/7/">Динамические параметры</a></li>
+                </ul>
+            </div>
             <div class="span9">
-                {% block data %}defaul{% endblock %}
+                {% block data %}{% endblock %}
             </div>
         </div>
     </div>

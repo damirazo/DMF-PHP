@@ -18,4 +18,12 @@
             return $this->render('index');
         }
 
+        /**
+         * Список примеров
+         */
+        public function examples()
+        {
+            return $this->render('examples');
+        }
+
     }
