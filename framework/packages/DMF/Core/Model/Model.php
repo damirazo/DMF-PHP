@@ -4,6 +4,8 @@
 
     use DMF\Core\Component\Component;
     use DMF\Core\Storage\Config;
+    use DMF\Core\OS\OS;
+    use DMF\Core\Model\Exception\DBError;
 
     /**
      * Базовая модель
@@ -85,14 +87,66 @@
             $this->_load_fixtures();
         }
 
+        /**
+         * Поиск и загрузка данных из фикстур
+         * @throws Exception\DBError
+         */
         public function _load_fixtures()
         {
+            // Имя файл фикстуры, генерируется из имени модуля и имени модели
             $fixture_name = strtolower($this->get_module_name()) . '__' . strtolower($this->get_class_name()) . '.json';
+            // Полный путь до файла с фикстурой
+            $fixture = OS::file(DATA_PATH . 'fixtures' . _SEP . $fixture_name)->as_string();
+            // Если файл с фикстурой отсутствует, то ничего не делаем
+            if ($fixture !== false) {
+                // Данные из файла, преобразованные в PHP массив
+                $data = json_decode($fixture);
+                // Выполнение сохранения объектов из БД в транзакции с откатом при ошибке
+                try {
+                    self::$db->beginTransaction();
+                    // Обходим массив и добавляем каждый элемент в БД
+                    foreach ($data as $element) {
+                        $this->create($element);
+                    }
+                    self::$db->commit();
+                }
+                catch (\Exception $e) {
+                    // Откатываемся, если обнаружили ошибку
+                    self::$db->rollBack();
+                    throw new DBError('[DB] Произошла ошибка при выполнении запроса к БД, транзакция будет отменена.
+                        Текст ошибки: ' . $e->getMessage());
+                }
+            }
         }
 
+        /**
+         * Получение данных из БД и выгрузка их в файл фикстур
+         */
         public function _dump_fixtures()
         {
+            $fixture_name = strtolower($this->get_module_name()) . '__' . strtolower($this->get_class_name()) . '.json';
+            $data = $this->_dump_data(10);
+            OS::file(DATA_PATH . 'fixtures' . _SEP . $fixture_name)->write(json_encode($data, JSON_PRETTY_PRINT));
+        }
 
+        /**
+         * Дамп данных из БД за вычетом первичного ключа
+         * @param null|int $limit Предел выборки данных из БД
+         * @return mixed
+         */
+        protected function _dump_data($limit = null)
+        {
+            $fixture = [];
+            // Запрос на выборку элементов из БД
+            $query = 'SELECT * FROM ' . $this->_get_table_name() . (is_null($limit) ? '' : ' LIMIT ' . (int)$limit);
+            $data = self::$db->query($query)->fetch_all();
+            // Имя первичного ключа, для его удаления
+            $primary_key = $this->_get_primary_key_field_name();
+            foreach ($data as $element) {
+                unset($element[$primary_key]);
+                $fixture[] = $element;
+            }
+            return $fixture;
         }
 
         /**
@@ -134,10 +188,10 @@
          * @param array $condition Список параметров для выборки
          * @return array
          */
-        protected function _get_sql_from_condition($condition)
+        protected function _get_sql_from_condition($condition = [])
         {
             if (count($condition) <= 0) {
-                return '';
+                return ['query' => '', 'params' => []];
             }
             $result = [
                 'queries' => [],

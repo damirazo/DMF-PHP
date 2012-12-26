@@ -23,6 +23,9 @@
             '/examples/'                      => 'Example.Base.examples',
             '/examples/hello/'                => 'Example.Base.example_hello',
             '/examples/var/'                  => 'Example.Base.example_var',
-            '/examples/params/(@int)/(@int)/' => 'Example.Base.example_params'
+            '/examples/params/(@int)/(@int)/' => 'Example.Base.example_params',
+            '/examples/model/'                => 'Example.Base.example_model',
+            '/examples/model/create/'         => 'Example.Base.example_model_create_data',
+            '/examples/model/dump/'           => 'Example.Base.example_model_dump_data'
         ]
     );

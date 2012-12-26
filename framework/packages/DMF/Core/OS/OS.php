@@ -46,4 +46,9 @@
             }
         }
 
+        public static function file($file_path)
+        {
+            return new File($file_path);
+        }
+
     }

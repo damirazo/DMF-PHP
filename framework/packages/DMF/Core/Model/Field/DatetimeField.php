@@ -1,13 +1,5 @@
 <?php
 
-    /**
-     * Этот файл часть фреймворка DM Framework
-     *
-     * (c) damirazo <damirazo.kazan@gmail.com> 2012
-     * DatetimeField.php
-     * 21.11.12, 17:21
-     */
-
     namespace DMF\Core\Model\Field;
 
     /**
@@ -19,9 +11,7 @@
         /**
          * Возвращает строку, содержащую код для создания данного поля
          * @param string $name Имя поля
-         *
          * @return string
-         *
          * Используемые параметры и их значения по умолчанию:
          * nullable: false
          * default: false
@@ -31,7 +21,6 @@
             $nullable = ($this->get_param('nullable', false) === true) ? 'NULL' : 'NOT NULL';
             $default = $this->get_param('default', false);
             $default_value = $default === false ? '' : 'DEFAULT ' . $default;
-
             return '`' . $name . '` TIMESTAMP ' . $nullable . ' ' . $default_value;
         }
 
