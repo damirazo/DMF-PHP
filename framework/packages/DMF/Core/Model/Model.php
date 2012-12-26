@@ -1,13 +1,5 @@
 <?php
 
-    /**
-     * Этот файл часть фреймворка DM Framework
-     *
-     * (c) damirazo <damirazo.kazan@gmail.com> 2012
-     * Model.php
-     * 19.11.12, 22:46
-     */
-
     namespace DMF\Core\Model;
 
     use DMF\Core\Component\Component;
@@ -50,7 +42,6 @@
             if (is_null($this->table_name)) {
                 return $this->_get_table_prefix() . strtolower($this->get_class_name()) . 's';
             }
-
             return $this->_get_table_prefix() . $this->table_name;
         }
 
@@ -62,13 +53,10 @@
         {
             $scheme = $this->_scheme();
             $fields = [];
-            /**
-             * @var $field_object \DMF\Core\Model\Field\BaseField
-             */
+            /** @var $field_object \DMF\Core\Model\Field\BaseField */
             foreach ($scheme as $field_name => $field_object) {
                 $fields[] = trim($field_object->create_sql($field_name));
             }
-
             return $fields;
         }
 
@@ -87,10 +75,24 @@
         /**
          * Создание новой таблицы
          * @return bool
+         * TODO: Добавить реализацию загрузки фикстур
          */
         public function _create_table()
         {
+            // Выполнение запроса на создание таблицы в БД
             self::$db->exec($this->_generate_sql_for_table());
+            // Загрузка фикстур
+            $this->_load_fixtures();
+        }
+
+        public function _load_fixtures()
+        {
+            $fixture_name = strtolower($this->get_module_name()) . '__' . strtolower($this->get_class_name()) . '.json';
+        }
+
+        public function _dump_fixtures()
+        {
+
         }
 
         /**
@@ -110,7 +112,6 @@
             $query = 'CREATE TABLE IF NOT EXISTS `' . $this->_get_table_name() . '` (' . PHP_EOL;
             $fields = $this->_generate_sql_for_model_fields();
             $query .= implode(',' . PHP_EOL, $fields) . PHP_EOL . ')';
-
             return $query;
         }
 
@@ -125,15 +126,12 @@
                     return $field_name;
                 }
             }
-
             return 'id';
         }
 
         /**
          * Генерация параметризированного SQL кода
-         *
          * @param array $condition Список параметров для выборки
-         *
          * @return array
          */
         protected function _get_sql_from_condition($condition)
@@ -152,17 +150,20 @@
                 /** Обработка логического условия */
                 if ($i == 0) {
                     $precond = '';
-                } elseif (substr($data[0], 0, 1) == '~') {
+                }
+                elseif (substr($data[0], 0, 1) == '~') {
                     $precond = ' OR ';
                     $field_name = substr($data[0], 1);
-                } else {
+                }
+                else {
                     $precond = ' AND ';
                 }
                 /** Создание массива значений для выборки */
                 if (count($data) == 1) {
                     $result['queries'][] = $precond . $field_name . '=:' . $field_name;
                     $result['params'][$field_name] = $value;
-                } else {
+                }
+                else {
                     $cond = $data[1];
                     switch ($cond) {
                         /** Проверка на точное совпадение */
@@ -222,7 +223,8 @@
                         case 'is_null':
                             if ($value === true) {
                                 $result['queries'][] = $precond . $field_name . ' IS NULL ';
-                            } else {
+                            }
+                            else {
                                 $result['queries'][] = $precond . $field_name . ' IS NOT NULL ';
                             }
                             break;
@@ -234,7 +236,6 @@
                 }
                 $i++;
             }
-
             return [
                 'query'  => ' WHERE ' . implode('', $result['queries']),
                 'params' => $result['params']
@@ -243,9 +244,7 @@
 
         /**
          * Генерация SQL кода для сортировки вывода
-         *
          * @param string|array $order_by
-         *
          * @return string
          */
         protected function _get_sql_from_order_by($order_by)
@@ -257,32 +256,31 @@
                 if (substr($order_by, 0, 1) == '~') {
                     $order_direction = 'DESC';
                     $order_by = substr($order_by, 1);
-                } else {
+                }
+                else {
                     $order_direction = 'ASC';
                 }
-
                 return ' ORDER BY ' . $order_by . ' ' . $order_direction;
-            } else {
+            }
+            else {
                 $data = [];
                 foreach ($order_by as $field) {
                     if (substr($field, 0, 1) == '~') {
                         $order_direction = 'DESC';
                         $field = substr($field, 1);
-                    } else {
+                    }
+                    else {
                         $order_direction = 'ASC';
                     }
                     $data[] = $field . ' ' . $order_direction;
                 }
-
                 return ' ORDER BY ' . implode(', ', $data);
             }
         }
 
         /**
          * Генерация SQL кода для реализации лимита выборки
-         *
          * @param string|int $limit Лимит выборки
-         *
          * @return string
          */
         protected function _get_sql_from_limit($limit)
@@ -290,7 +288,6 @@
             if (is_null($limit)) {
                 return '';
             }
-
             return ' LIMIT ' . $limit;
         }
 
@@ -305,9 +302,7 @@
 
         /**
          * Выбор связанных полем ForeignKey объектов
-         *
          * @param array $data Массив выбранных данных
-         *
          * @return array
          */
         protected function _get_chained_object($data)
@@ -326,7 +321,6 @@
                     }
                 }
             }
-
             return $chained_fields;
         }
 
@@ -334,7 +328,6 @@
          * Возвращает один объект, выбранный по первичному ключу
          * @param int   $pk     Первичный ключ
          * @param array $fields Список выбираемых из таблицы полей
-         *
          * @return array
          */
         public function get_by_pk($pk, $fields = [])
@@ -342,13 +335,12 @@
             $select_fields = (count($fields) > 0) ? $fields : $this->_get_table_fields();
             $data = self::$db->query(
                 'SELECT ' . implode(', ', $select_fields) . ' FROM ' . $this->_get_table_name() . ' WHERE '
-                    . $this->_get_primary_key_field_name() . '=:pk LIMIT 1',
+                        . $this->_get_primary_key_field_name() . '=:pk LIMIT 1',
                 ['pk' => (int)$pk]
             );
             if ($data->num_rows() == 1) {
                 return $data->fetch_one();
             }
-
             return [];
         }
 
@@ -358,7 +350,6 @@
          * @param array $condition Условия для выборки
          * @param int   $limit     Количество объектов
          * @param array $fields    Список выбираемых полей
-         *
          * @return array|string
          */
         public function get_by_condition($condition = [], $order_by = [], $limit = null, $fields = [])
@@ -366,15 +357,13 @@
             $select_fields = (count($fields) > 0) ? $fields : $this->_get_table_fields();
             $sql_condition = $this->_get_sql_from_condition($condition);
             $sql = 'SELECT ' . implode(', ', $select_fields) . ' FROM ' . $this->_get_table_name()
-                . $sql_condition['query']
-                . $this->_get_sql_from_order_by($order_by)
-                . $this->_get_sql_from_limit($limit);
-
+                    . $sql_condition['query']
+                    . $this->_get_sql_from_order_by($order_by)
+                    . $this->_get_sql_from_limit($limit);
             $data = self::$db->query($sql, $sql_condition['params']);
             if ($data->num_rows() > 0) {
                 return $data->fetch_all();
             }
-
             return [];
         }
 
@@ -396,7 +385,7 @@
             }
             $params['pk'] = $pk;
             $result_code = 'UPDATE ' . $this->_get_table_name() . ' SET ' . implode(', ', $sql)
-                . ' WHERE ' . $this->_get_primary_key_field_name() . '=:pk';
+                    . ' WHERE ' . $this->_get_primary_key_field_name() . '=:pk';
             self::$db->query($result_code, $params);
         }
 

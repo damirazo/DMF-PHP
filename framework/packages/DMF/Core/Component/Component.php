@@ -11,7 +11,7 @@
     use DMF\Core\Template\Template;
 
     /**
-     * Общий класс для большинства частей фреймворка
+     * Базовый класс для большинства частей фреймворка
      */
     class Component
     {
@@ -51,11 +51,15 @@
         protected function get_component($name, $type)
         {
             $data = explode('.', $name);
+            // Если указан лишь один параметр в строке, то считаем его именем конмонента
             if (count($data) < 2) {
+                // Модуль считаем текущим
                 $module = $this->get_module();
                 $component_name = $data[0];
             }
+            // Если указаны оба параметра, то следовательно они являются именем модуля и компонента
             else {
+                // Получаем модуль по его имени
                 $module = Application::get_instance()->get_module_by_name($data[0]);
                 $component_name = $data[1];
             }
@@ -182,6 +186,17 @@
         protected function get_module_name()
         {
             return $this->get_module()->name;
+        }
+
+        /**
+         * Возвращает имя класса, в контексте которого вызван
+         * @return string
+         */
+        protected function get_class_name()
+        {
+            $namespace = get_class($this);
+            $pieces = (mb_strpos($namespace, '\\')) ? explode('\\', $namespace) : explode('_', $namespace);
+            return $pieces[count($pieces) - 1];
         }
 
     }
