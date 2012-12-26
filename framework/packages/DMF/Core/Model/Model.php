@@ -165,7 +165,7 @@
         {
             $query = 'CREATE TABLE IF NOT EXISTS `' . $this->_get_table_name() . '` (' . PHP_EOL;
             $fields = $this->_generate_sql_for_model_fields();
-            $query .= implode(',' . PHP_EOL, $fields) . PHP_EOL . ')';
+            $query .= implode(',' . PHP_EOL, $fields) . PHP_EOL . ') ENGINE=InnoDB DEFAULT CHARSET=utf8';
             return $query;
         }
 
