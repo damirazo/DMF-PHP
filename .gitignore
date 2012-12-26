@@ -10,6 +10,3 @@ framework/data/cache/templates/*
 
 framework/data/migrations/*
 !.gitkeep
-
-framework/data/fixtures/*
-!.gitkeep
