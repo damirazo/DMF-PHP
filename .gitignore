@@ -1,8 +1,5 @@
 .idea/*
 
-application/*
-!Example
-
 framework/config/config.local.php
 
 framework/data/cache/templates/*
