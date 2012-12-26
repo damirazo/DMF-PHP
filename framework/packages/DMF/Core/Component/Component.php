@@ -19,15 +19,22 @@
         /** @var \DMF\Core\Model\Database|null Ссылка на соединение с БД */
         public static $db = null;
 
+        /** @var \DMF\Core\Application\Application|null */
+        public static $app = null;
+
         /** @var array Кэш объектов моделей */
         protected static $_models = [];
 
         /** Конструктор */
         public function __construct()
         {
-            /** Проверяем наличие соединения с БД */
+            // Создание подключения к БД
             if (is_null(self::$db)) {
                 self::$db = new Database();
+            }
+            // Создание экземпляра приложения
+            if (is_null(self::$app)) {
+                self::$app = Application::get_instance();
             }
         }
 

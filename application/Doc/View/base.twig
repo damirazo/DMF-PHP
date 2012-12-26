@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Документация DMF &bull; {% block title %}Описание фреймворка{% endblock %}</title>
+    <link rel="stylesheet" href="{{ static_url }}styles/bootstrap.min.css">
+</head>
+<body>
+
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+            <a href="#" class="brand">DMF.DOC</a>
+            <ul class="nav">
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">Начало работы <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{{ base_url }}/doc/index.html">Описание</a></li>
+                        <li><a href="{{ base_url }}/doc/installation.html">Установка</a></li>
+                        <li><a href="{{ base_url }}/doc/setup.html">Базовые настройки</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="container" style="margin-top: 40px;">
+    {% block content %}{% endblock %}
+</div>
+
+<script type="text/javascript" src="//code.jquery.com/jquery.min.js"></script>
+<script type="text/javascript" src="{{ static_url }}scripts/bootstrap.min.js"></script>
+</body>
+</html>

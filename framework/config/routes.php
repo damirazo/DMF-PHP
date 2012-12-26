@@ -23,6 +23,9 @@
             '/examples/'                      => 'Example.Base.examples',
             '/examples/hello/'                => 'Example.Base.example_hello',
             '/examples/var/'                  => 'Example.Base.example_var',
-            '/examples/params/(@int)/(@int)/' => 'Example.Base.example_params'
+            '/examples/params/(@int)/(@int)/' => 'Example.Base.example_params',
+
+            '/doc/'                           => 'Doc.Base.index',
+            '/doc/(@alphanum).html/'          => 'Doc.Base.page',
         ]
     );

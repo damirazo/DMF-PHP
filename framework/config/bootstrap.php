@@ -22,6 +22,7 @@
     Application::get_instance()->register_modules(
         [
             'Example' => 'App\\Example',
+            'Doc'     => 'App\\Doc',
         ]
     );
 
