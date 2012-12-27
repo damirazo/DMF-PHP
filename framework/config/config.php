@@ -5,6 +5,7 @@
      */
 
     use DMF\Core\Storage\Config;
+    use DMF\Core\OS\OS;
 
     /** Активация дебагового режима */
     Config::set('debug', DEBUG);
@@ -30,3 +31,8 @@
             'prefix'   => 'dm_'
         ]
     );
+
+    /** Импортирование локального конфига для переопределения системных настроек */
+    if (DEBUG) {
+        OS::import(CONFIG_PATH . 'config.local.php', false);
+    }
