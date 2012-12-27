@@ -24,11 +24,15 @@
             // Путь к директории с шаблонами
             $pages_dir = self::$app->module->path . 'View' . _SEP;
             // Проверяем наличие шаблона, чтобы переопределить поведение по умолчанию для шаблонизатора
-            if (OS::file_exists($pages_dir . $name . '.twig')/* && $name != 'base'*/) {
+            if (OS::file_exists($pages_dir . $name . '.twig') && $name != 'base') {
                 return $this->render($name);
             }
+            /*
             // Генерируем 404 ошибку, если страницы с таким именем не существует
             throw new Http404('Указанная страница отсутствует на сайте!');
+            */
+            // Возвращаем шаблон 404 ошибки
+            return $this->render('404', [], 404);
         }
 
     }

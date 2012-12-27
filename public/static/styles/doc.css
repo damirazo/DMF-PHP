@@ -1,0 +1,28 @@
+html, body, .container, .content {
+    height: 100%;
+}
+
+.container, .content {
+    position: relative;
+}
+
+.proper-content {
+    padding-top: 40px; /* >= navbar height */
+}
+
+.wrapper {
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    margin: 0 auto -50px; /* same as the footer */
+}
+
+.push {
+    height: 50px; /* same as the footer */
+}
+
+.footer-wrapper {
+    position: relative;
+    height: 49px;
+    border-top: 1px solid #363636;
+}

@@ -17,3 +17,5 @@
     Context::add('base_url', Request::get_instance()->base_url());
     /** Путь до папки статичных файлов */
     Context::add('static_url', Request::get_instance()->base_url() . '/static/');
+    /** Рандомная строка в режиме разработки для добавления к именам статичных файлов */
+    Context::add('random_string', DEBUG ? '?' . uniqid() : '');
