@@ -19,13 +19,15 @@
             # Пример типичного маршрута (редактирование статьи)
             #'/post/(@int)/edit/' => 'Blog.Post.edit',
 
+            /* Примеры */
             '/'                               => 'Example.Base.index',
             '/examples/'                      => 'Example.Base.examples',
             '/examples/hello/'                => 'Example.Base.example_hello',
             '/examples/var/'                  => 'Example.Base.example_var',
             '/examples/params/(@int)/(@int)/' => 'Example.Base.example_params',
 
+            /* Документация */
             '/doc/'                           => 'Doc.Base.index',
-            '/doc/(@alphanum).html/'          => 'Doc.Base.page',
+            '/doc/([\w\d\-]+).html/'          => 'Doc.Base.page',
         ]
     );
