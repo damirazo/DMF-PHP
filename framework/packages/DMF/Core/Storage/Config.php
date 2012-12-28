@@ -2,6 +2,9 @@
 
     namespace DMF\Core\Storage;
 
+    use DMF\Core\Storage\Exception\IsFinalElement;
+    use DMF\Core\Storage\Element;
+
     /**
      * Хранение конфигурационных настроек
      */
@@ -15,16 +18,22 @@
          * Создание элемента конфигурации
          * @param string $name  Имя элемента конфигурации
          * @param mixed  $value Содержимое элемента конфигурации
+         * @param bool   $final Является ли элемент "финальным" (можно ли его переопределить)
+         * @throws \DMF\Core\Storage\Exception\IsFinalElement
          */
-        public static function set($name, $value)
+        public static function set($name, $value, $final = false)
         {
-            self::$_data[$name] = $value;
+            if (isset(self::$_data[$name]) && self::$_data[$name]->is_final) {
+                throw new IsFinalElement('Элемент с именем ' . $name
+                        . ' уже был объявлен как финальный и его нельзя переопределить!');
+            }
+            self::$_data[$name] = new Element($name, $value, $final);
         }
 
         /**
          * Получение элемента конфигурации
-         * @param  string $name    Имя элемента конфигурации
-         * @param mixed   $default Значение, возвращаемое по умолчанию
+         * @param  string  $name    Имя элемента конфигурации
+         * @param  mixed   $default Значение, возвращаемое по умолчанию
          * @return mixed
          */
         public static function get($name, $default = false)
@@ -32,7 +41,9 @@
             // Если элемент с именем $name задан, то возвращаем его
             // В противном случае возвращаем значение $default
             if (self::has($name)) {
-                return self::$_data[$name];
+                /** @var $element \DMF\Core\Storage\Element */
+                $element = self::$_data[$name];
+                return $element->get();
             }
             return $default;
         }

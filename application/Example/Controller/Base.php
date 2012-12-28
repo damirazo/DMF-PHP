@@ -3,6 +3,7 @@
     namespace App\Example\Controller;
 
     use DMF\Core\Controller\Controller;
+    use DMF\Core\Storage\Element;
 
     /**
      * Базовый тестовый контроллер
