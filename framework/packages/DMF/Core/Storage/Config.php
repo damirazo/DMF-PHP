@@ -23,9 +23,13 @@
          */
         public static function set($name, $value, $final = false)
         {
-            if (isset(self::$_data[$name]) && self::$_data[$name]->is_final) {
-                throw new IsFinalElement('Элемент с именем ' . $name
-                        . ' уже был объявлен как финальный и его нельзя переопределить!');
+            if (isset(self::$_data[$name])) {
+                /** @var $element \DMF\Core\Storage\Element */
+                $element = self::$_data[$name];
+                if ($element->is_final()) {
+                    throw new IsFinalElement('Элемент с именем ' . $name
+                            . ' уже был объявлен как финальный и его нельзя переопределить!');
+                }
             }
             self::$_data[$name] = new Element($name, $value, $final);
         }
