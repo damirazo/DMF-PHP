@@ -10,9 +10,7 @@
     class Database extends \PDO
     {
 
-        /**
-         * Инициализация подключения
-         */
+        /** Инициализация подключения */
         public function __construct()
         {
             $db_config = Config::get('database');
@@ -27,24 +25,19 @@
          * Осуществление запроса к БД
          * @param string $query  Код запроса
          * @param array  $params Массив параметров
-         *
          * @return Statement|\PDOStatement
          * @throws \Exception
          */
         public function query($query, $params = [])
         {
-            /**
-             * @var \PDOStatement $q
-             */
+            /**  @var \PDOStatement $q */
             $q = $this->prepare($query);
             $q->setFetchMode(\PDO::FETCH_ASSOC);
             $q->execute($params);
-
             $error = $q->errorInfo();
             if ($error[0] != '0000') {
                 throw new \Exception('[DB] ' . $error[2]);
             }
-
             return new Statement($this, $q);
         }
 

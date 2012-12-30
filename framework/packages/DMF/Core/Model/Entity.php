@@ -13,12 +13,20 @@
         /** @var array Массив данных сущности */
         protected $data = [];
 
+        /** @var null|string Имя таблицы */
+        protected $table = null;
+
+        /** @var bool Внесены ли изменения в сущность */
+        public $is_modified = false;
+
         /**
          * Конструктор сущности
-         * @param array $data Массив значений
+         * @param array  $data  Массив значений
+         * @param string $table Имя таблицы в БД
          */
-        public function __construct(array $data = [])
+        public function __construct($table, array $data = [])
         {
+            $this->table = $table;
             $this->data = $data;
         }
 
@@ -29,7 +37,10 @@
          */
         public function offsetSet($offset, $value)
         {
-            $this->data[$offset] = $value;
+            if (isset($this->data[$offset])) {
+                $this->data[$offset] = $value;
+                $this->is_modified = true;
+            }
         }
 
         /**
@@ -59,6 +70,7 @@
         public function offsetUnset($offset)
         {
             unset($this->data[$offset]);
+            $this->is_modified = true;
         }
 
     }

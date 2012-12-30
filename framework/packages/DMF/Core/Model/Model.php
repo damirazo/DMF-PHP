@@ -369,7 +369,7 @@
                         $c_module = $field_object->chained_module;
                         $c_model = $field_object->chained_model;
                         $chained_model_namespace = 'Application\\' . $c_module . '\\Model\\' . $c_model;
-                        /** @var $chained_model \DMF\Core\Model\Model  */
+                        /** @var $chained_model \DMF\Core\Model\Model */
                         $chained_model = new $chained_model_namespace();
                         $chained_fields[$field_name] = $chained_model->get_by_pk((int)$value);
                     }
@@ -382,22 +382,24 @@
          * Возвращает один объект, выбранный по первичному ключу
          * @param int   $pk     Первичный ключ
          * @param array $fields Список выбираемых из таблицы полей
-         * @return Entity
+         * @return Entity Сущность
          */
         public function get_by_pk($pk, $fields = [])
         {
             // Список выбираемых из таблицы полей (по умолчанию все поля)
             $select_fields = (count($fields) > 0) ? $fields : $this->_get_table_fields();
+            // Выполнение запроса к БД
             $data = self::$db->query(
                 'SELECT ' . implode(', ', $select_fields) . ' FROM ' . $this->_get_table_name() . ' WHERE '
                         . $this->_get_primary_key_field_name() . '=:pk LIMIT 1',
                 ['pk' => (int)$pk]
             );
+            // Если элемент обнаружен, то добавляем его в сущность
             if ($data->num_rows() == 1) {
                 $entity = $data->fetch_one();
-                return new Entity($entity);
+                return new Entity($this->_get_table_name(), $entity);
             }
-            return new Entity([]);
+            return new Entity($this->_get_table_name(), []);
         }
 
         /**
@@ -406,27 +408,33 @@
          * @param array $condition Условия для выборки
          * @param int   $limit     Количество объектов
          * @param array $fields    Список выбираемых полей
-         * @return EntityCollection
+         * @return EntityCollection Коллекция сущностей
          */
         public function get_by_condition($condition = [], $order_by = [], $limit = null, $fields = [])
         {
+            // Список выбираемых из таблицы полей (по умолчанию все поля)
             $select_fields = (count($fields) > 0) ? $fields : $this->_get_table_fields();
+            // Формирование SQL для условия выборки
             $sql_condition = $this->_get_sql_from_condition($condition);
+            // Выполнение запроса к БД
             $sql = 'SELECT ' . implode(', ', $select_fields) . ' FROM ' . $this->_get_table_name()
                     . $sql_condition['query']
                     . $this->_get_sql_from_order_by($order_by)
                     . $this->_get_sql_from_limit($limit);
+            // Препарирование параметров выборки
             $data = self::$db->query($sql, $sql_condition['params']);
+            // Если найдена хотя бы 1 запись,
+            // то создаем из нее объект сущности и добавляем в коллекцию сущностей
             if ($data->num_rows() > 0) {
                 $entities = $data->fetch_all();
-                $collection = new EntityCollection();
+                $collection = new EntityCollection($this->_get_table_name());
                 foreach ($entities as $element) {
-                    $entity = new Entity($element);
+                    $entity = new Entity($this->_get_table_name(), $element);
                     $collection->add_entity($entity);
                 }
                 return $collection;
             }
-            return new EntityCollection();
+            return new EntityCollection($this->_get_table_name());
         }
 
         /**

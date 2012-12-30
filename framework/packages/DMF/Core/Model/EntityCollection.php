@@ -13,10 +13,13 @@
         /** @var array Массив данных сущности */
         protected $data = [];
 
-        /** Конструктор */
-        public function __construct()
-        {
+        /** @var null|string Имя таблицы в БД */
+        protected $table = null;
 
+        /** Конструктор */
+        public function __construct($table)
+        {
+            $this->table = $table;
         }
 
         /**

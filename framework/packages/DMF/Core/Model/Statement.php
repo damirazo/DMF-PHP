@@ -1,13 +1,5 @@
 <?php
 
-    /**
-     * Этот файл часть фреймворка DM Framework
-     *
-     * (c) damirazo <damirazo.kazan@gmail.com> 2012
-     * Statement.php
-     * 09.12.12, 16:06
-     */
-
     namespace DMF\Core\Model;
 
     /**
@@ -41,6 +33,7 @@
             return $this->_statement->fetchAll();
         }
 
+        /** Выполнение запроса */
         public function send()
         {
             return $this->_statement->execute();
