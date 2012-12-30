@@ -3,7 +3,7 @@
     namespace App\Example\Controller;
 
     use DMF\Core\Controller\Controller;
-    use DMF\Core\Storage\Element;
+    use DMF\Core\Model\Entity;
 
     /**
      * Базовый тестовый контроллер
@@ -14,7 +14,14 @@
         /** Главная страница */
         public function index()
         {
-            return $this->render('index');
+            //return $this->render('index');
+            $data = $this->model('Post')->get_by_condition(
+                [
+                    'status__not_equal' => false,
+                    'id__lte'           => 5
+                ], ['created_at']
+            );
+            return $this->dump($data);
         }
 
         /** Список примеров */

@@ -382,10 +382,11 @@
          * Возвращает один объект, выбранный по первичному ключу
          * @param int   $pk     Первичный ключ
          * @param array $fields Список выбираемых из таблицы полей
-         * @return array
+         * @return Entity
          */
         public function get_by_pk($pk, $fields = [])
         {
+            // Список выбираемых из таблицы полей (по умолчанию все поля)
             $select_fields = (count($fields) > 0) ? $fields : $this->_get_table_fields();
             $data = self::$db->query(
                 'SELECT ' . implode(', ', $select_fields) . ' FROM ' . $this->_get_table_name() . ' WHERE '
@@ -393,9 +394,10 @@
                 ['pk' => (int)$pk]
             );
             if ($data->num_rows() == 1) {
-                return $data->fetch_one();
+                $entity = $data->fetch_one();
+                return new Entity($entity);
             }
-            return [];
+            return new Entity([]);
         }
 
         /**
@@ -404,7 +406,7 @@
          * @param array $condition Условия для выборки
          * @param int   $limit     Количество объектов
          * @param array $fields    Список выбираемых полей
-         * @return array|string
+         * @return EntityCollection
          */
         public function get_by_condition($condition = [], $order_by = [], $limit = null, $fields = [])
         {
@@ -416,9 +418,15 @@
                     . $this->_get_sql_from_limit($limit);
             $data = self::$db->query($sql, $sql_condition['params']);
             if ($data->num_rows() > 0) {
-                return $data->fetch_all();
+                $entities = $data->fetch_all();
+                $collection = new EntityCollection();
+                foreach ($entities as $element) {
+                    $entity = new Entity($element);
+                    $collection->add_entity($entity);
+                }
+                return $collection;
             }
-            return [];
+            return new EntityCollection();
         }
 
         /**
