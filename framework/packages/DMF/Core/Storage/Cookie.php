@@ -1,13 +1,5 @@
 <?php
 
-    /**
-     * Этот файл часть фреймворка DM Framework
-     *
-     * (c) damirazo <damirazo.kazan@gmail.com> 2012
-     * Cookie.php
-     * 07.11.12, 23:23
-     */
-
     namespace DMF\Core\Storage;
 
     use DMF\Core\Security\Crypt;
@@ -93,7 +85,6 @@
             if (self::has($name)) {
                 return $_COOKIE[$name];
             }
-
             return $default;
         }
 
@@ -112,7 +103,6 @@
             if ($data !== $default) {
                 return Crypt::decrypt(Crypt::base64_decode($data));
             }
-
             return $default;
         }
 
@@ -125,10 +115,8 @@
         {
             if (setcookie('test', 'worked!')) {
                 self::delete('test');
-
                 return true;
             }
-
             return false;
         }
 
@@ -139,7 +127,9 @@
          */
         public static function delete($name)
         {
-            setcookie($name, null, -1);
+            if (self::has($name)) {
+                setcookie($name, null, -1);
+            }
         }
 
     }

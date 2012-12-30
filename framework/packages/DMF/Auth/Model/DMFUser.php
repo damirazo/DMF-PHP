@@ -21,6 +21,7 @@
 
         /**
          * Указание кастомных полей для пользователя
+         * Используется, чтобы добавить к базовой модели пользователя дополнительные поля
          * @return array
          */
         public function _custom_fields()
@@ -54,13 +55,13 @@
          */
         public function check_auth()
         {
+            // авторизационный токен
             $auth_token = $this->session()->get('auth_token');
+            // если авторизационный токен обнаружен, то выполняем подсчет количества пользователей с указанным токеном
             if ($auth_token) {
-                $user = self::$db->query(
-                    'SELECT COUNT(*) FROM ' . $this->_get_table_name() . ' WHERE auth_token=:auth_token LIMIT 1',
-                    ['auth_token' => $auth_token]
-                );
-                if ($user->num_rows() == 1) {
+                $check_user = $this->get_count('*', ['auth_token' => $auth_token]);
+                // если число пользователей с указанным токеном равно единице, то возвращаем истину
+                if ($check_user == 1) {
                     return true;
                 }
             }
@@ -74,8 +75,11 @@
          */
         public function create_password_hash($password)
         {
+            // секретный ключ, указанный в конфигурации
             $secret_key = $this->config('secret_key');
+            // создаем соль для хэширования пароля
             $salt = substr(Crypt::hash($secret_key . $password, 'ripemd320'), 7, 16);
+            // создаем хэш пароля
             $hash = Crypt::hash($secret_key . $password . $salt, 'sha512');
             return $hash;
         }
@@ -95,28 +99,37 @@
          * Создание пользователя
          * @param array $data Массив параметров для создания
          */
-        public function create_user($data = [])
+        public function create($data = [])
         {
+            // массив полей
             $fields = $this->_scheme();
             $field = [];
             $params = [];
+            // основа SQL запроса для вставки нового пользователя в БД
             $sql = 'INSERT INTO `' . $this->_get_table_name() . '` SET ';
+            // обходим массив полей
             /** @var $field_object \DMF\Core\Model\Field\BaseField */
             foreach ($fields as $field_name => $field_object) {
+                // если в массиве параметров есть значение с данным именем,
+                // то добавляем его в массив для добавления в БД
                 if (isset($data[$field_name])) {
                     $field[] = $field_name . '=:' . $field_name;
                 }
+                // если это поле для хранения пароля, то заменяем его на хэш пароля
                 if ($field_name == 'password') {
                     $params['password'] = $this->create_password_hash($data['password']);
                 }
+                // в противном случае добавляем в массив параметров как есть
                 else {
                     if (isset($data[$field_name])) {
                         $params[$field_name] = $data[$field_name];
                     }
                 }
             }
+            // добавляем в массив для добавления БД и в массив параметров значение авторизационного токена
             $field[] = 'auth_token=:auth_token';
             $params['auth_token'] = $this->generate_auth_token();
+            // выполняем запрос добавления нового пользователя в БД
             self::$db->query($sql . implode(', ', $field), $params)->send();
         }
 
@@ -153,6 +166,7 @@
             // если токен задан, то ищем пользователя с таким же токеном
             if ($token) {
                 // выборка коллекции сущностей по токену
+                /** @var $data \DMF\Core\Model\EntityCollection */
                 $data = $this->get_by_condition(
                     [
                         'auth_token' => $token,
@@ -178,21 +192,33 @@
          */
         public function login($username, $password, $save_session = false)
         {
+            // создаем хэш пароля
             $hash = $this->create_password_hash($password);
-            $check_user = self::$db->query(
-                'SELECT id, auth_token FROM `' . $this->_get_table_name()
-                        . '` WHERE username=:username AND password=:password AND status=1 LIMIT 1',
-                ['username' => $username, 'password' => $hash]
-            )->fetch_one();
-            if (count($check_user) == 1) {
+            // получаем количество пользователей с указанным именем пользователя и хэшем пароля
+            $check_user = $this->get_count(
+                '*', [
+                    'username' => $username,
+                    'password' => $hash
+                ]
+            );
+            // если число пользователей равно единице,
+            // то генерируем новый токен и обновляем дату и время последнего входа
+            if ($check_user == 1) {
                 $auth_token = $this->generate_auth_token();
-                self::$db->query(
-                    'UPDATE `' . $this->_get_table_name()
-                            . '` SET auth_token=:auth_token, last_update=NOW()
-                        WHERE username=:username AND password=:password AND status=1',
-                    ['auth_token' => $auth_token, 'username' => $username, 'password' => $hash]
-                )->send();
+                $this->update_by_condition(
+                    [
+                        'auth_token'  => $auth_token,
+                        'last_update' => 'NOW()'
+                    ], [
+                        'username' => $username,
+                        'password' => $hash,
+                        'status'   => true
+                    ]
+                );
+                // указываем в сессии новый авторизационный токен
                 $this->session()->set('auth_token', $auth_token);
+                // если указано, что авторизацию следует запомнить после окончания сессии,
+                // то сохраняем авторизационный токен в кукисах, предварительно зашифровав
                 if ($save_session) {
                     Cookie::set_crypt('auth_token', $auth_token, null, '/');
                 }
@@ -206,6 +232,18 @@
          */
         public function logout($token)
         {
+            // проверяем, что указанный пользователь авторизован
+            // и что переданный им токен соответствует хэшу авторизационного токена
+            if ($this->session()->get('auth_token')) {
+                $auth_token = $this->session()->get('auth_token');
+                if ($token == md5($auth_token . Config::get('secret_key'))) {
+                    // снимаем авторизацию с пользователя
+                    $this->session()->remove('auth_token');
+                    Cookie::delete('auth_token');
+                    return true;
+                }
+            }
+            return false;
         }
 
         /**
@@ -215,12 +253,7 @@
          */
         public function check_username($username)
         {
-            $check_username = self::$db->query(
-                'SELECT * FROM `'
-                        . $this->_get_table_name() . '` WHERE username=:username LIMIT 1',
-                ['username' => $username]
-            );
-            return !!($check_username->num_rows() == 1);
+            return !!($this->get_count('*', ['username' => $username]) > 0);
         }
 
         /**
@@ -230,12 +263,7 @@
          */
         public function check_email($email)
         {
-            $check_email = self::$db->query(
-                'SELECT * FROM `'
-                        . $this->_get_table_name() . '` WHERE email=:email LIMIT 1',
-                ['email' => $email]
-            );
-            return !!($check_email->num_rows() == 1);
+            return !!($this->get_count('*', ['email' => $email]) > 0);
         }
 
     }
