@@ -438,6 +438,23 @@
         }
 
         /**
+         * Возвращает количество записей в БД с указанным условием
+         * @param string|array $fields    Поле/поля для выборки
+         * @param array        $condition Условия для выборки
+         * @return int Количество записей, подходящих под условия
+         */
+        public function get_count($fields = '*', $condition = [])
+        {
+            if (is_array($fields)) {
+                $fields = implode(', ', $fields);
+            }
+            // Формирование SQL для условия выборки
+            $sql_condition = $this->_get_sql_from_condition($condition);
+            $sql = 'SELECT COUNT(' . $fields . ') AS count FROM ' . $this->_get_table_name() . $sql_condition['query'];
+            return self::$db->query($sql, $sql_condition['params'])->fetch_one()['count'];
+        }
+
+        /**
          * Обновление объекта по его первичному ключу
          * @param array $data Данные для обновления
          * @param int   $pk   Первичный ключ

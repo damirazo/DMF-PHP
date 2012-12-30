@@ -37,9 +37,18 @@
         public function save()
         {
             /** @var Entity $entity */
-            foreach($this->data as $entity) {
+            foreach ($this->data as $entity) {
                 $entity->save();
             }
+        }
+
+        /**
+         * Возвращает количество сущностей в коллекции
+         * @return int Количество сущностей в коллекции
+         */
+        public function count()
+        {
+            return count($this->data);
         }
 
         /**

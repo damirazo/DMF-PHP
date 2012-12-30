@@ -16,11 +16,8 @@
     /**
      * Базовая модель пользователя
      */
-    class BaseUser extends Model
+    class DMFUser extends Model
     {
-
-        /** @var mixed Объект пользователя */
-        protected $user = null;
 
         /**
          * Указание кастомных полей для пользователя
@@ -30,6 +27,7 @@
         {
             return [];
         }
+
         /**
          * Указание схемы модели
          * @return array
@@ -47,7 +45,6 @@
                 'last_update'  => new DatetimeField(),
                 'status'       => new BooleanField()
             ];
-
             return array_merge($this->_custom_fields(), $fields);
         }
 
@@ -60,24 +57,19 @@
             $auth_token = $this->session()->get('auth_token');
             if ($auth_token) {
                 $user = self::$db->query(
-                    'SELECT * FROM :table_name WHERE auth_token=:auth_token LIMIT 1',
-                    [
-                        'table_name' => $this->_get_table_name(),
-                        'auth_token' => $auth_token
-                    ]
+                    'SELECT COUNT(*) FROM ' . $this->_get_table_name() . ' WHERE auth_token=:auth_token LIMIT 1',
+                    ['auth_token' => $auth_token]
                 );
                 if ($user->num_rows() == 1) {
                     return true;
                 }
             }
-
             return false;
         }
 
         /**
          * Создание хэша пароля
          * @param string $password Пароль
-         *
          * @return string
          */
         public function create_password_hash($password)
@@ -85,7 +77,6 @@
             $secret_key = $this->config('secret_key');
             $salt = substr(Crypt::hash($secret_key . $password, 'ripemd320'), 7, 16);
             $hash = Crypt::hash($secret_key . $password . $salt, 'sha512');
-
             return $hash;
         }
 
@@ -93,7 +84,6 @@
          * Сравнение пароля с хэшем
          * @param string $password Пароль
          * @param string $hash     Хэш
-         *
          * @return bool
          */
         public function compare_password($password, $hash)
@@ -118,7 +108,8 @@
                 }
                 if ($field_name == 'password') {
                     $params['password'] = $this->create_password_hash($data['password']);
-                } else {
+                }
+                else {
                     if (isset($data[$field_name])) {
                         $params[$field_name] = $data[$field_name];
                     }
@@ -126,8 +117,7 @@
             }
             $field[] = 'auth_token=:auth_token';
             $params['auth_token'] = $this->generate_auth_token();
-
-            self::$db->get_all($sql . implode(', ', $field), $params);
+            self::$db->query($sql . implode(', ', $field), $params)->send();
         }
 
         /**
@@ -145,40 +135,38 @@
          */
         public function authenticate()
         {
+            // авторизационный токен из сессии
             $session_token = $this->session()->get('auth_token');
+            // авторизационный токен из кукисов
             $cookie_token = trim(Cookie::get_crypt('auth_token'));
+            // проверка наличия токенов
+            // токен в сессии имеет приоритет над токеном в кукисах
             if ($session_token) {
                 $token = $session_token;
-            } elseif ($cookie_token) {
+            }
+            elseif ($cookie_token) {
                 $token = $cookie_token;
-            } else {
+            }
+            else {
                 $token = false;
             }
+            // если токен задан, то ищем пользователя с таким же токеном
             if ($token) {
-                $data = self::$db->get_one(
-                    'SELECT * FROM `' . $this->_get_table_name()
-                        . '` WHERE auth_token=:auth_token AND status=1 LIMIT 1',
-                    ['auth_token' => $token]
+                // выборка коллекции сущностей по токену
+                $data = $this->get_by_condition(
+                    [
+                        'auth_token' => $token,
+                        'status'     => true
+                    ], [], 1
                 );
-                if (count($data) > 0) {
-                    $this->session()->set('user', $data);
-                    $this->user = $data;
-
+                // если количество сущностей равно единице,
+                // то считаем ее требуемым пользователем
+                if ($data->count() == 1) {
+                    $this->session()->set('user', $data[0]);
                     return $data;
                 }
             }
-            $this->user = null;
-
             return false;
-        }
-
-        /**
-         * Возвращает объект пользователя
-         * @return mixed|null
-         */
-        public function get_user()
-        {
-            return $this->user;
         }
 
         /**
@@ -186,76 +174,68 @@
          * @param string $username     Имя пользователя
          * @param string $password     Пароль пользователя
          * @param bool   $save_session Сохранять ли авторизацию после закрытия сайта
-         *
          * @return bool
          */
         public function login($username, $password, $save_session = false)
         {
             $hash = $this->create_password_hash($password);
-            $check_user = self::$db->get_all(
+            $check_user = self::$db->query(
                 'SELECT id, auth_token FROM `' . $this->_get_table_name()
-                    . '` WHERE username=:username AND password=:password AND status=1 LIMIT 1',
+                        . '` WHERE username=:username AND password=:password AND status=1 LIMIT 1',
                 ['username' => $username, 'password' => $hash]
-            );
+            )->fetch_one();
             if (count($check_user) == 1) {
                 $auth_token = $this->generate_auth_token();
-                self::$db->get_one(
+                self::$db->query(
                     'UPDATE `' . $this->_get_table_name()
-                        . '` SET auth_token=:auth_token, last_update=NOW()
+                            . '` SET auth_token=:auth_token, last_update=NOW()
                         WHERE username=:username AND password=:password AND status=1',
                     ['auth_token' => $auth_token, 'username' => $username, 'password' => $hash]
-                );
+                )->send();
                 $this->session()->set('auth_token', $auth_token);
                 if ($save_session) {
                     Cookie::set_crypt('auth_token', $auth_token, null, '/');
                 }
-
                 return true;
             }
-
             return false;
         }
 
         /**
          * Выполнение выхода с сайта
          */
-        public function logout()
+        public function logout($token)
         {
-
         }
 
         /**
          * Проверка имени пользователя на уникальность
          * @param string $username Имя пользователя
-         *
          * @return bool
          */
         public function check_username($username)
         {
-            $check_username = self::$db->get_all(
+            $check_username = self::$db->query(
                 'SELECT * FROM `'
-                    . $this->_get_table_name() . '` WHERE username=:username LIMIT 1',
+                        . $this->_get_table_name() . '` WHERE username=:username LIMIT 1',
                 ['username' => $username]
             );
-
-            return !!(count($check_username) == 1);
+            return !!($check_username->num_rows() == 1);
         }
 
         /**
          * Проверка адреса электронной почты пользователя на уникальность
          * @param string $email Адрес электронной почты пользователя
-         *
          * @return bool
          */
         public function check_email($email)
         {
-            $check_email = self::$db->get_all(
+            $check_email = self::$db->query(
                 'SELECT * FROM `'
-                    . $this->_get_table_name() . '` WHERE email=:email LIMIT 1',
+                        . $this->_get_table_name() . '` WHERE email=:email LIMIT 1',
                 ['email' => $email]
             );
-
-            return !!(count($check_email) == 1);
+            return !!($check_email->num_rows() == 1);
         }
 
     }
