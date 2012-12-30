@@ -38,7 +38,7 @@
             $validator = parent::validate($form, $value, $label);
             if ($this->_rules('matches_to')) {
                 $matches_field = $this->_rules('matches_to');
-                if ($this->request()->REQUEST($matches_field)) {
+                if ($this->request()->_request($matches_field)) {
                     $matches_value = $this->request()->REQUEST($matches_field);
                     if ($matches_value != $value) {
                         $validator->add_error('Значение поля "' . $label . '" не совпадает с полем "'

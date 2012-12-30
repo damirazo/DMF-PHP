@@ -45,4 +45,15 @@
             );
         }
 
+        public function register()
+        {
+            $form = $this->form('Register');
+            if ($form->is_received()) {
+                if ($form->validate()) {
+                    return $this->dump($form->data());
+                }
+            }
+            return $this->render('register', ['form' => $form]);
+        }
+
     }

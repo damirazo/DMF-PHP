@@ -23,6 +23,7 @@
         [
             'Example' => 'App\\Example',
             'Doc'     => 'App\\Doc',
+            'Auth'    => 'DMF\\Auth'
         ]
     );
 

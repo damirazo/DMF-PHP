@@ -2,7 +2,6 @@
 
     /**
      * Этот файл часть фреймворка DM Framework
-     *
      * (c) damirazo <damirazo.kazan@gmail.com> 2012
      * BaseField.php
      * 27.11.12, 17:32
@@ -50,10 +49,8 @@
 
         /**
          * Возвращает HTML код поля
-         *
          * @param string $name    Имя поля
          * @param mixed  $default Значение поля по умолчанию
-         *
          * @return string
          */
         public function _get_html_code($name, $default)
@@ -81,14 +78,12 @@
             foreach ($params as $param_name => $param_value) {
                 $data[] = $param_name . '="' . $param_value . '"';
             }
-
             return implode(' ', $data);
         }
 
         /**
          * Возвращает правило с требуемым именем
          * @param string $name Имя правила
-         *
          * @return bool|array
          */
         public function _rules($name)
@@ -96,7 +91,6 @@
             if (isset($this->_rules[$name])) {
                 return $this->_rules[$name];
             }
-
             return false;
         }
 
@@ -105,7 +99,6 @@
          * @param \DMF\Core\Form\Form Объект формы
          * @param string $value Значение для валидации
          * @param string $label Имя поля
-         *
          * @return array
          */
         public function validate($form, $value, $label)
@@ -116,7 +109,8 @@
                 if (is_string($value) && mb_strlen($value) == 0) {
                     $this->validator->add_error('Поле "' . $label . '" обязательно для заполнения!');
                     /** Проверка для полей с несколькими значениями */
-                } elseif (is_array($value) && count($value) == 0) {
+                }
+                elseif (is_array($value) && count($value) == 0) {
                     $this->validator->add_error('В поле "' . $label . '" нужно выбрать хотя бы одно значение!');
                 }
             }
@@ -124,14 +118,14 @@
             if ($this->_rules('min_length') && mb_strlen($value) < $this->_rules('min_length')) {
                 $this->validator->add_error(
                     'Значение поля "' . $label . '" должно быть больше '
-                        . $this->_rules('min_length') . ' символов!'
+                            . $this->_rules('min_length') . ' символов!'
                 );
             }
             /** Проверка максимальной длины значения */
             if ($this->_rules('max_length') && mb_strlen($value) > $this->_rules('max_length')) {
                 $this->validator->add_error(
                     'Значение поля "' . $label . '" должно быть меньше '
-                        . $this->_rules('max_length') . ' символов!'
+                            . $this->_rules('max_length') . ' символов!'
                 );
             }
             /** Обработка кастомных валидаторов */
@@ -143,7 +137,8 @@
                         $this->validator->add_error($data['message']);
                     }
                     /** Если указан массив валидаторов */
-                } elseif (is_array($this->_rules('custom_rules'))) {
+                }
+                elseif (is_array($this->_rules('custom_rules'))) {
                     $rules = $this->_rules('custom_rules');
                     foreach ($rules as $rule) {
                         $data = call_user_func_array([$form, $rule], [$form, $value, $label]);
@@ -160,7 +155,8 @@
                 if (is_array($this->_rules('pattern'))) {
                     $regexp = $this->_rules('pattern')[0];
                     $modificators = $this->_rules('pattern')[1];
-                } /** В противном случае значение содержит регулярное выражение */
+                }
+                /** В противном случае значение содержит регулярное выражение */
                 else {
                     $regexp = $this->_rules('pattern');
                     $modificators = '';
@@ -169,7 +165,6 @@
                     $this->validator->add_error('Значение поля "' . $label . '" не соответствует требуемому шаблону!');
                 }
             }
-
             return $this->validator;
         }
 
@@ -177,16 +172,15 @@
          * Возвращает значение данного поля
          * @param string $name Имя поля
          * @param bool   $raw  Необходимо ли очищать значение
-         *
          * @return bool|string
          */
         public function get($name, $raw = true)
         {
             if ($raw) {
-                return $this->request()->REQUEST($name);
-            } else {
-                $value = $this->request()->REQUEST($name);
-
+                return $this->request()->_request($name);
+            }
+            else {
+                $value = $this->request()->_request($name);
                 return $this->clean($value);
             }
         }

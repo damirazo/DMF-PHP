@@ -32,6 +32,9 @@
         ]
     );
 
+    /** Секретный ключ для алгоритмов шифрования */
+    Config::set('secret_key', 'Kdl39&34m<dfk)fkd3sdfLSD)ds73mf,,sdf');
+
     /** Импортирование локального конфига для переопределения системных настроек */
     if (DEBUG) {
         OS::import(CONFIG_PATH . 'config.local.php', false);
