@@ -3,12 +3,16 @@
     namespace DMF\Core\Model;
 
     use ArrayAccess;
+    use DMF\Core\Component\Component;
 
     /**
      * Базовая модуль для сущности из БД
      */
-    class Entity implements \ArrayAccess
+    class Entity extends Component implements \ArrayAccess
     {
+
+        /** @var null|Model Связанная модель */
+        protected $model = null;
 
         /** @var array Массив данных сущности */
         protected $data = [];
@@ -16,18 +20,55 @@
         /** @var null|string Имя таблицы */
         protected $table = null;
 
+        /** @var null|int ID сущности в БД */
+        protected $pk = null;
+
+        /** @var null|string Имя поля первичного ключа */
+        protected $pk_name = null;
+
         /** @var bool Внесены ли изменения в сущность */
         public $is_modified = false;
 
         /**
          * Конструктор сущности
-         * @param array  $data  Массив значений
-         * @param string $table Имя таблицы в БД
+         * @param Model $model Связанная модель
+         * @param array $data  Массив данных сущности
          */
-        public function __construct($table, array $data = [])
+        public function __construct(Model $model, array $data = [])
         {
-            $this->table = $table;
+            $this->model = $model;
+            $this->table = $model->_get_table_name();
             $this->data = $data;
+            $this->pk_name = $model->_get_primary_key_field_name();
+            $this->pk = $data[$model->_get_primary_key_field_name()];
+        }
+
+        /**
+         * Сохранение сущности в БД
+         */
+        public function save()
+        {
+            // Если сущность не была изменена, то игнорируем ее сохранение
+            if ($this->is_modified) {
+                self::$db->query(
+                    'UPDATE ' . $this->table . ' SET '
+                            . $this->get_update_condition() . ' WHERE ' . $this->pk_name . '=' . $this->pk,
+                    $this->data
+                )->send();
+            }
+        }
+
+        /**
+         * Возвращает строку с сохраняемыми значениями
+         * @return string
+         */
+        protected function get_update_condition()
+        {
+            $condition = [];
+            foreach ($this->data as $key => $value) {
+                $condition[] = $key . '=:' . $key;
+            }
+            return implode(', ', $condition);
         }
 
         /**

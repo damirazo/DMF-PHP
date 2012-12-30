@@ -173,7 +173,7 @@
          * Возвращает имя первичного ключа таблицы
          * @return bool|int|string
          */
-        protected function _get_primary_key_field_name()
+        public function _get_primary_key_field_name()
         {
             foreach ($this->_scheme() as $field_name => $field_object) {
                 if ($field_object instanceof \DMF\Core\Model\Field\PrimaryKeyField) {
@@ -397,9 +397,9 @@
             // Если элемент обнаружен, то добавляем его в сущность
             if ($data->num_rows() == 1) {
                 $entity = $data->fetch_one();
-                return new Entity($this->_get_table_name(), $entity);
+                return new Entity($this, $entity);
             }
-            return new Entity($this->_get_table_name(), []);
+            return new Entity($this, []);
         }
 
         /**
@@ -429,7 +429,7 @@
                 $entities = $data->fetch_all();
                 $collection = new EntityCollection($this->_get_table_name());
                 foreach ($entities as $element) {
-                    $entity = new Entity($this->_get_table_name(), $element);
+                    $entity = new Entity($this, $element);
                     $collection->add_entity($entity);
                 }
                 return $collection;

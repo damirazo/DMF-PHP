@@ -10,7 +10,7 @@
     class EntityCollection implements \ArrayAccess
     {
 
-        /** @var array Массив данных сущности */
+        /** @var array Коллекция сущностей */
         protected $data = [];
 
         /** @var null|string Имя таблицы в БД */
@@ -29,6 +29,17 @@
         public function add_entity(\DMF\Core\Model\Entity $entity)
         {
             $this->data[] = $entity;
+        }
+
+        /**
+         * Сохранение измененных в коллекции сущностей
+         */
+        public function save()
+        {
+            /** @var Entity $entity */
+            foreach($this->data as $entity) {
+                $entity->save();
+            }
         }
 
         /**

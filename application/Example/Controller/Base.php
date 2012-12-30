@@ -14,14 +14,7 @@
         /** Главная страница */
         public function index()
         {
-            //return $this->render('index');
-            $data = $this->model('Post')->get_by_condition(
-                [
-                    'status__not_equal' => false,
-                    'id__lte'           => 5
-                ], ['created_at']
-            );
-            return $this->dump($data);
+            return $this->render('index');
         }
 
         /** Список примеров */
