@@ -48,8 +48,9 @@
         public function register()
         {
             $form = $this->form('Register');
+            $form->bound(['username' => 'damirazo']);
             if ($form->is_received()) {
-                if ($form->validate()) {
+                if ($form->is_valid()) {
                     return $this->dump($form->data());
                 }
             }

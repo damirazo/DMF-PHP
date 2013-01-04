@@ -1,32 +1,31 @@
 <?php
 
-    /**
-     * Этот файл часть фреймворка DM Framework
-     *
-     * (c) damirazo <damirazo.kazan@gmail.com> 2012
-     * EmailField.php
-     * 28.11.12, 0:16
-     */
-
     namespace DMF\Core\Form\Field;
 
     /**
-     * Поле для электропочты
+     * Поле электронной почты
      */
     class EmailField extends InputField
     {
 
+        /** {@inheritdoc} */
+        protected $rules = [
+            'validate_email' => true
+        ];
+
+        /** {@inheritdoc} */
+        protected $type = 'email';
+
         /**
-         * {@inheritdoc}
+         * Валидация корректности адреса эл.почты
+         * @param string $value Значение
+         * @param bool $rule Параметр
          */
-        public function validate($form, $value, $label)
+        protected function rule__validate_email($value, $rule)
         {
-            /** @var $validator \DMF\Core\Form\Validator */
-            $validator = parent::validate($form, $value, $label);
             if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-                $validator->add_error('Значение поля "'.$label.'" содержит некорректный E-Mail адрес!');
+                $this->validator->add_error('Значение поле "' . $this->label() . '" содержит неверный адрес эл.почты!');
             }
-            return $validator;
         }
 
     }

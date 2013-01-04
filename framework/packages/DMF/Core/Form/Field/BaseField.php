@@ -1,188 +1,193 @@
 <?php
 
-    /**
-     * Этот файл часть фреймворка DM Framework
-     * (c) damirazo <damirazo.kazan@gmail.com> 2012
-     * BaseField.php
-     * 27.11.12, 17:32
-     */
-
     namespace DMF\Core\Form\Field;
 
     use DMF\Core\Component\Component;
-    use DMF\Core\Http\Request;
     use DMF\Core\Form\Validator;
 
     /**
-     * Класс базового поля в форме
+     * Базовый объект поля
      */
-    class BaseField extends Component
+    abstract class BaseField extends Component
     {
 
-        /** @var array Список параметров поля */
-        protected $_params = [];
+        /** @var \DMF\Core\Form\Form|null Объект формы */
+        protected $form = null;
 
-        /** @var array Список правил валидации */
-        protected $_rules = [];
+        /** @var array Настройки поля */
+        protected $data = [];
 
-        /** @var string Имя поля */
-        public $label = '';
+        /** @var null|string Имя поля */
+        protected $name = null;
 
-        /** @var \DMF\Core\Form\Validator|null Объект валидатора */
-        public $validator = null;
+        /** @var null|\DMF\Core\Form\Validator */
+        protected $validator = null;
+
+        /** @var null|mixed Значение поля */
+        protected $value = null;
+
+        /** @var array Массив правил для проверки поля */
+        protected $rules = [];
 
         /**
-         * Инициализация поля
-         * @param string $label  Имя поля
-         * @param array  $params Список параметров
-         * @param array  $rules  Список правил валидации
+         * Конструктор поля
+         * @param \DMF\Core\Form\Form $form Объект формы
+         * @param string              $name Имя поля
+         * @param array               $data Настройки поля
          */
-        public function __construct($label, $rules = [], $params = [])
+        public function __construct($form, $name, $data)
         {
-            $this->_params = $params;
-            $this->_rules = $rules;
-            $this->label = $label;
-            if (is_null($this->validator)) {
-                $this->validator = new Validator();
-            }
+            $this->form = $form;
+            $this->data = $data;
+            $this->name = $name;
+            $this->validator = new Validator();
         }
 
         /**
-         * Возвращает HTML код поля
-         * @param string $name    Имя поля
-         * @param mixed  $default Значение поля по умолчанию
+         * Возвращает лейбл поля
+         * @return null|string
+         */
+        public function label()
+        {
+            return !(isset($this->data['label'])) ? $this->generate_label() : $this->data['label'];
+        }
+
+        /**
+         * Возвращает HTML код для отображения поля
          * @return string
          */
-        public function _get_html_code($name, $default)
+        public function html()
         {
-            return '&nbsp;';
+            return '';
         }
 
         /**
-         * Значения полей по умолчанию
-         * @return array
+         * Валидация значения, переданного полю
+         * @param mixed               $value Переданное значение
+         * @return \DMF\Core\Form\Validator
          */
-        public function _defaults()
+        public function validate($value)
         {
-            return [];
-        }
-
-        /**
-         * Список параметров поля
-         * @return string
-         */
-        public function _params()
-        {
-            $data = [];
-            $params = array_merge($this->_defaults(), $this->_params);
-            foreach ($params as $param_name => $param_value) {
-                $data[] = $param_name . '="' . $param_value . '"';
-            }
-            return implode(' ', $data);
-        }
-
-        /**
-         * Возвращает правило с требуемым именем
-         * @param string $name Имя правила
-         * @return bool|array
-         */
-        public function _rules($name)
-        {
-            if (isset($this->_rules[$name])) {
-                return $this->_rules[$name];
-            }
-            return false;
-        }
-
-        /**
-         * Валидация поля
-         * @param \DMF\Core\Form\Form Объект формы
-         * @param string $value Значение для валидации
-         * @param string $label Имя поля
-         * @return array
-         */
-        public function validate($form, $value, $label)
-        {
-            /** Проверка обязательных полей */
-            if ($this->_rules('required')) {
-                /** Проверка для полей с одним значением */
-                if (is_string($value) && mb_strlen($value) == 0) {
-                    $this->validator->add_error('Поле "' . $label . '" обязательно для заполнения!');
-                    /** Проверка для полей с несколькими значениями */
+            // обходим массив правил проверки поля
+            foreach ($this->rules() as $rule_name => $rule_value) {
+                // если валидатор сообщил, что он невалиден,
+                // то прерываем проверку поля
+                if (!$this->validator->is_valid()) {
+                    break;
                 }
-                elseif (is_array($value) && count($value) == 0) {
-                    $this->validator->add_error('В поле "' . $label . '" нужно выбрать хотя бы одно значение!');
+                // проверяем наличия правила с нужным именем
+                // и вызываем его
+                if (method_exists($this, 'rule__' . $rule_name)) {
+                    call_user_func_array([$this, 'rule__' . $rule_name], [$value, $rule_value]);
                 }
             }
-            /** Проверка минимальной длины значения */
-            if ($this->_rules('min_length') && mb_strlen($value) < $this->_rules('min_length')) {
-                $this->validator->add_error(
-                    'Значение поля "' . $label . '" должно быть больше '
-                            . $this->_rules('min_length') . ' символов!'
-                );
-            }
-            /** Проверка максимальной длины значения */
-            if ($this->_rules('max_length') && mb_strlen($value) > $this->_rules('max_length')) {
-                $this->validator->add_error(
-                    'Значение поля "' . $label . '" должно быть меньше '
-                            . $this->_rules('max_length') . ' символов!'
-                );
-            }
-            /** Обработка кастомных валидаторов */
-            if ($this->_rules('custom_rules')) {
-                /** Если указан лишь один валидатор в виде строки */
-                if (is_string($this->_rules('custom_rules'))) {
-                    $data = call_user_func_array([$form, $this->_rules('custom_rules')], [$form, $value, $label]);
-                    if (!$data['status']) {
-                        $this->validator->add_error($data['message']);
-                    }
-                    /** Если указан массив валидаторов */
-                }
-                elseif (is_array($this->_rules('custom_rules'))) {
-                    $rules = $this->_rules('custom_rules');
-                    foreach ($rules as $rule) {
-                        $data = call_user_func_array([$form, $rule], [$form, $value, $label]);
-                        if (!$data['status']) {
-                            $this->validator->add_error($data['message']);
-                        }
-                    }
-                }
-            }
-            /** Проверка значения по регулярному выражению */
-            if ($this->_rules('pattern')) {
-                /** Если правило содержит массив, значит первое значение это регулярное выражение,
-                 * а второе - модификаторы */
-                if (is_array($this->_rules('pattern'))) {
-                    $regexp = $this->_rules('pattern')[0];
-                    $modificators = $this->_rules('pattern')[1];
-                }
-                /** В противном случае значение содержит регулярное выражение */
-                else {
-                    $regexp = $this->_rules('pattern');
-                    $modificators = '';
-                }
-                if (preg_match('~' . $regexp . '~' . $modificators, $value) == 0) {
-                    $this->validator->add_error('Значение поля "' . $label . '" не соответствует требуемому шаблону!');
-                }
-            }
+            // возвращаем "заряженный" объект валидатора
             return $this->validator;
         }
 
         /**
-         * Возвращает значение данного поля
-         * @param string $name Имя поля
-         * @param bool   $raw  Необходимо ли очищать значение
-         * @return bool|string
+         * Получение сообщения об ошибке от валидатора
+         * @return null|string
          */
-        public function get($name, $raw = true)
+        public function error()
         {
-            if ($raw) {
-                return $this->request()->_request($name);
+            return $this->validator->get_error();
+        }
+
+        /**
+         * Возвращает значение поля
+         * @return mixed
+         */
+        public function value()
+        {
+            return $this->form->value($this->name);
+        }
+
+        /**
+         * Возвращает массив правил для проверки поля
+         * @return array
+         */
+        public function rules()
+        {
+            return array_merge(isset($this->data['rules']) ? $this->data['rules'] : [], $this->rules);
+        }
+
+        /**
+         * Генерация лейбла поля из имени класса
+         * @return string
+         */
+        protected function generate_label()
+        {
+            return ucfirst(strtolower($this->get_class_name()));
+        }
+
+        /**
+         * Возвращает параметр с требуемым именем или значение по умолчанию
+         * @param string $name    Имя параметра
+         * @param bool   $default Значение по умолчанию
+         * @return bool
+         */
+        protected function data($name, $default = false)
+        {
+            if (isset($this->data[$name])) {
+                return $this->data[$name];
             }
-            else {
-                $value = $this->request()->_request($name);
-                return $this->clean($value);
+            return $default;
+        }
+
+        /**
+         * Правило для проверки обязательных для заполнения полей
+         * @param mixed $value Значение
+         * @param mixed $rule  Параметры правила
+         */
+        protected function rule__required($value, $rule)
+        {
+            if (is_string($value) && strlen($value) == 0) {
+                $this->validator->add_error('Поле "' . $this->label() . '" обязательно для заполнения!');
             }
+            elseif (is_array($value) && count($value) == 0) {
+                $this->validator->add_error(
+                    'Необходимо выбрать не менее одного значения поля "' . $this->label() . '"!'
+                );
+            }
+        }
+
+        /**
+         * Правило для проверки минимальной длины значения
+         * @param mixed $value Значение
+         * @param mixed $rule  Параметры правила
+         */
+        protected function rule__min_length($value, $rule)
+        {
+            if (is_string($value) && mb_strlen($value) < $rule) {
+                $this->validator->add_error(
+                    'Значение поля "' . $this->label() . '" не может быть менее ' . $rule . ' символов!'
+                );
+            }
+        }
+
+        /**
+         * Правило для проверки максимальной длины значения
+         * @param mixed $value Значение
+         * @param mixed $rule  Параметры правила
+         */
+        protected function rule__max_length($value, $rule)
+        {
+            if (is_string($value) && mb_strlen($value) > $rule) {
+                $this->validator->add_error(
+                    'Значение поля "' . $this->label() . '" не может быть более ' . $rule . ' символов!'
+                );
+            }
+        }
+
+        /**
+         * Правило для проверки соответствия значения регулярному выражению
+         * @param mixed $value Значение
+         * @param mixed $rule  Параметры правила
+         */
+        protected function rule__pattern($value, $rule)
+        {
+
         }
 
     }

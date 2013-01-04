@@ -3,48 +3,43 @@
     namespace DMF\Core\Form;
 
     /**
-     * Объект валидатора
+     * Класс валидатора поля
      */
     class Validator
     {
 
-        /** @var array Массив ошибок */
-        protected $_errors = [];
+        /** @var bool Проверка валидатора на валидность */
+        protected $is_valid = true;
+
+        /** @var null|string Сообщение об ошибке */
+        protected $error = null;
 
         /**
-         * Добавление ошибки валидации
+         * Добавление ошибки в валидатор
          * @param string $error Текст ошибки
          */
         public function add_error($error)
         {
-            $this->_errors[] = $error;
+            $this->is_valid = false;
+            $this->error = $error;
         }
 
         /**
-         * Проверка валидности
+         * Получение сообщения об ошибке
+         * @return null|string
+         */
+        public function get_error()
+        {
+            return $this->error;
+        }
+
+        /**
+         * Возвращает данные о том является ли валидатор валидным
          * @return bool
          */
         public function is_valid()
         {
-            return !!(count($this->_errors) == 0);
-        }
-
-        /**
-         * Возвращает первую полученную ошибку
-         * @return bool
-         */
-        public function error()
-        {
-            return (count($this->_errors) > 0) ? $this->_errors[0] : false;
-        }
-
-        /**
-         * Возвращает все ошибки, полученные при валидации поля
-         * @return array
-         */
-        public function errors()
-        {
-            return $this->_errors;
+            return $this->is_valid;
         }
 
     }

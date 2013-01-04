@@ -3,22 +3,34 @@
     namespace App\Example\Form;
 
     use DMF\Core\Form\Form;
-    use DMF\Core\Form\Field\EmailField;
-    use DMF\Core\Form\Field\PasswordField;
-    use DMF\Core\Form\Field\InputField;
 
     class Register extends Form
     {
 
-        public $csrf_protection = true;
+        public $csrf = true;
 
         public function scheme()
         {
             return [
-                'username'        => new InputField('Имя пользователя', ['min_length' => 5, 'max_length' => 16]),
-                'email'           => new EmailField('Электропочта'),
-                'password'        => new PasswordField('Пароль', ['min_length' => 5]),
-                'password_repeat' => new PasswordField('Повторите пароль', ['matches_to' => 'password'])
+                'username'        => [
+                    'type'  => 'string',
+                    'label' => 'Имя пользователя',
+                    'rules' => ['required' => true, 'min_length' => 5, 'max_length' => 16]
+                ],
+                'email'           => [
+                    'type'  => 'email',
+                    'label' => 'Адрес эл. почты',
+                    'rules' => ['required' => true]
+                ],
+                'password'        => [
+                    'type'  => 'password',
+                    'label' => 'Пароль',
+                    'rules' => ['required' => true, 'matches_to' => 'password_repeat']
+                ],
+                'password_repeat' => [
+                    'type'  => 'password',
+                    'label' => 'Повторите пароль'
+                ]
             ];
         }
 

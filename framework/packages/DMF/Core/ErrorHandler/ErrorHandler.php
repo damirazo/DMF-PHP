@@ -110,6 +110,11 @@
             exit();
         }
 
+        public static function show_backtrace()
+        {
+            return self::backtrace(debug_backtrace());
+        }
+
         /**
          * Активация перехвата ошибок
          */
