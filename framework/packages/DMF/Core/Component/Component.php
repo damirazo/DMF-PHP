@@ -174,6 +174,15 @@
          */
         public function clean($value)
         {
+            // если получен массив, то пытаемся почистить все его элементы
+            if (is_array($value)) {
+                $cleaned = [];
+                foreach ($value as $element) {
+                    $cleaned[] = htmlspecialchars(trim($element));
+                }
+                return $cleaned;
+            }
+            // в противном случае чистим лишь полученный элемент
             return htmlspecialchars(trim($value));
         }
 

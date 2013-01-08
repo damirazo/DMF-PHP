@@ -2,6 +2,7 @@
 
     namespace DMF\Core\Form;
 
+    use DMF\Core\Application\Application;
     use DMF\Core\Component\Component;
 
     /**
@@ -11,7 +12,7 @@
     {
 
         /** @var bool Активация CSRF защиты */
-        public $csrf = false;
+        public $csrf = true;
 
         /** @var string Имя метода получения запроса формы */
         public $method = 'POST';
@@ -102,10 +103,13 @@
         public function is_valid()
         {
             $is_valid = true;
+            // обходим массив полей
             /** @var $field_object \DMF\Core\Form\Field\BaseField */
             foreach ($this->fields() as $field_name => $field_object) {
-                $validator = $field_object->validate($this->value($field_name));
-                if (!$validator->is_valid()) {
+                // валидируем поле и получаем объект валидатора
+                $validator = $field_object->validate();
+                // если валидатор невалиден, то ставим значение формы невалидным
+                if ($validator->is_valid() === false) {
                     $is_valid = false;
                 }
             }
@@ -175,18 +179,21 @@
         /**
          * Возвращает значение поля с требуемым именем
          * @param string $field_name Имя поля
+         * @param mixed  $default    Значение по умолчанию
          * @return bool|mixed
          */
-        public function value($field_name)
+        public function value($field_name, $default = false)
         {
             $method_var = $this->get_method_var();
+            // проверяем наличие переменной с нужным именем в глобальных массивах
             if (isset($method_var[$field_name])) {
                 return $method_var[$field_name];
             }
+            // если переменная не была обнаружена, то ищем ее в переданных в форму данных
             elseif (isset($this->bounded_data[$field_name])) {
                 return $this->bounded_data[$field_name];
             }
-            return false;
+            return $default;
         }
 
         /**
@@ -225,21 +232,37 @@
         }
 
         /**
+         * Возвращает имя формы
+         * @return string
+         */
+        public function name()
+        {
+            return strtolower($this->get_class_name());
+        }
+
+        /**
          * Возвращает строку с пространством имен для требуемого типа поля
          * @param string $type Тип поля
          * @return string
          */
         protected function get_class_namespace_for_field_type($type)
         {
-            // регистрация списка стандартных полей
-            $this->register_field_type('string', '\DMF\Core\Form\Field\InputField');
-            $this->register_field_type('email', '\DMF\Core\Form\Field\EmailField');
-            $this->register_field_type('password', '\DMF\Core\Form\Field\PasswordField');
-            // проверка наличия поля требуемого типа
-            if (isset($this->field_types[$type])) {
-                return $this->field_types[$type];
+            //return $type;
+            $segments = explode('.', $type);
+            if (count($segments) == 2) {
+                if ($segments[0] == 'DMF') {
+                    $namespace = '\DMF\Core\Form\Field\\' . $segments[1];
+                }
+                else {
+                    $module = Application::get_instance()->get_module_by_name($segments[0]);
+                    $namespace = $module->namespace . '\Form\Field\\' . $segments[1];
+                }
             }
-            return $this->field_types['string'];
+            else {
+                $module = $this->get_module();
+                $namespace = $module->namespace . '\Form\Field\\' . $segments[0];
+            }
+            return $namespace;
         }
 
         /**

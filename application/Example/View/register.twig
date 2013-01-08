@@ -13,14 +13,16 @@
                     {% for field in form.fields %}
                         {% if field.error %}
                             <div class="alert alert-block alert-error">{{ field.error }}</div>
-                            {% endif %}
+                        {% endif %}
                         <div class="control-group">
                             <label class="control-label">{{ field.label }}</label>
+
                             <div class="controls">
                                 {{ field.html|raw }}
                             </div>
                         </div>
                     {% endfor %}
+
                     <div class="control-group">
                         <div class="controls">
                             <button class="btn">Отправить</button>

@@ -14,8 +14,8 @@
         /** {@inheritdoc} */
         public function html()
         {
-            $value = ($this->value()) ? $this->value() : '';
-            return '<input type="' . $this->type . '" name="' . $this->name . '" value="' . $value . '">';
+            return '<input type="' . $this->type . '" name="' . $this->name . '" value="' . $this->value() . '" '
+                    . $this->html_attrs() . '>';
         }
 
     }

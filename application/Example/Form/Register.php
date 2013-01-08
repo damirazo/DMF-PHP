@@ -7,29 +7,69 @@
     class Register extends Form
     {
 
-        public $csrf = true;
-
         public function scheme()
         {
             return [
                 'username'        => [
-                    'type'  => 'string',
-                    'label' => 'Имя пользователя',
-                    'rules' => ['required' => true, 'min_length' => 5, 'max_length' => 16]
+                    'type'   => 'DMF.InputField',
+                    'label'  => 'Имя пользователя',
+                    'rules'  => [],
+                    'attrs'  => ['class' => 'form-field']
                 ],
                 'email'           => [
-                    'type'  => 'email',
-                    'label' => 'Адрес эл. почты',
-                    'rules' => ['required' => true]
+                    'type'  => 'DMF.EmailField',
+                    'label' => 'Адрес эл. почты'
                 ],
                 'password'        => [
-                    'type'  => 'password',
+                    'type'  => 'DMF.PasswordField',
                     'label' => 'Пароль',
-                    'rules' => ['required' => true, 'matches_to' => 'password_repeat']
+                    'rules' => []
                 ],
                 'password_repeat' => [
-                    'type'  => 'password',
+                    'type'  => 'DMF.PasswordField',
                     'label' => 'Повторите пароль'
+                ],
+                'description'     => [
+                    'type'  => 'DMF.TextField',
+                    'label' => 'Описание'
+                ],
+                'city'            => [
+                    'type'    => 'DMF.RadioField',
+                    'label'   => 'Город',
+                    'options' => [
+                        'kazan'  => 'Казань',
+                        'moscow' => 'Москва'
+                    ],
+                    'rules' => []
+                ],
+                'gender' => [
+                    'type' => 'DMF.CheckboxField',
+                    'label' => 'Укажите пол',
+                    'options' => [
+                        'm' => 'Мужской',
+                        'f' => 'Женский'
+                    ],
+                    'rules' => []
+                ],
+                'list' => [
+                    'type' => 'DMF.SelectField',
+                    'label' => 'Список',
+                    'options' => [
+                        'p1' => 'Первый элемент',
+                        'p2' => 'Второй элемент',
+                        'p3' => 'Третий элемент'
+                    ]
+                ],
+                'multilist' => [
+                    'type' => 'DMF.MultiSelectField',
+                    'label' => 'Мульти-список',
+                    'options' => [
+                        'p1' => 'Первый элемент',
+                        'p2' => 'Второй элемент',
+                        'p3' => 'Третий элемент'
+                    ],
+                    'rules' => [],
+                    'errors' => ['required' => 'Уупс, пропущено обязательное поле "%s"!']
                 ]
             ];
         }

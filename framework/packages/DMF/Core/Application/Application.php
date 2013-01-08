@@ -117,7 +117,7 @@
         /**
          * Создание объекта модуля
          * @param null|string $name Имя модуля
-         * @return mixed
+         * @return \DMF\Core\Module\Module
          * @throws Exception\ModuleNotFound
          */
         public function get_module_by_name($name = null)
