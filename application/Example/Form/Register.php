@@ -70,6 +70,10 @@
                     ],
                     'rules' => [],
                     'errors' => ['required' => 'Уупс, пропущено обязательное поле "%s"!']
+                ],
+                'datetime' => [
+                    'type' => 'DMF.DatetimeField',
+                    'label' => 'Дата и время'
                 ]
             ];
         }

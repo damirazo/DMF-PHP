@@ -30,7 +30,7 @@
          */
         public function type()
         {
-            return 'timestamp';
+            return 'datetime';
         }
 
         /**

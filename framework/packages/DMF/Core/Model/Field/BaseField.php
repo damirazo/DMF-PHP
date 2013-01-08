@@ -7,7 +7,7 @@
     /**
      * Базовая модель для поля в БД
      */
-    class BaseField extends Component
+    abstract class BaseField extends Component
     {
 
         /**
