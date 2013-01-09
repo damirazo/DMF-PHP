@@ -7,7 +7,7 @@
     /**
      * Коллекция сущностей
      */
-    class EntityCollection implements \ArrayAccess
+    class EntityCollection implements \ArrayAccess, \Iterator
     {
 
         /** @var array Коллекция сущностей */
@@ -88,6 +88,51 @@
         public function offsetUnset($offset)
         {
             unset($this->data[$offset]);
+        }
+
+        /**
+         * Возвращение итератора на первый элемент
+         * @return mixed|void
+         */
+        public function rewind()
+        {
+            return reset($this->data);
+        }
+
+        /**
+         * Возвращает текущий элемент итератора
+         * @return mixed
+         */
+        public function current()
+        {
+            return current($this->data);
+        }
+
+        /**
+         * Возвращает ключ текущего элемента итератора
+         * @return mixed
+         */
+        public function key()
+        {
+            return key($this->data);
+        }
+
+        /**
+         * Перевод итератора на следующий элемент
+         * @return mixed|void
+         */
+        public function next()
+        {
+            return next($this->data);
+        }
+
+        /**
+         * Проверка существования элемента
+         * @return bool
+         */
+        public function valid()
+        {
+            return key($this->data) !== null;
         }
 
     }

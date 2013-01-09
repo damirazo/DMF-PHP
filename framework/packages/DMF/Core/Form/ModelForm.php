@@ -57,7 +57,7 @@
         /**
          * Возвращает сгенерированное имя поля из заданного массива
          * или на основе имени поля в модели
-         * @param $name
+         * @param $name Имя поля
          * @return string
          */
         protected function get_field_label($name)

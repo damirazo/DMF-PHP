@@ -473,7 +473,7 @@
             $params['pk'] = $pk;
             $result_code = 'UPDATE ' . $this->_get_table_name() . ' SET ' . implode(', ', $sql)
                     . ' WHERE ' . $this->_get_primary_key_field_name() . '=:pk';
-            self::$db->query($result_code, $params);
+            self::$db->query($result_code, $params)->send();
         }
 
         /**
@@ -495,7 +495,7 @@
             }
             $result_params = array_merge($params, $cond['params']);
             $result_code = 'UPDATE ' . $this->_get_table_name() . ' SET ' . implode(', ', $sql) . $cond['query'];
-            self::$db->query($result_code, $result_params);
+            self::$db->query($result_code, $result_params)->send();
         }
 
         /**

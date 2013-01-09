@@ -51,11 +51,12 @@
 //            $form->bound(['username' => 'damirazo']);
 
             $form = $this->form('PostEdit');
-            $form->bound(['name' => 'Другое название']);
+            $post = $this->model('Post')->get_by_pk(1);
+            $form->bound($post);
 
             if ($form->is_received()) {
                 if ($form->is_valid()) {
-                    return $this->dump($form->cleaned_data());
+                    $this->model('Post')->update_by_pk($form->cleaned_data(), 1);
                 }
             }
 

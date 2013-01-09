@@ -20,7 +20,7 @@
         {
             return [
                 'id'         => new PrimaryKeyField(),
-                'name'       => new CharField(['length' => 64, 'default' => 'Название']),
+                'name'       => new CharField(['length' => 64]),
                 'text'       => new TextField(),
                 'created_at' => new DatetimeField(),
                 'status'     => new BooleanField(['default' => true])
