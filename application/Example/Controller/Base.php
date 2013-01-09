@@ -49,14 +49,16 @@
         {
 //            $form = $this->form('Register');
 //            $form->bound(['username' => 'damirazo']);
-//            if ($form->is_received()) {
-//                if ($form->is_valid()) {
-//                    return $this->dump($form->cleaned_data());
-//                }
-//            }
-//            return $this->render('register', ['form' => $form]);
-//
+
             $form = $this->form('PostEdit');
+            $form->bound(['name' => 'Другое название']);
+
+            if ($form->is_received()) {
+                if ($form->is_valid()) {
+                    return $this->dump($form->cleaned_data());
+                }
+            }
+
             return $this->render('register', ['form' => $form]);
         }
 
