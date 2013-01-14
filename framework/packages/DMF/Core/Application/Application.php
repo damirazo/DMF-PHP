@@ -107,7 +107,7 @@
                         return $route_object;
                     }
                 }
-                throw new Http404('Данная страница отсутствует на сайте!');
+                throw new Http404('Страница ' . Request::get_instance()->url() . ' отсутствует на сайте!');
             }
             else {
                 return $this->route_object;

@@ -10,6 +10,12 @@
     /** Активация дебагового режима */
     Config::set('debug', DEBUG);
 
+    /** Базовый хост сайта */
+    Config::set('base_url', 'http://localhost/');
+
+    /** Путь до статичных файлов */
+    Config::set('static_url', 'http://localhost/_/');
+
     /** Настройки подключения к базе данных */
     Config::set(
         'database', [

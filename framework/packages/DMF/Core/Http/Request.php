@@ -2,6 +2,8 @@
 
     namespace DMF\Core\Http;
 
+    use DMF\Core\Storage\Config;
+
     /**
      * Класс для работы с входящими запросами
      */
@@ -34,13 +36,40 @@
         }
 
         /**
+         * Текущий полный URL сайта
+         * @return string
+         */
+        public function url()
+        {
+            return $this->base_url() . substr($this->request_uri(), 1);
+        }
+
+        /**
          * Базовый URI сайта
          * @return string
          */
         public function base_url()
         {
+            // если базовый адрес указан в конфигурации сайта,
+            // то используем его
+            if (Config::get('base_url')) {
+                return Config::get('base_url');
+            }
+            // в противном случае высчитываем сами
             $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') ? 'https' : 'http';
-            return $protocol . '://' . $_SERVER['HTTP_HOST'];
+            return $protocol . '://' . $_SERVER['HTTP_HOST'] . '/';
+        }
+
+        /**
+         * Путь до директории со статичными файлами
+         * @return mixed|string
+         */
+        public function static_url()
+        {
+            if (Config::get('static_url')) {
+                return Config::get('static_url');
+            }
+            return $this->base_url() . 'static/';
         }
 
         /**

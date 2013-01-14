@@ -50,17 +50,18 @@
 //            $form = $this->form('Register');
 //            $form->bound(['username' => 'damirazo']);
 
-            $form = $this->form('PostEdit');
-            $post = $this->model('Post')->get_by_pk(1);
-            $form->bound($post);
-
-            if ($form->is_received()) {
-                if ($form->is_valid()) {
-                    $this->model('Post')->update_by_pk($form->cleaned_data(), 1);
-                }
-            }
-
-            return $this->render('register', ['form' => $form]);
+//            $form = $this->form('PostEdit');
+//            $post = $this->model('Post')->get_by_pk(1);
+//            $form->bound($post);
+//
+//            if ($form->is_received()) {
+//                if ($form->is_valid()) {
+//                    $this->model('Post')->update_by_pk($form->cleaned_data(), 1);
+//                }
+//            }
+//
+//            return $this->render('register', ['form' => $form]);
+            return $this->redirect('test');
         }
 
     }

@@ -17,8 +17,6 @@
     /** Базовый URL сайта */
     Context::add('base_url', Request::get_instance()->base_url());
     /** Путь до папки статичных файлов */
-    Context::add('static_url', Request::get_instance()->base_url() . '/static/');
+    Context::add('static_url', Request::get_instance()->static_url());
     /** Рандомная строка в режиме разработки для добавления к именам статичных файлов */
     Context::add('random_string', DEBUG ? '?' . uniqid() : '');
-    /** Стек вызовов */
-    Context::add('backtrace', DEBUG ? ErrorHandler::show_backtrace() : '');
