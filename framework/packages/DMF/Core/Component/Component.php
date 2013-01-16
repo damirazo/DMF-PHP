@@ -3,12 +3,14 @@
     namespace DMF\Core\Component;
 
     use DMF\Core\Application\Application;
+    use SimpleXMLElement;
     use DMF\Core\Model\Database;
     use DMF\Core\Storage\Config;
     use DMF\Core\Storage\Session;
     use DMF\Core\Http\Request;
     use DMF\Core\Http\Response;
     use DMF\Core\Template\Template;
+    use DMF\Core\Document\Array2XML;
 
     /**
      * Базовый класс для большинства частей фреймворка
@@ -147,6 +149,16 @@
         }
 
         /**
+         * Возврат данных в виде XML
+         * @param mixed $data    Данные для представления в XML
+         * @return \DMF\Core\Http\Response
+         */
+        public function xml($data)
+        {
+            return new Response($this->array2xml($data), 200, ['Content-type: application/xml']);
+        }
+
+        /**
          * Вывод дампа объекта
          * @param mixed $data Данные для вывода
          * @return \DMF\Core\Http\Response
@@ -213,6 +225,21 @@
             $namespace = get_class($this);
             $pieces = (mb_strpos($namespace, '\\')) ? explode('\\', $namespace) : explode('_', $namespace);
             return $pieces[count($pieces) - 1];
+        }
+
+        /**
+         * Преобразование массива в XML документ
+         * @param array  $data      Данные для генерации документа
+         * @param string $root_node Имя корневой ноды
+         * @param string $encoding  Кодировка документа
+         * @param string $version   Версия документа
+         * @return string
+         */
+        protected function array2xml($data, $root_node = 'root', $encoding = 'utf-8', $version = '1.0')
+        {
+            Array2XML::init($version, $encoding, true);
+            $document = Array2XML::createXML($root_node, $data);
+            return $document->saveXML();
         }
 
     }

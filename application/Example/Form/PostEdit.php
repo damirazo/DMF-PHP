@@ -11,7 +11,7 @@
     {
 
         /** @var string Имя связанной с классом модели */
-        public $model = 'Example.Post';
+        public $model = 'Post';
 
         /**
          * Массив лейблов полей

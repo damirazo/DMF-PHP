@@ -3,7 +3,9 @@
     namespace DMF\Core\Form;
 
     use DMF\Core\Application\Application;
+    use DMF\Core\Http\Exception\HttpError;
     use DMF\Core\Component\Component;
+    use DMF\Core\Storage\Cookie;
 
     /**
      * Базовый класс для форм
@@ -31,6 +33,39 @@
 
         /** @var bool Была ли заполнена форма */
         protected $is_bound = false;
+
+        /**
+         * Конструктор формы
+         */
+        public function __construct()
+        {
+            // проверяем, активна ли CSRF защита
+            if ($this->csrf) {
+                // если значение CSRF токена равно нулю, то ищем его в сессии и кукисах
+                // в противном случае генерируем заново
+                if (is_null($this->csrf_token)) {
+                    if ($this->session()->get('csrf_token')) {
+                        $this->csrf_token = $this->session()->get('csrf_token');
+                    }
+                    elseif (Cookie::get_crypt('csrf_token')) {
+                        $this->csrf_token = Cookie::get_crypt('csrf_token');
+                    }
+                    else {
+                        $csrf_token = $this->generate_csrf_token();
+                        $this->session()->set('csrf_token', $csrf_token);
+                        Cookie::set_crypt(
+                            'csrf_token',
+                            $csrf_token,
+                            null, null,
+                            $this->config('base_url'),
+                            null,
+                            true
+                        );
+                        $this->csrf_token = $csrf_token;
+                    }
+                }
+            }
+        }
 
         /**
          * Определение схемы формы
@@ -102,18 +137,21 @@
          */
         public function is_valid()
         {
-            $is_valid = true;
-            // обходим массив полей
-            /** @var $field_object \DMF\Core\Form\Field\BaseField */
-            foreach ($this->fields() as $field_name => $field_object) {
-                // валидируем поле и получаем объект валидатора
-                $validator = $field_object->validate();
-                // если валидатор невалиден, то ставим значение формы невалидным
-                if ($validator->is_valid() === false) {
-                    $is_valid = false;
+            if ($this->check_csrf_token()) {
+                $is_valid = true;
+                // обходим массив полей
+                /** @var $field_object \DMF\Core\Form\Field\BaseField */
+                foreach ($this->fields() as $field_name => $field_object) {
+                    // валидируем поле и получаем объект валидатора
+                    $validator = $field_object->validate();
+                    // если валидатор невалиден, то ставим значение формы невалидным
+                    if ($validator->is_valid() === false) {
+                        $is_valid = false;
+                    }
                 }
+                return $is_valid;
             }
-            return $is_valid;
+            return false;
         }
 
         /**
@@ -151,7 +189,7 @@
         public function data()
         {
             $data = [];
-            $method_var = $this->get_method_var();
+            $method_var = $this->get_form_data_container();
             foreach ($this->fields() as $field_name => $field_object) {
                 if (isset($method_var[$field_name])) {
                     $data[$field_name] = $method_var[$field_name];
@@ -167,7 +205,7 @@
         public function cleaned_data()
         {
             $data = [];
-            $method_var = $this->get_method_var();
+            $method_var = $this->get_form_data_container();
             foreach ($this->fields() as $field_name => $field_object) {
                 if (isset($method_var[$field_name])) {
                     $data[$field_name] = $this->clean($method_var[$field_name]);
@@ -184,7 +222,7 @@
          */
         public function value($field_name, $default = false)
         {
-            $method_var = $this->get_method_var();
+            $method_var = $this->get_form_data_container();
             // проверяем наличие переменной с нужным именем в глобальных массивах
             if (isset($method_var[$field_name])) {
                 return $method_var[$field_name];
@@ -200,7 +238,7 @@
          * Возвращает переменную, содержащую переданные форме значения
          * @return array
          */
-        public function get_method_var()
+        public function get_form_data_container()
         {
             switch ($this->request()->get_method()) {
                 case 'POST':
@@ -241,28 +279,62 @@
         }
 
         /**
+         * Поле с CSRF токеном
+         * @return string
+         */
+        public function csrf_field()
+        {
+            return '<input type="hidden" name="csrf_token" value="'.$this->csrf_token.'">';
+        }
+
+        /**
          * Возвращает строку с пространством имен для требуемого типа поля
          * @param string $type Тип поля
          * @return string
+         * @description Собственные поля должны находится в папке Form/Field требуемого модуля,
+         * в противном случае их загрузка будет невозможна
          */
         protected function get_class_namespace_for_field_type($type)
         {
-            //return $type;
+            // разбиваем строку по разделителю точки
             $segments = explode('.', $type);
+            // если число сегментов равно двум, значит указаны имя модуля и имя поля
             if (count($segments) == 2) {
+                // если имя модуля DMF, следовательно это псевдоним системного модуля
                 if ($segments[0] == 'DMF') {
                     $namespace = '\DMF\Core\Form\Field\\' . $segments[1];
                 }
+                // в противном случае возвращаем объект требуемого модуля и достаем его пространство имен
                 else {
                     $module = Application::get_instance()->get_module_by_name($segments[0]);
                     $namespace = $module->namespace . '\Form\Field\\' . $segments[1];
                 }
             }
+            // в противном случае считаем, что поле находится в данном модуле
             else {
                 $module = $this->get_module();
                 $namespace = $module->namespace . '\Form\Field\\' . $segments[0];
             }
             return $namespace;
+        }
+
+        /**
+         * Проверка CSRF токена при активированной защите
+         * @throws \DMF\Core\Http\Exception\HttpError
+         * @return bool
+         */
+        protected function check_csrf_token()
+        {
+            if ($this->csrf) {
+                $received_csrf_token = $this->value('csrf_token');
+                if (!$received_csrf_token) {
+                    throw new HttpError('Отсутствует значение CSRF токена!', 403);
+                }
+                if (!$this->compare_csrf_token($received_csrf_token)) {
+                    throw new HttpError('Получено неверное значение CSRF токена!', 403);
+                }
+            }
+            return true;
         }
 
         /**

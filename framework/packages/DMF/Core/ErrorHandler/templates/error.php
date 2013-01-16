@@ -1,8 +1,11 @@
+<?php if (!isset($error)) {
+    $error = [];
+} ?>
 <!doctype html>
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Ошибка</title>
+    <title><?php echo $error['code'] . ' &bull; ' . substr($error['message'], 0, 32) . '...'; ?></title>
     <style type="text/css">
         body {
             margin: 0;
@@ -16,6 +19,14 @@
             height: 30px;
             color: #d2c2b5;
             text-align: center;
+        }
+
+        h2 a {
+            color: #d2c2b5;
+        }
+
+        h2 a:hover {
+            text-decoration: none;
         }
 
         .error-message, .error-data, .error-stack-element {
@@ -61,34 +72,59 @@
 <body>
 
 <div class="error-message">
-    <?php echo $message; ?>
+    <?php echo $error['message']; ?>
 </div>
 
 <?php if (DEBUG): ?>
 
-    <div class="error-data">
-        <?php echo $error_data; ?>
-    </div>
+<div class="error-data">
+    <?php echo $error['path']; ?>
+</div>
 
-    <h2>Стек вызовов</h2>
+<h2>Стек вызовов [<a id="hide-stack" href="#">свернуть</a>]</h2>
 
-    <?php if (count($error_stack) > 0): ?>
-        <?php foreach ($error_stack as $element): ?>
+<div id="stack">
+    <?php if (count($error['stack']) > 0): ?>
+    <?php foreach ($error['stack'] as $element): ?>
         <div class="error-stack-element">
             <p><strong>Файл:</strong><?php echo $element['file']; ?></p>
+
             <p><strong>Строка:</strong><?php echo $element['line'];?></p>
+
             <p><strong>Класс:</strong><?php echo $element['class']; ?></p>
+
             <p><strong>Функция/Метод:</strong><?php echo $element['function']; ?></p>
+
             <p><strong>Тип функции/метода:</strong><?php echo $element['type']; ?></p>
         </div>
         <?php endforeach; ?>
     <?php else: ?>
-        <div class="error-stack-element">
-            <p>Стек пуст</p>
-        </div>
+    <div class="error-stack-element">
+        <p>Стек пуст</p>
+    </div>
+    <?php endif; ?>
+</div>
     <?php endif; ?>
 
-<?php endif; ?>
 
+<script type="text/javascript" src="//code.jquery.com/jquery.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $('#hide-stack').on('click', function (event) {
+            event.preventDefault();
+            var self = $(this);
+            var $stack = $('#stack');
+            if (self.hasClass('hidden')) {
+                self.removeClass('hidden');
+                self.text('свернуть');
+            }
+            else {
+                self.addClass('hidden');
+                self.text('развернуть');
+            }
+            $stack.toggle();
+        });
+    });
+</script>
 </body>
 </html>

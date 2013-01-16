@@ -25,7 +25,7 @@
             '/examples/hello/'                => 'Example.Base.example_hello',
             '/examples/var/'                  => 'Example.Base.example_var',
             '/examples/params/(@int)/(@int)/' => 'Example.Base.example_params',
-            '/examples/register/'             => 'Example.Base.register',
+            '/examples/form/'                 => 'Example.Base.example_form',
 
             /* Документация */
             '/doc/'                           => 'Doc.Base.index',

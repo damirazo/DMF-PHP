@@ -7,3 +7,6 @@ framework/data/cache/templates/*
 
 framework/data/migrations/*
 !.gitkeep
+
+logs/*
+!.gitkeep

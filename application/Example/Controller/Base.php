@@ -45,23 +45,41 @@
             );
         }
 
-        public function register()
+        /** Пример работы с формами */
+        public function example_form()
         {
-//            $form = $this->form('Register');
-//            $form->bound(['username' => 'damirazo']);
+            //            // получение объекта формы
+            //            $form = $this->form('PostEdit');
+            //            // выборка статьи с айди 1
+            //            $post = $this->model('Post')->get_by_pk(1);
+            //            // отправка данных о статье в форму
+            //            $form->bound($post);
+            //            // проверяем была ли отправлена форма
+            //            if ($form->is_received()) {
+            //                // проверяем валидность формы
+            //                if ($form->is_valid()) {
+            //                    // обновляем статью
+            //                    $this->model('Post')->update_by_pk($form->cleaned_data(), 1);
+            //                    return $this->redirect('');
+            //                }
+            //            }
+            //            // рендерим форму
+            //            return $this->render('example_form', ['form' => $form]);
 
-//            $form = $this->form('PostEdit');
-//            $post = $this->model('Post')->get_by_pk(1);
-//            $form->bound($post);
-//
-//            if ($form->is_received()) {
-//                if ($form->is_valid()) {
-//                    $this->model('Post')->update_by_pk($form->cleaned_data(), 1);
-//                }
-//            }
-//
-//            return $this->render('register', ['form' => $form]);
-            return $this->redirect('test');
+            return $this->xml(
+                [
+                    'rss' => [
+                        'version'     => '2.0',
+                        '@attributes' => ['version' => 1, 'style' => 'color:red;'],
+                        'channel'     => [
+                            'data'        => 500,
+                            'title'       => ['test' => true, 'fgdfgdf' => 'тестовый элемент'],
+                            'link'        => 'http://damirazo.ru',
+                            'description' => 'dfgk dfg as fg hdfgdf rt dfgdfgsad fgghgfh'
+                        ]
+                    ]
+                ]
+            );
         }
 
     }

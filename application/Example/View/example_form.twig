@@ -8,7 +8,7 @@
             <div class="span12">
                 <h3>Регистрация нового пользователя</h3>
 
-                <form action="{{ base_url }}/examples/register/" method="post" accept-charset="utf-8"
+                <form action="{{ current_url }}" method="post" accept-charset="utf-8"
                       class="form-horizontal">
                     {% for field in form.fields %}
                         {% if field.error %}
@@ -22,6 +22,8 @@
                             </div>
                         </div>
                     {% endfor %}
+
+                    {{ form.csrf_field|raw }}
 
                     <div class="control-group">
                         <div class="controls">
