@@ -137,6 +137,11 @@
          */
         public function is_valid()
         {
+            // если форма не была получена, то следовательно она не валидна
+            if (!$this->is_received()) {
+                return false;
+            }
+            // проверяем корректность полученного CSRF токена
             if ($this->check_csrf_token()) {
                 $is_valid = true;
                 // обходим массив полей

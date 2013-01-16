@@ -27,6 +27,10 @@
             '/examples/params/(@int)/(@int)/' => 'Example.Base.example_params',
             '/examples/form/'                 => 'Example.Base.example_form',
 
+            '/db/update/'                     => 'Example.Base.db_update',
+
+            '/user/register/'                 => 'Example.Base.register',
+
             /* Документация */
             '/doc/'                           => 'Doc.Base.index',
             '/doc/([\w\d\-]+).html/'          => 'Doc.Base.page',

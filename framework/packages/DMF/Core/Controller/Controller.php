@@ -25,8 +25,8 @@
             // метод получения запроса
             $method = strtolower(Request::get_instance()->get_method());
             // вначале проверяем наличия требуемого метода с префиксом в виде метода запроса
-            if (method_exists($this, $action.'__'.$method)) {
-                return call_user_func_array([$this, $action], $args);
+            if (method_exists($this, $action . '__' . $method)) {
+                return call_user_func_array([$this, $action . '__' . $method], $args);
             }
             // затем ищем метод по точному имени
             elseif (method_exists($this, $action)) {

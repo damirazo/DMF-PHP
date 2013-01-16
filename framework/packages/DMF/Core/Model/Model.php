@@ -76,8 +76,6 @@
 
         /**
          * Создание новой таблицы
-         * @return bool
-         * TODO: Добавить реализацию загрузки фикстур
          */
         public function _create_table()
         {
@@ -96,7 +94,7 @@
             // Имя файл фикстуры, генерируется из имени модуля и имени модели
             $fixture_name = strtolower($this->get_module_name()) . '__' . strtolower($this->get_class_name()) . '.json';
             // Полный путь до файла с фикстурой
-            $fixture = OS::file(DATA_PATH . 'fixtures' . _SEP . $fixture_name)->as_string();
+            $fixture = OS::file_data(DATA_PATH . 'fixtures' . _SEP . $fixture_name, false, false);
             // Если файл с фикстурой отсутствует, то ничего не делаем
             if ($fixture !== false) {
                 // Данные из файла, преобразованные в PHP массив

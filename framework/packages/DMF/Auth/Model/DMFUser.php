@@ -130,7 +130,7 @@
             $field[] = 'auth_token=:auth_token';
             $params['auth_token'] = $this->generate_auth_token();
             // выполняем запрос добавления нового пользователя в БД
-            self::$db->query($sql . implode(', ', $field), $params)->send();
+            self::$db->query($sql . implode(', ', $field), $params);
         }
 
         /**

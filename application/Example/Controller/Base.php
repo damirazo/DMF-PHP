@@ -15,6 +15,7 @@
         public function index()
         {
             return $this->render('index');
+
         }
 
         /** Список примеров */
@@ -48,38 +49,46 @@
         /** Пример работы с формами */
         public function example_form()
         {
-            //            // получение объекта формы
-            //            $form = $this->form('PostEdit');
-            //            // выборка статьи с айди 1
-            //            $post = $this->model('Post')->get_by_pk(1);
-            //            // отправка данных о статье в форму
-            //            $form->bound($post);
-            //            // проверяем была ли отправлена форма
-            //            if ($form->is_received()) {
-            //                // проверяем валидность формы
-            //                if ($form->is_valid()) {
-            //                    // обновляем статью
-            //                    $this->model('Post')->update_by_pk($form->cleaned_data(), 1);
-            //                    return $this->redirect('');
-            //                }
-            //            }
-            //            // рендерим форму
-            //            return $this->render('example_form', ['form' => $form]);
+            // получение объекта формы
+            $form = $this->form('PostEdit');
+            // выборка статьи с айди 1
+            $post = $this->model('Post')->get_by_pk(1);
+            // отправка данных о статье в форму
+            $form->bound($post);
+            // проверяем была ли отправлена форма
+            if ($form->is_received()) {
+                // проверяем валидность формы
+                if ($form->is_valid()) {
+                    // обновляем статью
+                    $this->model('Post')->update_by_pk($form->cleaned_data(), 1);
+                    return $this->redirect('');
+                }
+            }
+            // рендерим форму
+            return $this->render('example_form', ['form' => $form]);
+        }
 
-            return $this->xml(
-                [
-                    'rss' => [
-                        'version'     => '2.0',
-                        '@attributes' => ['version' => 1, 'style' => 'color:red;'],
-                        'channel'     => [
-                            'data'        => 500,
-                            'title'       => ['test' => true, 'fgdfgdf' => 'тестовый элемент'],
-                            'link'        => 'http://damirazo.ru',
-                            'description' => 'dfgk dfg as fg hdfgdf rt dfgdfgsad fgghgfh'
-                        ]
-                    ]
-                ]
-            );
+        /** Создание таблицы в БД */
+        public function db_update()
+        {
+            $this->model('User')->_create_table();
+            return $this->string('Таблица успешно создана!');
+        }
+
+        /** Регистрация нового пользователя */
+        public function register()
+        {
+            // получаем объект формы
+            $form = $this->form('Register');
+            // проверяем факт отправки формы и валидность полученных данных
+            if ($form->is_valid()) {
+                // создаем новый объект пользователя и сохраняем его в БД
+                $this->model('User')->create($form->cleaned_data());
+                // возвращаемся на главную страницу
+                return $this->redirect('');
+            }
+            // выводим шаблон с формой
+            return $this->render('register', ['form' => $form]);
         }
 
     }

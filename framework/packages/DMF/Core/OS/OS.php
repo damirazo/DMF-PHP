@@ -46,9 +46,18 @@
             }
         }
 
-        public static function file($file_path)
+        public static function file_data($path, $as_array = false, $exception = true)
         {
-            return new File($file_path);
+            if (self::file_exists($path)) {
+                $file = fopen($path, 'r');
+                $data = fread($file, filesize($path));
+                fclose($file);
+                return $data;
+            }
+            elseif ($exception) {
+                throw new FileNotFound('Файл ' . $path . ' не обнаружен!');
+            }
+            return false;
         }
 
     }
