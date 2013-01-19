@@ -16,6 +16,9 @@
         /** @var null|string Имя таблицы в БД */
         public $table_name = null;
 
+        /** @var string Имя класса для возвращаемой выборкой из БД сущности */
+        public $entity_name = 'DMF.Entity';
+
         /**
          * Возвращает текущую схему БД
          * @return array
@@ -353,27 +356,21 @@
         }
 
         /**
-         * Выбор связанных полем ForeignKey объектов
-         * @param array $data Массив выбранных данных
-         * @return array
+         * Возвращает полный путь до класса сущности
+         * @return string
          */
-        protected function _get_chained_object($data)
+        protected function _get_entity_namespace()
         {
-            $chained_fields = [];
-            foreach ($data as $field_name => $value) {
-                if (isset($this->_scheme()[$field_name])) {
-                    $field_object = $this->_scheme()[$field_name];
-                    if ($field_object instanceof \DMF\Core\Model\Field\ForeignKeyField) {
-                        $c_module = $field_object->chained_module;
-                        $c_model = $field_object->chained_model;
-                        $chained_model_namespace = 'Application\\' . $c_module . '\\Model\\' . $c_model;
-                        /** @var $chained_model \DMF\Core\Model\Model */
-                        $chained_model = new $chained_model_namespace();
-                        $chained_fields[$field_name] = $chained_model->get_by_pk((int)$value);
-                    }
-                }
+            $segments = explode('.', $this->entity_name);
+            if (count($segments) == 1) {
+                return $this->get_module()->namespace . '\\Model\\' . $segments[0];
             }
-            return $chained_fields;
+            else {
+                if ($segments[0] == 'DMF') {
+                    return '\\DMF\\Core\\Model\\Entity';
+                }
+                return $this->get_module($segments[0])->namespace . '\\Model\\' . $segments[1];
+            }
         }
 
         /**
@@ -395,9 +392,10 @@
             // Если элемент обнаружен, то добавляем его в сущность
             if ($data->num_rows() == 1) {
                 $entity = $data->fetch_one();
-                return new Entity($this, $entity);
+                $entity_namespace = $this->_get_entity_namespace();
+                return new $entity_namespace($this, $entity);
             }
-            return new Entity($this, []);
+            return false;
         }
 
         /**
@@ -427,7 +425,8 @@
                 $entities = $data->fetch_all();
                 $collection = new EntityCollection($this->_get_table_name());
                 foreach ($entities as $element) {
-                    $entity = new Entity($this, $element);
+                    $entity_namespace = $this->_get_entity_namespace();
+                    $entity = new $entity_namespace($this, $element);
                     $collection->add_entity($entity);
                 }
                 return $collection;

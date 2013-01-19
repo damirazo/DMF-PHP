@@ -29,7 +29,9 @@
 
             '/db/update/'                     => 'Example.Base.db_update',
 
+            '/user/(@int)/'                   => 'Example.Base.user',
             '/user/register/'                 => 'Example.Base.register',
+            '/user/login/'                    => 'Example.Base.login',
 
             /* Документация */
             '/doc/'                           => 'Doc.Base.index',

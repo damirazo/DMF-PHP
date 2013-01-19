@@ -199,12 +199,16 @@
         }
 
         /**
-         * Возвращает объект текущего модуля
+         * Возвращает объект требуемого модуля, либо текущего модуля
+         * @param string|null $name Имя требуемого модуля
          * @return \DMF\Core\Module\Module|null
          */
-        protected function get_module()
+        protected function get_module($name = null)
         {
-            return Application::get_instance()->module;
+            if (is_null($name)) {
+                return Application::get_instance()->module;
+            }
+            return Application::get_instance()->get_module_by_name($name);
         }
 
         /**

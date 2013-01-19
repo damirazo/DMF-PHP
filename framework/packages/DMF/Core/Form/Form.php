@@ -56,8 +56,9 @@
                         Cookie::set_crypt(
                             'csrf_token',
                             $csrf_token,
-                            null, null,
-                            $this->config('base_url'),
+                            null,
+                            null,
+                            null,
                             null,
                             true
                         );
@@ -235,6 +236,22 @@
             // если переменная не была обнаружена, то ищем ее в переданных в форму данных
             elseif (isset($this->bounded_data[$field_name])) {
                 return $this->bounded_data[$field_name];
+            }
+            return $default;
+        }
+
+        /**
+         * Возвращает зачищенное значение поля с требуемым именем
+         * @param string $field_name Имя поля
+         * @param mixed  $default    Значение по умолчанию
+         * @return bool|mixed
+         */
+        public function cleaned_value($field_name, $default=false) {
+            if (isset($this->cleaned_data()[$field_name])) {
+                return $this->cleaned_data()[$field_name];
+            }
+            elseif (isset($this->bounded_data[$field_name])) {
+                return $this->clean($this->bounded_data[$field_name]);
             }
             return $default;
         }

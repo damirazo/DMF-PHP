@@ -91,4 +91,25 @@
             return $this->render('register', ['form' => $form]);
         }
 
+        /** Авторизация пользователя */
+        public function login()
+        {
+            $form = $this->form('Login');
+            if ($form->is_valid()) {
+                $this->model('User')->login($form->value('username'), $form->value('password'));
+                return $this->redirect('');
+            }
+            return $this->render('login', ['form' => $form]);
+        }
+
+        /** Информация о пользователе с указанным ID */
+        public function user($user_id)
+        {
+            $user = $this->model('User')->get_by_pk($user_id);
+            if ($user) {
+                return $this->string($user->hello());
+            }
+            return $this->string('Указанный пользователь не обнаружен!');
+        }
+
     }

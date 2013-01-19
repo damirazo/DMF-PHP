@@ -159,4 +159,30 @@
             return key($this->data) !== null;
         }
 
+        /**
+         * Получение свойства с требуемым именем
+         * @param string $name Имя свойства
+         * @return null|mixed
+         */
+        public function __get($name)
+        {
+            if (isset($this->data[$name])) {
+                return $this->data[$name];
+            }
+            return null;
+        }
+
+        /**
+         * Установка свойства с требуемым именем
+         * @param string $name  Имя свойства
+         * @param mixed  $value Значение свойства
+         */
+        public function __set($name, $value)
+        {
+            if (isset($this->data[$name])) {
+                $this->data[$name] = $value;
+                $this->is_modified = true;
+            }
+        }
+
     }

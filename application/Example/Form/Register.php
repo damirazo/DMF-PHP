@@ -56,8 +56,7 @@
          */
         public function rule__username__check_username($value, $rule)
         {
-            $users_count = $this->model('User')->get_count('*', ['username' => $value, 'status' => true]);
-            if ($users_count > 0) {
+            if ($this->model('User')->check_username($value)) {
                 return 'Имя пользователя "' . $value . '" уже используется на данном сайте!';
             }
             return false;
@@ -68,8 +67,7 @@
          */
         public function rule__email__check_email($value, $rule)
         {
-            $users_count = $this->model('User')->get_count('*', ['email' => $value, 'status' => true]);
-            if ($users_count > 0) {
+            if ($this->model('User')->check_email($value)) {
                 return 'Адрес эл.почты "' . $value . '" уже используется на данном сайте!';
             }
             return false;

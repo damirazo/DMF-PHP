@@ -10,4 +10,6 @@
     class User extends DMFUser
     {
 
+        public $entity_name = 'UserEntity';
+
     }

@@ -192,23 +192,20 @@
          */
         public function login($username, $password, $save_session = false)
         {
-            // создаем хэш пароля
-            $hash = $this->create_password_hash($password);
-            // получаем количество пользователей с указанным именем пользователя и хэшем пароля
-            $check_user = $this->get_count(
-                '*', [
-                    'username' => $username,
-                    'password' => $hash
-                ]
-            );
             // если число пользователей равно единице,
             // то генерируем новый токен и обновляем дату и время последнего входа
-            if ($check_user == 1) {
+            if ($this->is_exists($username, $password)) {
+                // хэш пароля
+                $hash = $this->create_password_hash($password);
+                // аутентификационный токен
                 $auth_token = $this->generate_auth_token();
+                // текущие дата и время
+                $now = date('Y-m-d H:i:s', time());
+                // обновляем пользовательские данные
                 $this->update_by_condition(
                     [
                         'auth_token'  => $auth_token,
-                        'last_update' => 'NOW()'
+                        'last_update' => $now
                     ], [
                         'username' => $username,
                         'password' => $hash,
@@ -264,6 +261,20 @@
         public function check_email($email)
         {
             return !!($this->get_count('*', ['email' => $email]) > 0);
+        }
+
+        /**
+         * Проверка существования пользователя с указанным именем и паролем
+         * @param string $username Имя пользователя
+         * @param string $password Пароль
+         * @return bool
+         */
+        public function is_exists($username, $password)
+        {
+            $users = $this->get_count(
+                '*', ['username' => $username, 'password' => $this->create_password_hash($password)]
+            );
+            return !!($users == 1);
         }
 
     }
