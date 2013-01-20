@@ -279,11 +279,11 @@
 
         /**
          * Возвращает объект текущего пользователя или объект гостя
-         * @return bool|DMFGuest|mixed
+         * @return bool|DMFGuestEntity|mixed
          */
         public function get_user()
         {
-            return ($this->authenticate()) ? $this->authenticate() : new DMFGuest();
+            return ($this->authenticate()) ? $this->authenticate() : new DMFGuestEntity($this, []);
         }
 
     }

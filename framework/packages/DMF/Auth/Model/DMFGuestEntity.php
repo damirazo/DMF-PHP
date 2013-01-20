@@ -2,10 +2,12 @@
 
     namespace DMF\Auth\Model;
 
+    use DMF\Core\Model\Entity;
+
     /**
      * Объект неавторизованного пользователя
      */
-    class DMFGuest
+    class DMFGuestEntity extends Entity
     {
 
         /**
