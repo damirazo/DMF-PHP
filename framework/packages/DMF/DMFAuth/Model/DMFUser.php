@@ -1,6 +1,6 @@
 <?php
 
-    namespace DMF\Auth\Model;
+    namespace DMF\DMFAuth\Model;
 
     use DMF\Core\Model\Model;
     use DMF\Core\Model\Field\PrimaryKeyField;
@@ -18,6 +18,12 @@
      */
     class DMFUser extends Model
     {
+
+        /** @var string Название таблицы (без префикса) */
+        public $table_name = 'users';
+
+        /** @var string Имя возвращаемой сущности */
+        public $entity_name = 'DMFAuth.DMFUserEntity';
 
         /**
          * Указание кастомных полей для пользователя

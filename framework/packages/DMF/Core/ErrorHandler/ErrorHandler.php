@@ -129,6 +129,7 @@
             $error = [
                 'message' => $message,
                 'path'    => $error_file,
+                'line'    => $line,
                 'stack'   => $error_stack,
                 'code'    => $http_code,
                 'type'    => $type
@@ -157,9 +158,9 @@
                     = '[' . date('Y-m-d H:i:s') . '], ' . $http_code . ', ' . (($_SERVER['REMOTE_ADDR'])
                     ? $_SERVER['REMOTE_ADDR']
                     : $_SERVER['X_FORWARDED_FOR']) . ', ' . $type
-                            . ', ' . $file . ':' . $line . ', "'
-                            . trim($message)
-                            . '"' . PHP_EOL;
+                    . ', ' . $file . ':' . $line . ', "'
+                    . trim($message)
+                    . '"' . PHP_EOL;
             flock($log_file, LOCK_EX);
             fwrite($log_file, $log_string);
             flock($log_file, LOCK_UN);

@@ -7,6 +7,7 @@
     use DMF\Core\Http\Request;
     use DMF\Core\Module\Module;
     use DMF\Core\OS\OS;
+    use DMF\Core\Event\Event;
     use DMF\Core\Http\Exception\Http404;
     use DMF\Core\Application\Exception\ModuleNotFound;
     use DMF\Core\Application\Exception\ControllerProxyNotFound;
@@ -156,7 +157,10 @@
             // Загрузка системного файла настроек
             OS::import(CONFIG_PATH . 'config.php');
             // Загрузка файла настроек модуля
-            OS::import($this->module->path . 'config.php', false);
+            foreach ($this->modules as $module_name => $module_namespace) {
+                $module = $this->get_module_by_name($module_name);
+                OS::import($module->path . 'config.php', false);
+            }
         }
 
         /**
@@ -166,8 +170,11 @@
         {
             // Загрузка системного файла событий
             OS::import(CONFIG_PATH . 'events.php');
-            // Загрузка файла событий модуля
-            OS::import($this->module->path . 'events.php', false);
+            // Загрузка событий всех зарегистрированных модулей
+            foreach ($this->modules as $module_name => $module_namespace) {
+                $module = $this->get_module_by_name($module_name);
+                OS::import($module->path . 'events.php', false);
+            }
         }
 
         /**
@@ -178,7 +185,10 @@
             // Загрузка системного файла шаблонного контекста
             OS::import(CONFIG_PATH . 'context.php');
             // Загрузка файла шаблонного контекста модуля
-            OS::import($this->module->path . 'context.php', false);
+            foreach ($this->modules as $module_name => $module_namespace) {
+                $module = $this->get_module_by_name($module_name);
+                OS::import($module->path . 'context.php', false);
+            }
         }
 
         /**
@@ -219,6 +229,8 @@
             $this->load_events();
             // Загрузка шаблонного контекста
             $this->load_context();
+            // Генерация события загрузки системы
+            Event::trigger('boot');
             // Загрузка контроллера и действия
             $this->load_controller();
         }

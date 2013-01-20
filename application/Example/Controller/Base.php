@@ -71,7 +71,7 @@
         /** Создание таблицы в БД */
         public function db_update()
         {
-            $this->model('User')->_create_table();
+            $this->model('DMFAuth.DMFUser')->_create_table();
             return $this->string('Таблица успешно создана!');
         }
 
@@ -83,7 +83,7 @@
             // проверяем факт отправки формы и валидность полученных данных
             if ($form->is_valid()) {
                 // создаем новый объект пользователя и сохраняем его в БД
-                $this->model('User')->create($form->cleaned_data());
+                $this->model('DMFAuth.DMFUser')->create($form->cleaned_data());
                 // возвращаемся на главную страницу
                 return $this->redirect('');
             }
@@ -96,7 +96,7 @@
         {
             $form = $this->form('Login');
             if ($form->is_valid()) {
-                $this->model('User')->login($form->value('username'), $form->value('password'));
+                $this->model('DMFAuth.DMFUser')->login($form->value('username'), $form->value('password'));
                 return $this->redirect('user');
             }
             return $this->render('login', ['form' => $form]);
@@ -105,9 +105,9 @@
         /** Информация о пользователе с указанным ID */
         public function user($user_id)
         {
-            $user = $this->model('User')->get_by_pk($user_id);
+            $user = $this->model('DMFAuth.DMFUser')->get_by_pk($user_id);
             if ($user) {
-                return $this->string($user->hello());
+                return $this->string($user->username);
             }
             return $this->string('Указанный пользователь не обнаружен!');
         }
@@ -115,8 +115,7 @@
         /** Вывести информацию о пользователе */
         public function me()
         {
-            $user = $this->model('User')->get_user();
-            return $this->render('user', ['user' => $user]);
+            return $this->render('user');
         }
 
     }

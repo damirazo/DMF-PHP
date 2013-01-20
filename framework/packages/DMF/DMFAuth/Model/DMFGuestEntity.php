@@ -1,6 +1,6 @@
 <?php
 
-    namespace DMF\Auth\Model;
+    namespace DMF\DMFAuth\Model;
 
     use DMF\Core\Model\Entity;
 

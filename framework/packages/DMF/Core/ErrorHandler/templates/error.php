@@ -78,7 +78,7 @@
 <?php if (DEBUG): ?>
 
 <div class="error-data">
-    <?php echo $error['path']; ?>
+    <?php echo $error['path'] . ':' . $error['line']; ?>
 </div>
 
 <h2>Стек вызовов [<a id="hide-stack" href="#">свернуть</a>]</h2>

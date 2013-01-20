@@ -2,10 +2,12 @@
 
     namespace DMF\Core\Event;
 
+    use DMF\Core\Component\Component;
+
     /**
      * Базовый объект управления событиями
      */
-    class Event
+    class Event extends Component
     {
 
         /** @var array Список зарегистрированных событий */

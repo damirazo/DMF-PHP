@@ -25,15 +25,20 @@
         public function __construct($callable)
         {
             $app = Application::get_instance();
-            $this->module = $app->module;
             $data = explode('.', $callable);
-            if (count($data) == 2) {
+            if (count($data) == 3) {
+                $this->module = $app->get_module_by_name($data[0]);
+                $this->event_class = $data[1];
+                $this->event_method = $data[2];
+            }
+            elseif (count($data) == 2) {
+                $this->module = $app->module;
                 $this->event_class = $data[0];
                 $this->event_method = $data[1];
             }
             else {
                 throw new WrongArgsNumber('Неверный формат записи вызова события!
-                    Требуется "ИмяКласса.имяМетода", получено ' . $callable);
+                    Требуется "[ИмяМодуля.]ИмяКласса.имяМетода", получено ' . $callable);
             }
         }
 
