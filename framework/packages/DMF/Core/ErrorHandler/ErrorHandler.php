@@ -154,9 +154,12 @@
             $log_file_name = PROJECT_PATH . 'logs' . _SEP . date('Y-m-d', time()) . '.log';
             $log_file = fopen($log_file_name, 'a');
             $log_string
-                    = '[' . date('Y-m-d H:i:s') . '], ' . $http_code . ', ' . $type . ', ' . $file . ':' . $line . ', "'
-                    . trim($message)
-                    . '"' . PHP_EOL;
+                    = '[' . date('Y-m-d H:i:s') . '], ' . $http_code . ', ' . (($_SERVER['REMOTE_ADDR'])
+                    ? $_SERVER['REMOTE_ADDR']
+                    : $_SERVER['X_FORWARDED_FOR']) . ', ' . $type
+                            . ', ' . $file . ':' . $line . ', "'
+                            . trim($message)
+                            . '"' . PHP_EOL;
             flock($log_file, LOCK_EX);
             fwrite($log_file, $log_string);
             flock($log_file, LOCK_UN);
