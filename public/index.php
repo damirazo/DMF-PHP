@@ -64,4 +64,4 @@
     define('CORE_PATH', DMF_PATH . 'Core' . _SEP);
 
     /** Импортирование загрузочного файла */
-    require_once CONFIG_PATH . 'bootstrap.php';
+    require_once CONFIG_PATH . 'autoload.php';
