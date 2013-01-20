@@ -20,6 +20,7 @@
         public static function register_namespaces($namepspaces = [])
         {
             self::$_namespaces = $namepspaces;
+            self::run();
         }
 
         /**

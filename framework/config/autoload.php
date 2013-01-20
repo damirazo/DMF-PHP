@@ -12,6 +12,7 @@
 
     use DMF\Core\ErrorHandler\ErrorHandler;
     use DMF\Core\Autoloader\Autoloader;
+    use DMF\Core\Application\Application;
 
     /** Активация перехвачика ошибок */
     ErrorHandler::run();
@@ -33,5 +34,19 @@
         ]
     );
 
-    /** Активация автозагрузчика */
-    Autoloader::run();
+    /**
+     * Регистрация списка модулей и их пространство имен
+     * Формат записи:
+     * Ключ - Имя папки с модулем (и имя модуля)
+     * Значение - Пространство имен корня модуля
+     */
+    Application::get_instance()->register_modules(
+        [
+            'Example' => 'App\\Example',
+            'Doc'     => 'App\\Doc',
+            'Auth'    => 'DMF\\Auth'
+        ]
+    );
+
+    /** Активация приложения */
+    Application::get_instance()->run();
