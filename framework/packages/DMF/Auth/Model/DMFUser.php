@@ -176,8 +176,8 @@
                 // если количество сущностей равно единице,
                 // то считаем ее требуемым пользователем
                 if ($data->count() == 1) {
-                    $this->session()->set('user', $data[0]);
-                    return $data;
+                    $this->session()->set('user', $data->index(0));
+                    return $data->index(0);
                 }
             }
             return false;
@@ -275,6 +275,15 @@
                 '*', ['username' => $username, 'password' => $this->create_password_hash($password)]
             );
             return !!($users == 1);
+        }
+
+        /**
+         * Возвращает объект текущего пользователя или объект гостя
+         * @return bool|DMFGuest|mixed
+         */
+        public function get_user()
+        {
+            return ($this->authenticate()) ? $this->authenticate() : new DMFGuest();
         }
 
     }

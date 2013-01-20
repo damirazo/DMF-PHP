@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Информация о пользователе</title>
+</head>
+<body>
+{% if user.is_authenticated %}
+    <p>Привет, {{ user.username }}! Ты в группе {% if user.is_admin %}администраторы{% else %}пользователи{% endif %}...</p>
+{% else %}
+    <p>Привет, гость!</p>
+{% endif %}
+</body>
+</html>

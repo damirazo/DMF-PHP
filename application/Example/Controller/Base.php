@@ -97,7 +97,7 @@
             $form = $this->form('Login');
             if ($form->is_valid()) {
                 $this->model('User')->login($form->value('username'), $form->value('password'));
-                return $this->redirect('');
+                return $this->redirect('user');
             }
             return $this->render('login', ['form' => $form]);
         }
@@ -110,6 +110,13 @@
                 return $this->string($user->hello());
             }
             return $this->string('Указанный пользователь не обнаружен!');
+        }
+
+        /** Вывести информацию о пользователе */
+        public function me()
+        {
+            $user = $this->model('User')->get_user();
+            return $this->render('user', ['user' => $user]);
         }
 
     }

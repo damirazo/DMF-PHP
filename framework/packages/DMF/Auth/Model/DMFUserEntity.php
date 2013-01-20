@@ -19,4 +19,13 @@
             return !!($this->data['access_level'] >= 100);
         }
 
+        /**
+         * Проверка авторизован ли пользователь на сайте
+         * @return bool
+         */
+        public function is_authenticated()
+        {
+            return true;
+        }
+
     }

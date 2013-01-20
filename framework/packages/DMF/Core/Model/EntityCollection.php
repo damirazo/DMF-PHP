@@ -135,4 +135,17 @@
             return key($this->data) !== null;
         }
 
+        /**
+         * Вернуть элемент коллекции по его индексу
+         * @param int $index Индекс элемента
+         * @return null|\DMF\Core\Model\Entity
+         */
+        public function index($index)
+        {
+            if (isset($this->data[$index])) {
+                return $this->data[$index];
+            }
+            return null;
+        }
+
     }

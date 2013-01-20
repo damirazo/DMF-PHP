@@ -2,12 +2,12 @@
 
     namespace App\Example\Model;
 
-    use DMF\Core\Model\Entity;
+    use DMF\Auth\Model\DMFUserEntity;
 
     /**
      * Сущность модели пользователя
      */
-    class UserEntity extends Entity
+    class UserEntity extends DMFUserEntity
     {
 
         public function hello()

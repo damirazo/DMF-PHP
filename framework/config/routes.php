@@ -29,6 +29,7 @@
 
             '/db/update/'                     => 'Example.Base.db_update',
 
+            '/user/'                          => 'Example.Base.me',
             '/user/(@int)/'                   => 'Example.Base.user',
             '/user/register/'                 => 'Example.Base.register',
             '/user/login/'                    => 'Example.Base.login',
