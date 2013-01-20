@@ -181,4 +181,14 @@
             return (isset($_SERVER['REQUEST_METHOD'])) ? $_SERVER['REQUEST_METHOD'] : 'unknown';
         }
 
+        /**
+         * Проверка был ли отправлен запрос через AJAX
+         * @return bool
+         */
+        public function is_ajax()
+        {
+            return !!(!empty($_SERVER['HTTP_X_REQUESTED_WITH'])
+                    && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest');
+        }
+
     }
