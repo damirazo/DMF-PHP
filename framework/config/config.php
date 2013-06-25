@@ -14,7 +14,7 @@
     Config::set('base_url', 'http://localhost/');
 
     /** Путь до статичных файлов */
-    Config::set('static_url', 'http://localhost/_/');
+    Config::set('static_url', 'http://localhost/static/');
 
     /** Настройки подключения к базе данных */
     Config::set(

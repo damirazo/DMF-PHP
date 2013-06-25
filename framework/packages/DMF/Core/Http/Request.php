@@ -79,11 +79,11 @@
         public function request_uri()
         {
             // Если URI отсутствует, то указываем его как корень сайта
-            if (!isset($_SERVER['PATH_INFO'])) {
-                $_SERVER['PATH_INFO'] = '/';
+            if (!isset($_SERVER['REQUEST_URI'])) {
+                $_SERVER['REQUEST_URI'] = '/';
             }
             // Разбиваем URI на сегменты
-            $segments = explode('/', $_SERVER['PATH_INFO']);
+            $segments = explode('/', $_SERVER['REQUEST_URI']);
             $new_segments = [];
             // Обходим массив сегментов
             foreach ($segments as $segment) {
