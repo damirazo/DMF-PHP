@@ -27,7 +27,6 @@
             '/examples/params/(@int)/(@int)/' => 'Example.Base.example_params',
             '/examples/form/'                 => 'Example.Base.example_form',
 
-            '/db/update/'                     => 'Example.Base.db_update',
             '/db/update/([.+?])/'             => 'Example.Base.db_update',
 
             '/user/'                          => 'Example.Base.me',
