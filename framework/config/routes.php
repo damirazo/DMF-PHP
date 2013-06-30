@@ -10,7 +10,7 @@
      * Список маршрутов
      * Формат записи:
      * Ключ - регулярное выражение, которое может содержать псевдонимы для некоторых частей
-     * Примеры псевдонимов: @int = [\d]+; @str = [\w]+; @alphanum = [\w\d]+; @all = '[\w\d\.\,\-\static\+]+;
+     * Примеры псевдонимов: @int = [\d]+; @str = [\w]+; @alphanum = [\w\d]+; @all = '[\w\d\.\,\-\_\+]+;
      * Части регулярного выражения в круглых скобках будут переданы действию в качестве аргументов
      * Значение - строка с форматом записи "ИмяМодуля.ИмяКонтроллера.ИмяДействия"
      */
@@ -27,7 +27,7 @@
             '/examples/params/(@int)/(@int)/' => 'Example.Base.example_params',
             '/examples/form/'                 => 'Example.Base.example_form',
 
-            '/db/update/([\w\d\$\-\_+])/'     => 'Example.Base.db_update',
+            '/db/update/([\w\d\$\-\_]+)/'     => 'Example.Base.db_update',
 
             '/user/'                          => 'Example.Base.me',
             '/user/(@int)/'                   => 'Example.Base.user',
