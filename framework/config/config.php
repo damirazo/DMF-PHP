@@ -41,6 +41,9 @@
     /** Секретный ключ для алгоритмов шифрования */
     Config::set('secret_key', 'Kdl39&34m<dfk)fkd3sdfLSD)ds73mf,,sdf');
 
+    /** Кодовое слово для активации скаффолдинга в демонстрационных приложениях */
+    Config::set('scaffolding_password', '123456qwerty');
+
     /** Импортирование локального конфига для переопределения системных настроек */
     if (DEBUG) {
         OS::import(CONFIG_PATH . 'config.local.php', false);

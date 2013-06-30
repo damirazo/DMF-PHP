@@ -71,8 +71,30 @@
         /** Создание таблицы в БД */
         public function db_update()
         {
+            // Эталонное кодовое слово из конфигурации проекта
+            $password = $this->config('scaffolding_password');
+            // Полученное из GET кодовое слово
+            $given_password = $this->request()->_get('p');
+            // Проверка кодового слова
+            $error = false;
+            if ($password) {
+                $error = 'Не задано значение секретного слова для создания таблиц!';
+            }
+            if (!$given_password) {
+                $error = 'Для доступа к системе создания таблиц требуется знать кодовое слово!';
+            }
+            if ($given_password != $password) {
+                $error = 'Введено некорректное кодовое слово!';
+            }
+            if ($error) {
+                return $this->string($error);
+            }
+
+            // Создание демонстрационных таблиц в БД
             $this->model('DMFAuth.DMFUser')->_create_table();
-            return $this->string('Таблица успешно создана!');
+            $this->model('Post')->_create_table();
+
+            return $this->string('Таблицы успешно создана!');
         }
 
         /** Регистрация нового пользователя */
