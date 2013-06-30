@@ -75,7 +75,7 @@
             $password = $this->config('scaffolding_password');
             // Проверка кодового слова
             $error = false;
-            if ($password) {
+            if (!$password) {
                 $error = 'Не задано значение секретного слова для создания таблиц!';
             }
             if (!$given_password) {
