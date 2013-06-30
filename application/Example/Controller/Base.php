@@ -69,12 +69,10 @@
         }
 
         /** Создание таблицы в БД */
-        public function db_update()
+        public function db_update($given_password)
         {
             // Эталонное кодовое слово из конфигурации проекта
             $password = $this->config('scaffolding_password');
-            // Полученное из GET кодовое слово
-            $given_password = $this->request()->_get('p');
             // Проверка кодового слова
             $error = false;
             if ($password) {
