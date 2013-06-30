@@ -41,7 +41,7 @@
          */
         public function url()
         {
-            return $this->base_url() . substr($this->request_uri(), 1);
+            return $this->base_url() . '/' . substr($this->request_uri(), 1);
         }
 
         /**
