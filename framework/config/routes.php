@@ -29,6 +29,7 @@
             '/posts/'                         => 'Example.Base.posts',
             '/post/(@int)/'                   => 'Example.Base.post_view',
             '/post/(@int)/edit/'              => 'Example.Base.post_edit',
+            '/post/(@int)/delete/'            => 'Example.Base.post_delete',
             '/post/new/'                      => 'Example.Base.post_new',
 
             '/db/update/([\w\d\$\-\_]+)/'     => 'Example.Base.db_update',

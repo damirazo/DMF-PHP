@@ -78,7 +78,7 @@
                 // проверяем валидность формы
                 if ($form->is_valid()) {
                     // обновляем статью
-                    $this->model('Post')->create($form->cleaned_data());
+                    $post_id = $this->model('Post')->create($form->cleaned_data());
                     return $this->redirect('/post/' . $post_id . '/');
                 }
             }
