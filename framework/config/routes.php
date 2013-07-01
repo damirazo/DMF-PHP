@@ -3,7 +3,6 @@
     /**
      * Все маршруты проекта
      */
-
     use DMF\Core\Router\Router;
 
     /**
@@ -26,7 +25,11 @@
             '/examples/var/'                  => 'Example.Base.example_var',
             '/examples/params/(@int)/(@int)/' => 'Example.Base.example_params',
             '/examples/form/'                 => 'Example.Base.example_form',
-            '/examples/posts/'                => 'Example.Base.example_posts',
+
+            '/posts/'                         => 'Example.Base.posts',
+            '/post/(@int)/'                   => 'Example.Base.post_view',
+            '/post/(@int)/edit/'              => 'Example.Base.post_edit',
+            '/post/new/'                      => 'Example.Base.post_new',
 
             '/db/update/([\w\d\$\-\_]+)/'     => 'Example.Base.db_update',
 

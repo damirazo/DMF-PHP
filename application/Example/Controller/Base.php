@@ -51,7 +51,7 @@
         {
             // получение объекта формы
             $form = $this->form('PostEdit');
-            // выборка статьи с айди 1
+            // выборка статьи
             $post = $this->model('Post')->get_by_pk($post_id);
             // отправка данных о статье в форму
             $form->bound($post);
@@ -61,17 +61,31 @@
                 if ($form->is_valid()) {
                     // обновляем статью
                     $this->model('Post')->update_by_pk($form->cleaned_data(), $post_id);
-                    return $this->redirect('');
+                    return $this->redirect('/post/' . $post_id . '/');
                 }
             }
             // рендерим форму
             return $this->render('example_form', ['form' => $form]);
         }
 
-        /** Отображение списка опубликованных статей */
-        public function example_posts()
+        /** Просмотр статьи с указанным id */
+        public function post_view($post_id)
         {
-            $posts = $this->model('Post')->get_all(['id', 'name']);
+            $post = $this->model('Post')->get_by_pk($post_id);
+            return $this->render('post_view', ['post' => $post]);
+        }
+
+        /** Удаление статьи */
+        public function post_delete($post_id)
+        {
+            $this->model('Post')->update_by_pk($post_id, ['status' => false]);
+            return $this->redirect('/posts/');
+        }
+
+        /** Отображение списка опубликованных статей */
+        public function posts()
+        {
+            $posts = $this->model('Post')->get_by_condition(['status' => true]);
             return $this->render('example_posts', ['posts' => $posts]);
         }
 
