@@ -175,7 +175,7 @@
         {
             $fixture_name = strtolower($this->get_module_name()) . '__' . strtolower($this->get_class_name()) . '.json';
             $data = $this->dump_data(10);
-            OS::file(DATA_PATH . 'fixtures' . _SEP . $fixture_name)->write(json_encode($data, JSON_PRETTY_PRINT));
+            OS::file_data(DATA_PATH . 'fixtures' . _SEP . $fixture_name)->write(json_encode($data, JSON_PRETTY_PRINT));
         }
 
         /**
@@ -483,10 +483,13 @@
 
         /**
          * Обновление объекта по его первичному ключу
+         * Данные, передаваемые в data будут заменять значения полей объекта,
+         * имеющие имена полей, соответствующие ключам переданных данных.
+         *
+         * @param int   $pk   ID объекта
          * @param array $data Данные для обновления
-         * @param int   $pk   Первичный ключ
          */
-        public function update_by_pk($data, $pk)
+        public function update_by_pk($pk, $data)
         {
             $fields = $this->fields();
             $sql = [];
@@ -505,10 +508,10 @@
 
         /**
          * Обновление объектов по определенному условию
-         * @param array $data      Данные для обновления
          * @param array $condition Условия для выборки
+         * @param array $data      Данные для обновления
          */
-        public function update_by_condition($data, $condition)
+        public function update_by_condition($condition, $data)
         {
             $cond = $this->generate_condition_sql($condition);
             $fields = $this->fields();

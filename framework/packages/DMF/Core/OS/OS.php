@@ -6,19 +6,10 @@
 
     /**
      * Класс для взаимодействия с операционной системой
+     * TODO: Завершить реализацию класса
      */
     class OS
     {
-
-        /**
-         * Проверка существования файла и доступности его для чтения
-         * @param string $path Путь до файла
-         * @return bool
-         */
-        public static function file_exists($path)
-        {
-            return !!(is_readable($path));
-        }
 
         /**
          * Проверка существования директории
@@ -32,6 +23,7 @@
 
         /**
          * Импортирование PHP файла
+         *
          * @param string  $path      Путь до файла
          * @param boolean $exception Требуется ли выбрасывать исключение, если файл отсутствует
          * @throws Exception\FileNotFound
@@ -40,10 +32,19 @@
         {
             if (self::file_exists($path)) {
                 require_once $path;
-            }
-            elseif ($exception) {
+            } elseif ($exception) {
                 throw new FileNotFound('Файл ' . $path . ' не обнаружен!');
             }
+        }
+
+        /**
+         * Проверка существования файла и доступности его для чтения
+         * @param string $path Путь до файла
+         * @return bool
+         */
+        public static function file_exists($path)
+        {
+            return !!(is_readable($path));
         }
 
         public static function file_data($path, $as_array = false, $exception = true)
@@ -53,8 +54,7 @@
                 $data = fread($file, filesize($path));
                 fclose($file);
                 return $data;
-            }
-            elseif ($exception) {
+            } elseif ($exception) {
                 throw new FileNotFound('Файл ' . $path . ' не обнаружен!');
             }
             return false;
