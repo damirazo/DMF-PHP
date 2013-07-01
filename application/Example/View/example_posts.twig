@@ -1,7 +1,8 @@
 {% extends 'base_examples.twig' %}
 
 {% block data %}
+    <p><a href="{{ base_url }}/post/new/">Добавить статью</a></p>
     {% for post in posts %}
-        {{ post.name }}
+        <h4><a href="{{ base_url }}/post/{{ post.id }}/">{{ post.name }}</a></h4>
     {% endfor %}
 {% endblock %}

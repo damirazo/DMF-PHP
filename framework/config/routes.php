@@ -26,6 +26,7 @@
             '/examples/var/'                  => 'Example.Base.example_var',
             '/examples/params/(@int)/(@int)/' => 'Example.Base.example_params',
             '/examples/form/'                 => 'Example.Base.example_form',
+            '/examples/posts/'                => 'Example.Base.example_posts',
 
             '/db/update/([\w\d\$\-\_]+)/'     => 'Example.Base.db_update',
 

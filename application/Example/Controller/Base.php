@@ -47,12 +47,12 @@
         }
 
         /** Пример работы с формами */
-        public function example_form()
+        public function post_edit($post_id)
         {
             // получение объекта формы
             $form = $this->form('PostEdit');
             // выборка статьи с айди 1
-            $post = $this->model('Post')->get_by_pk(1);
+            $post = $this->model('Post')->get_by_pk($post_id);
             // отправка данных о статье в форму
             $form->bound($post);
             // проверяем была ли отправлена форма
@@ -60,7 +60,7 @@
                 // проверяем валидность формы
                 if ($form->is_valid()) {
                     // обновляем статью
-                    $this->model('Post')->update_by_pk($form->cleaned_data(), 1);
+                    $this->model('Post')->update_by_pk($form->cleaned_data(), $post_id);
                     return $this->redirect('');
                 }
             }
@@ -68,9 +68,11 @@
             return $this->render('example_form', ['form' => $form]);
         }
 
+        /** Отображение списка опубликованных статей */
         public function posts_list()
         {
-            $posts = $this->model('Post')->get_all();
+            $posts = $this->model('Post')->get_all(['id', 'name']);
+            return $this->render('example_posts', ['posts' => $posts]);
         }
 
         /** Создание таблицы в БД */
