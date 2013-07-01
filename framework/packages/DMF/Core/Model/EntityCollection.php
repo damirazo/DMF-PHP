@@ -10,23 +10,36 @@
     class EntityCollection implements \ArrayAccess, \Iterator
     {
 
+        /** @var \DMF\Core\Model\Model|null */
+        protected $model = null;
         /** @var array Коллекция сущностей */
         protected $data = [];
-
         /** @var null|string Имя таблицы в БД */
         protected $table = null;
 
-        /** Конструктор */
-        public function __construct($table)
+        /**
+         * Инициализация коллекции компонентов
+         * @param \DMF\Core\Model\Model $model Базовая модель, содержащая коллекцию
+         * @param array                 $data  Список данных для коллекции
+         */
+        public function __construct($model, $data = [])
         {
-            $this->table = $table;
+            $this->model = $model;
+            $this->table = $this->model->table_name();
+            if (count($data) > 0) {
+                foreach ($data as $element) {
+                    $entity_namespace = $this->model->entity_namespace();
+                    $entity = new $entity_namespace($this->model, $element);
+                    $this->add($entity);
+                }
+            }
         }
 
         /**
          * Добавление сущности в коллекцию
          * @param Entity $entity Сущность
          */
-        public function add_entity(\DMF\Core\Model\Entity $entity)
+        public function add(\DMF\Core\Model\Entity $entity)
         {
             $this->data[] = $entity;
         }

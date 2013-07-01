@@ -37,10 +37,10 @@
         public function __construct(Model $model, array $data = [])
         {
             $this->model = $model;
-            $this->table = $model->_get_table_name();
+            $this->table = $model->table_name();
             $this->data = $data;
-            $this->pk_name = $model->_get_primary_key_field_name();
-            $this->pk = $data[$model->_get_primary_key_field_name()];
+            $this->pk_name = $model->primary_key();
+            $this->pk = $data[$model->primary_key()];
         }
 
         /**

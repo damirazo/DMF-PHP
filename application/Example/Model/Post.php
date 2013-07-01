@@ -16,7 +16,7 @@
     {
 
         /** Схема модели */
-        public function _scheme()
+        public function scheme()
         {
             return [
                 'id'         => new PrimaryKeyField(),

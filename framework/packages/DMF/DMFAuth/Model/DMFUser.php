@@ -39,7 +39,7 @@
          * Указание схемы модели
          * @return array
          */
-        public function _scheme()
+        public function scheme()
         {
             $fields = [
                 'id'           => new PrimaryKeyField(),
@@ -108,11 +108,11 @@
         public function create($data = [])
         {
             // массив полей
-            $fields = $this->_scheme();
+            $fields = $this->scheme();
             $field = [];
             $params = [];
             // основа SQL запроса для вставки нового пользователя в БД
-            $sql = 'INSERT INTO `' . $this->_get_table_name() . '` SET ';
+            $sql = 'INSERT INTO `' . $this->table_name() . '` SET ';
             // обходим массив полей
             /** @var $field_object \DMF\Core\Model\Field\BaseField */
             foreach ($fields as $field_name => $field_object) {

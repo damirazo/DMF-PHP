@@ -39,7 +39,7 @@
             /** @var $model \DMF\Core\Model\Model */
             $model = $this->model($this->model);
             /** @var $field_object \DMF\Core\Model\Field\BaseField */
-            foreach ($model->_scheme() as $field_name => $field_object) {
+            foreach ($model->scheme() as $field_name => $field_object) {
                 // тип поля модели
                 $field_type = $field_object->type();
                 // если данное поле модели является первичным ключем
