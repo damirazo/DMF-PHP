@@ -68,6 +68,11 @@
             return $this->render('example_form', ['form' => $form]);
         }
 
+        public function posts_list()
+        {
+            $posts = $this->model('Post')->get_all();
+        }
+
         /** Создание таблицы в БД */
         public function db_update($given_password)
         {

@@ -1,0 +1,7 @@
+{% extends 'base_examples.twig' %}
+
+{% block data %}
+    {% for post in posts %}
+        {{ post.name }}
+    {% endfor %}
+{% endblock %}
