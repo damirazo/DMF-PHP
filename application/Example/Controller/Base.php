@@ -69,7 +69,7 @@
         }
 
         /** Отображение списка опубликованных статей */
-        public function posts_list()
+        public function example_posts()
         {
             $posts = $this->model('Post')->get_all(['id', 'name']);
             return $this->render('example_posts', ['posts' => $posts]);
