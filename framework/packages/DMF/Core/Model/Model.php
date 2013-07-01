@@ -141,6 +141,7 @@
         /**
          * Создание нового объекта в БД
          * @param array $data Данные для создания объекта
+         * @return int ID созданной записи
          */
         public function create($data)
         {
@@ -154,7 +155,8 @@
                 }
             }
             $result_code = 'INSERT INTO ' . $this->table_name() . ' SET ' . implode(', ', $sql);
-            self::$db->query($result_code, $params);
+            $query = self::$db->query($result_code, $params);
+            return $query->last_insert_id();
         }
 
         /**

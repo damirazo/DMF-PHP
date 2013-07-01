@@ -68,6 +68,24 @@
             return $this->render('example_form', ['form' => $form]);
         }
 
+        /** Пример работы с формами */
+        public function post_new()
+        {
+            // получение объекта формы
+            $form = $this->form('PostEdit');
+            // проверяем была ли отправлена форма
+            if ($form->is_received()) {
+                // проверяем валидность формы
+                if ($form->is_valid()) {
+                    // обновляем статью
+                    $this->model('Post')->create($form->cleaned_data());
+                    return $this->redirect('/post/' . $post_id . '/');
+                }
+            }
+            // рендерим форму
+            return $this->render('example_form', ['form' => $form]);
+        }
+
         /** Просмотр статьи с указанным id */
         public function post_view($post_id)
         {

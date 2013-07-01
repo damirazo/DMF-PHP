@@ -4,7 +4,7 @@
     <h2>{{ post.name }}</h2>
     <p>{{ post.text }}</p>
     <p>
-        {{ post.created_at|date:"d.m.Y в H:i" }},
+        {{ post.created_at|date "d.m.Y в H:i" }},
         <a href="{{ base_url }}/post/{{ post.id }}/edit/">редактировать</a>
         <a href="{{ base_url }}/post/{{ post.id }}/delete/">удалить</a>
     </p>
