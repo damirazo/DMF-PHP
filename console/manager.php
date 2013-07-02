@@ -9,7 +9,7 @@
     $args = $_SERVER['argv'];
 
     /** @var string $version Версия консоли */
-    $version = '0.1';
+    $version = '0.1a';
 
     /**
      * Преобразование строки в кодировку CP866

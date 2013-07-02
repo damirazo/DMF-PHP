@@ -2,15 +2,15 @@
 
     namespace DMF\Core\Application;
 
-    use DMF\Core\Router\Router;
-    use DMF\Core\Storage\Config;
+    use DMF\Core\Application\Exception\ControllerProxyNotFound;
+    use DMF\Core\Application\Exception\ModuleNotFound;
+    use DMF\Core\Event\Event;
+    use DMF\Core\Http\Exception\Http404;
     use DMF\Core\Http\Request;
     use DMF\Core\Module\Module;
     use DMF\Core\OS\OS;
-    use DMF\Core\Event\Event;
-    use DMF\Core\Http\Exception\Http404;
-    use DMF\Core\Application\Exception\ModuleNotFound;
-    use DMF\Core\Application\Exception\ControllerProxyNotFound;
+    use DMF\Core\Router\Router;
+    use DMF\Core\Storage\Config;
 
     /**
      * Базовый класс приложения
@@ -18,28 +18,19 @@
     class Application
     {
 
+        /** @var null|Application Инстанс объекта */
+        private static $_instance = null;
+        /** @var null|array Объект с данными о текущем маршруте */
+        public $route_object = null;
+        /** @var array Список модулей */
+        public $modules = [];
+        /** @var null|\DMF\Core\Module\Module */
+        public $module = null;
         /** @var \DMF\Core\Http\Request */
         private $request;
 
-        /** @var null|Application Инстанс объекта */
-        private static $_instance = null;
-
-        /** @var null|array Объект с данными о текущем маршруте */
-        public $route_object = null;
-
-        /** @var array Список модулей */
-        public $modules = [];
-
-        /** @var null|\DMF\Core\Module\Module */
-        public $module = null;
-
         /** Запрет на создание объекта */
         private function __construct()
-        {
-        }
-
-        /** Запрет на копирование объекта */
-        private function __clone()
         {
         }
 
@@ -68,16 +59,27 @@
         }
 
         /**
-         * Возвращает имя требуемого модуля
-         * @return string
+         * Активация приложения
          */
-        protected function module_name()
+        public function run()
         {
-            return $this->parse_route()['pattern']->module_name;
+            // Получаем request объект
+            $this->request = Request::get_instance();
+            // Получаем данные о маршруте
+            $this->parse_route();
+            // Загрузка модуля
+            $this->load_module();
+            // Загрузка системных параметров
+            $this->loader();
+            // Генерация события загрузки системы
+            Event::trigger('boot');
+            // Загрузка контроллера и действия
+            $this->load_controller();
         }
 
         /**
          * Разбивка URI и получение информации о маршруте
+         *
          * @return array
          * @throws \DMF\Core\Http\Exception\Http404
          */
@@ -109,10 +111,18 @@
                     }
                 }
                 throw new Http404('Страница ' . Request::get_instance()->url() . ' отсутствует на сайте!');
-            }
-            else {
+            } else {
                 return $this->route_object;
             }
+        }
+
+        /**
+         * Загрузка модуля и информации о нем
+         * @throws Exception\ModuleNotFound
+         */
+        protected function load_module()
+        {
+            $this->module = $this->get_module_by_name();
         }
 
         /**
@@ -130,63 +140,40 @@
                 // Проверяем существование папки с модулем
                 if (OS::dir_exists($module->path)) {
                     return $module;
-                }
-                else {
+                } else {
                     throw new ModuleNotFound('Модуль ' . $module_name . ' не найден по указанному пути!');
                 }
-            }
-            else {
+            } else {
                 throw new ModuleNotFound('Модуль ' . $module_name . ' не зарегистрирован!');
             }
         }
 
         /**
-         * Загрузка модуля и информации о нем
-         * @throws Exception\ModuleNotFound
+         * Возвращает имя требуемого модуля
+         * @return string
          */
-        protected function load_module()
+        protected function module_name()
         {
-            $this->module = $this->get_module_by_name();
+            return $this->parse_route()['pattern']->module_name;
         }
 
         /**
-         * Загрузка кастомных настроек
+         * Загрузка системных параметров
          */
-        protected function load_config()
+        protected function loader()
         {
-            // Загрузка системного файла настроек
+            // Загрузка глобальных настроек
             OS::import(CONFIG_PATH . 'config.php');
-            // Загрузка файла настроек модуля
+            // Загрузка глобальных событий
+            OS::import(CONFIG_PATH . 'events.php');
+            // Загрузка глобального шаблонного контекста
+            OS::import(CONFIG_PATH . 'context.php');
+
+            // Обход списка зарегистрированных модулей и загрузка их параметров
             foreach ($this->modules as $module_name => $module_namespace) {
                 $module = $this->get_module_by_name($module_name);
                 OS::import($module->path . 'config.php', false);
-            }
-        }
-
-        /**
-         * Загрузка событий
-         */
-        protected function load_events()
-        {
-            // Загрузка системного файла событий
-            OS::import(CONFIG_PATH . 'events.php');
-            // Загрузка событий всех зарегистрированных модулей
-            foreach ($this->modules as $module_name => $module_namespace) {
-                $module = $this->get_module_by_name($module_name);
                 OS::import($module->path . 'events.php', false);
-            }
-        }
-
-        /**
-         * Загрузка шаблонного контекста
-         */
-        protected function load_context()
-        {
-            // Загрузка системного файла шаблонного контекста
-            OS::import(CONFIG_PATH . 'context.php');
-            // Загрузка файла шаблонного контекста модуля
-            foreach ($this->modules as $module_name => $module_namespace) {
-                $module = $this->get_module_by_name($module_name);
                 OS::import($module->path . 'context.php', false);
             }
         }
@@ -205,34 +192,15 @@
             $controller = new $controller_namespace();
             if (method_exists($controller, 'proxy')) {
                 return $controller->proxy($route_object['pattern']->action_name, $route_object['arguments']);
-            }
-            else {
+            } else {
                 throw new ControllerProxyNotFound('Для контроллера ' . $controller_namespace
-                        . ' не задан прокси-метод!');
+                . ' не задан прокси-метод!');
             }
         }
 
-        /**
-         * Активация приложения
-         */
-        public function run()
+        /** Запрет на копирование объекта */
+        private function __clone()
         {
-            // Получаем request объект
-            $this->request = Request::get_instance();
-            // Получаем данные о маршруте
-            $this->parse_route();
-            // Загрузка модуля
-            $this->load_module();
-            // Загрузка настроек
-            $this->load_config();
-            // Загрузка событий
-            $this->load_events();
-            // Загрузка шаблонного контекста
-            $this->load_context();
-            // Генерация события загрузки системы
-            Event::trigger('boot');
-            // Загрузка контроллера и действия
-            $this->load_controller();
         }
 
     }

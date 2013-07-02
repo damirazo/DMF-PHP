@@ -4,15 +4,14 @@
      * Активация перехватчика ошибок и автозагрузчика
      * должна производится до момента запуска фреймворка и инициализации приложения
      */
+    use DMF\Core\Application\Application;
+    use DMF\Core\Autoloader\Autoloader;
+    use DMF\Core\ErrorHandler\ErrorHandler;
 
     /** Импортирование перехватчика ошибок */
     require_once CORE_PATH . 'ErrorHandler' . _SEP . 'ErrorHandler.php';
     /** Импортирование автозагрузчика */
     require_once CORE_PATH . 'Autoloader' . _SEP . 'Autoloader.php';
-
-    use DMF\Core\ErrorHandler\ErrorHandler;
-    use DMF\Core\Autoloader\Autoloader;
-    use DMF\Core\Application\Application;
 
     /** Активация перехвачика ошибок */
     ErrorHandler::run();
@@ -43,13 +42,11 @@
      * Ключ - Имя папки с модулем (и имя модуля)
      * Значение - Пространство имен корня модуля
      */
-    Application::get_instance()->register_modules(
-        [
-            'Example' => 'App\\Example',
-            'Doc'     => 'App\\Doc',
-            'DMFAuth'    => 'DMF\\DMFAuth'
-        ]
-    );
+    Application::get_instance()->register_modules([
+        'Example' => 'App\\Example',
+        'Doc'     => 'App\\Doc',
+        'DMFAuth' => 'DMF\\DMFAuth'
+    ]);
 
     /** Активация приложения */
     Application::get_instance()->run();

@@ -23,8 +23,7 @@
             foreach ($routes as $pattern => $callable) {
                 if (!isset(self::$_routes[$pattern])) {
                     self::$_routes[$pattern] = new Pattern($callable);
-                }
-                else {
+                } else {
                     throw new RouteExists('Маршрут ' . $pattern . ' уже был задан ранее для действия ' . $callable);
                 }
             }
@@ -32,6 +31,7 @@
 
         /**
          * read only доступ к списку маршрутов
+         *
          * @return array
          */
         public static function data()

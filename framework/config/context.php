@@ -5,10 +5,9 @@
      * Переменные, указанные здесь, и их значения
      * будут переданы во все шаблоны автоматически
      */
-
-    use DMF\Core\Template\Context;
     use DMF\Core\ErrorHandler\ErrorHandler;
     use DMF\Core\Http\Request;
+    use DMF\Core\Template\Context;
 
     /** Загрузка и инициализация списка шаблонного контекста */
 
