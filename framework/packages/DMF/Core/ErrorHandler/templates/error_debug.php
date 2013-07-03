@@ -1,6 +1,3 @@
-<?php if (!isset($error)) {
-    $error = [];
-} ?>
 <!doctype html>
 <html>
 <head>

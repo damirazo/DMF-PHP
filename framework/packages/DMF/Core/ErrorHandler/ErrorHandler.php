@@ -74,13 +74,13 @@
                     'type'    => $type
                 ];
                 // импортируем шаблон для отображения страницы ошибки
-                OS::import(OS::join($error_templates_path, 'error_debug.php'));
+                require_once OS::join($error_templates_path, 'error_debug.php');
             } else {
                 $error = [
                     'message' => $message,
                     'code'    => $http_code
                 ];
-                OS::import(OS::join($error_templates_path, 'error.php'));
+                require_once OS::join($error_templates_path, 'error.php');
             }
 
             // записываем в лог информацию об ошибке
