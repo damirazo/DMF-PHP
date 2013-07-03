@@ -22,7 +22,7 @@
          */
         public function proxy($action, $args)
         {
-            if ($this->model('DMFUser')->check_auth()) {
+            if ($this->model('DMFAuth.DMFUser')->check_auth()) {
                 return parent::proxy($action, $args);
             } else {
                 return $this->call_controller('user_login');
