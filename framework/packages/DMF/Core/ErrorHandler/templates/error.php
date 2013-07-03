@@ -11,7 +11,7 @@
             font-size: 14px;
         }
 
-        .error-message, {
+        .error-message {
             padding: 8px 35px 8px 14px;
             text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
             -webkit-border-radius: 4px;
@@ -20,13 +20,11 @@
             width: 700px;
             margin: 20px auto;
             text-align: center;
-        }
-
-        .error-message {
             color: #b94a48;
             background-color: #f2dede;
             border-color: #eed3d7;
         }
+
     </style>
 </head>
 <body>
