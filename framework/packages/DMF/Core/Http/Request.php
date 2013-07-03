@@ -18,11 +18,6 @@
         {
         }
 
-        /** Запрет на копирование объекта */
-        private function __clone()
-        {
-        }
-
         /**
          * Возвращает инстанс объекта
          * @return Request|null
@@ -37,6 +32,7 @@
 
         /**
          * Текущий полный URL сайта
+         *
          * @return string
          */
         public function url()
@@ -46,6 +42,7 @@
 
         /**
          * Базовый URI сайта
+         *
          * @return string
          */
         public function base_url()
@@ -56,20 +53,11 @@
                 return Config::get('base_url');
             }
             // в противном случае высчитываем сами
-            $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') ? 'https' : 'http';
-            return $protocol . '://' . $_SERVER['HTTP_HOST'] . '/';
-        }
+            $protocol = (isset($_SERVER['HTTPS'])
+                    && $_SERVER['HTTPS'] != 'off'
+                    && !empty($_SERVER['HTTPS'])) ? 'https' : 'http';
 
-        /**
-         * Путь до директории со статичными файлами
-         * @return mixed|string
-         */
-        public function static_url()
-        {
-            if (Config::get('static_url')) {
-                return Config::get('static_url');
-            }
-            return $this->base_url() . 'static/';
+            return $protocol . '://' . $_SERVER['HTTP_HOST'];
         }
 
         /**
@@ -95,8 +83,7 @@
             // Если сегменты отсутствуют, то считаем текущий URI корнем сайта
             if (count($new_segments) < 1) {
                 return '/';
-            }
-            // В противном случае собираем сегменты в строку и возвращаем
+            } // В противном случае собираем сегменты в строку и возвращаем
             else {
                 $uri = implode('/', $new_segments);
                 return '/' . $uri . '/';
@@ -104,24 +91,33 @@
         }
 
         /**
+         * Путь до директории со статичными файлами
+         * @return mixed|string
+         */
+        public function static_url()
+        {
+            if (Config::get('static_url')) {
+                return Config::get('static_url');
+            }
+            return $this->base_url() . 'static/';
+        }
+
+        /**
          * Получение клиентского IP адреса
+         *
          * @return bool|string
          */
         public function client_ip()
         {
             if (isset($_SERVER['HTTP_CLIENT_IP'])) {
                 $ip = $_SERVER['HTTP_CLIENT_IP'];
-            }
-            elseif (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            } elseif (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
                 $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-            }
-            elseif (isset($_SERVER['HTTP_X_REAL_IP'])) {
+            } elseif (isset($_SERVER['HTTP_X_REAL_IP'])) {
                 $ip = $_SERVER['HTTP_X_REAL_IP'];
-            }
-            elseif (isset($_SERVER['REMOTE_ADDR'])) {
+            } elseif (isset($_SERVER['REMOTE_ADDR'])) {
                 $ip = $_SERVER['REMOTE_ADDR'];
-            }
-            else {
+            } else {
                 $ip = '0.0.0.0';
             }
             if (filter_var($ip, FILTER_VALIDATE_IP)) {
@@ -183,12 +179,18 @@
 
         /**
          * Проверка был ли отправлен запрос через AJAX
+         *
          * @return bool
          */
         public function is_ajax()
         {
             return !!(!empty($_SERVER['HTTP_X_REQUESTED_WITH'])
                     && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest');
+        }
+
+        /** Запрет на копирование объекта */
+        private function __clone()
+        {
         }
 
     }
