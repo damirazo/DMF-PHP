@@ -47,6 +47,19 @@
             return !!(is_readable($path));
         }
 
+        /**
+         * Возвращает рассчитанный путь
+         * @param string $path Путь до директории
+         * @param string $file Имя файла
+         * @return string
+         */
+        public static function join($path, $file)
+        {
+            return $path . _SEP . $file;
+        }
+
+        // TODO: Требуется реализация метода чтения файлов
+
         public static function file_data($path, $as_array = false, $exception = true)
         {
             if (self::file_exists($path)) {
