@@ -3,9 +3,9 @@
     namespace DMF\Core\Controller;
 
     use DMF\Core\Component\Component;
+    use DMF\Core\Controller\Exception\ActionNotFoundException;
     use DMF\Core\Http\Request;
     use DMF\Core\Storage\Config;
-    use DMF\Core\Controller\Exception\ActionNotFoundException;
 
     /**
      * Базовый контроллер
@@ -27,13 +27,23 @@
             // вначале проверяем наличия требуемого метода с префиксом в виде метода запроса
             if (method_exists($this, $action . '__' . $method)) {
                 return call_user_func_array([$this, $action . '__' . $method], $args);
-            }
-            // затем ищем метод по точному имени
+            } // затем ищем метод по точному имени
             elseif (method_exists($this, $action)) {
-                return call_user_func_array([$this, $action], $args);
+                return $this->call_controller($action, $args);
             }
             // если метод не обнаружен, то генерируем исключение
             throw new ActionNotFoundException('Действие ' . $action . ' не обнаружено');
+        }
+
+        /**
+         * Вызов запрашиваемого контроллера в контексте текущего запроса
+         * @param string $controller_name Имя контроллера
+         * @param mixed  $args            Список аргументов
+         * @return mixed
+         */
+        protected function call_controller($controller_name, $args = [])
+        {
+            return call_user_func_array([$this, $controller_name], $args);
         }
 
     }
