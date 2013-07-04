@@ -57,7 +57,7 @@
          */
         public function __toString()
         {
-            return md5(get_class($this).serialize($this->_params));
+            return md5($this->name().'+'.serialize($this->_params));
         }
 
         /**

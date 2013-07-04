@@ -10,24 +10,8 @@
 
         /** @var string Имя связанной модели */
         public $model;
-
-        /**
-         * Заданные лейблы для имен полей
-         * @return array
-         */
-        public function labels()
-        {
-            return [];
-        }
-
-        /**
-         * Массив имен исключаемых полей
-         * @return array
-         */
-        public function excluded_fields()
-        {
-            return [];
-        }
+        /** @var array Список правил для полей модельной формы */
+        public $rules = [];
 
         /**
          * Генерация схемы формы
@@ -55,6 +39,101 @@
         }
 
         /**
+         * Массив имен исключаемых полей
+         * @return array
+         */
+        public function excluded_fields()
+        {
+            return [];
+        }
+
+        /**
+         * Возвращает поле формы, соответствующее данному полю модели
+         * @param string                          $name   Имя поля
+         * @param \DMF\Core\Model\Field\BaseField $field  Объект поля модели
+         * @return array
+         */
+        protected function get_form_field_form_model_field($name, \DMF\Core\Model\Field\BaseField $field)
+        {
+            // если у поля указано значение по умолчанию,
+            // то записываем его в поле
+            if ($field->default_value() && !isset($this->bounded_data[$name])) {
+                $this->bounded_data[$name] = $field->default_value();
+            }
+            // ищем требуемый тип поля модели и конвертируем в соответствующий тип поля формы
+            switch ($field->type()) {
+                // обычное текстовое поле
+                case 'string':
+                    $data = $this->convert_string_field();
+                // большое текстовое поле
+                case 'text':
+                    $data = $this->convert_text_field();
+                // поле ввода даты и времени
+                case 'datetime':
+                    $data = $this->convert_datetime_field();
+                // поле ввода булева значения
+                case 'boolean':
+                    $data = $this->convert_boolean_field();
+                // по умолчанию считаем обычным текстовым полем
+                default:
+                    $data = $this->convert_string_field();
+            }
+
+            $data['label'] = $this->get_field_label($name);
+            $data['rules'] = $this->get_rule($name);
+
+            return $data;
+        }
+
+        /**
+         * Генерация обычного текстового поля
+         * @return array
+         */
+        protected function convert_string_field()
+        {
+            return [
+                'type'  => 'DMF.InputField'
+            ];
+        }
+
+        /**
+         * Генерация расширенного текстового поля
+         * @return array
+         */
+        protected function convert_text_field()
+        {
+            return [
+                'type' => 'DMF.TextField'
+            ];
+        }
+
+        /**
+         * Генерация расширенного текстового поля
+         * @return array
+         */
+        protected function convert_datetime_field()
+        {
+            return [
+                'type' => 'DMF.DatetimeField'
+            ];
+        }
+
+        /**
+         * Генерация поля с булевым значением
+         * @return array
+         */
+        protected function convert_boolean_field()
+        {
+            return [
+                'type'    => 'DMF.RadioField',
+                'options' => [
+                    1 => 'Включено',
+                    0 => 'Выключено'
+                ]
+            ];
+        }
+
+        /**
          * Возвращает сгенерированное имя поля из заданного массива
          * или на основе имени поля в модели
          * @param $name Имя поля
@@ -72,97 +151,25 @@
         }
 
         /**
-         * Возвращает поле формы, соответствующее данному полю модели
-         * @param string                          $name   Имя поля
-         * @param \DMF\Core\Model\Field\BaseField $object Объект поля модели
+         * Заданные лейблы для имен полей
          * @return array
          */
-        protected function get_form_field_form_model_field($name, \DMF\Core\Model\Field\BaseField $object)
+        public function labels()
         {
-            // если у поля указано значение по умолчанию,
-            // то записываем его в поле
-            if ($object->default_value() && !isset($this->bounded_data[$name])) {
-                $this->bounded_data[$name] = $object->default_value();
+            return [];
+        }
+
+        /**
+         * Возвращает список правил, определенных для указанного поля
+         * @param string $field_name Название поля
+         * @return bool|mixed
+         */
+        public function get_rule($field_name)
+        {
+            if (isset($this->rules[$field_name])) {
+                return $this->rules[$field_name];
             }
-            // ищем требуемый тип поля модели и конвертируем в соответствующий тип поля формы
-            switch ($object->type()) {
-                // обычное текстовое поле
-                case 'string':
-                    return $this->convert_string_field($name, $object);
-                // большое текстовое поле
-                case 'text':
-                    return $this->convert_text_field($name, $object);
-                // поле ввода даты и времени
-                case 'datetime':
-                    return $this->convert_datetime_field($name, $object);
-                // поле ввода булева значения
-                case 'boolean':
-                    return $this->convert_boolean_field($name, $object);
-                // по умолчанию считаем обычным текстовым полем
-                default:
-                    return $this->convert_string_field($name, $object);
-            }
-        }
-
-        /**
-         * Генерация обычного текстового поля
-         * @param string                          $name   Имя поля
-         * @param \DMF\Core\Model\Field\BaseField $object Объект поля модели
-         * @return array
-         */
-        protected function convert_string_field($name, \DMF\Core\Model\Field\BaseField $object)
-        {
-            return [
-                'type'  => 'DMF.InputField',
-                'label' => $this->get_field_label($name),
-                'rules' => ['max_length=' . $object->length()]
-            ];
-        }
-
-        /**
-         * Генерация расширенного текстового поля
-         * @param string                          $name   Имя поля
-         * @param \DMF\Core\Model\Field\BaseField $object Объект поля модели
-         * @return array
-         */
-        protected function convert_text_field($name, \DMF\Core\Model\Field\BaseField $object)
-        {
-            return [
-                'type'  => 'DMF.TextField',
-                'label' => $this->get_field_label($name)
-            ];
-        }
-
-        /**
-         * Генерация расширенного текстового поля
-         * @param string                          $name   Имя поля
-         * @param \DMF\Core\Model\Field\BaseField $object Объект поля модели
-         * @return array
-         */
-        protected function convert_datetime_field($name, \DMF\Core\Model\Field\BaseField $object)
-        {
-            return [
-                'type'  => 'DMF.DatetimeField',
-                'label' => $this->get_field_label($name)
-            ];
-        }
-
-        /**
-         * Генерация поля с булевым значением
-         * @param                                 $name   Имя поля
-         * @param \DMF\Core\Model\Field\BaseField $object Объект поля модели
-         * @return array
-         */
-        protected function convert_boolean_field($name, \DMF\Core\Model\Field\BaseField $object)
-        {
-            return [
-                'type'    => 'DMF.RadioField',
-                'label'   => $this->get_field_label($name),
-                'options' => [
-                    1 => 'Включено',
-                    0 => 'Выключено'
-                ]
-            ];
+            return [];
         }
 
     }

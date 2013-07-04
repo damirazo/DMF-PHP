@@ -12,6 +12,14 @@
 
         /** @var string Имя связанной с классом модели */
         public $model = 'Post';
+        /** {@inheritdoc} */
+        public $rules = [
+            'name' => [
+                'min_length=3',
+                'max_length=32'
+            ],
+            'text' => ['min_length=5']
+        ];
 
         /**
          * Массив лейблов полей
@@ -20,10 +28,9 @@
         public function labels()
         {
             return [
-                'name'       => 'Название статьи',
-                'text'       => 'Текст статьи',
-                'created_at' => 'Дата публикации',
-                'status'     => 'Статус статьи'
+                'name'   => 'Название статьи',
+                'text'   => 'Текст статьи',
+                'status' => 'Статус статьи'
             ];
         }
 

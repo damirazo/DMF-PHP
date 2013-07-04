@@ -139,23 +139,22 @@
         public function is_valid()
         {
             // если форма не была получена, то следовательно она не валидна
-            if (!$this->is_received()) {
-                return false;
-            }
-            // проверяем корректность полученного CSRF токена
-            if ($this->check_csrf_token()) {
-                $is_valid = true;
-                // обходим массив полей
-                /** @var $field_object \DMF\Core\Form\Field\BaseField */
-                foreach ($this->fields() as $field_name => $field_object) {
-                    // валидируем поле и получаем объект валидатора
-                    $validator = $field_object->validate();
-                    // если валидатор невалиден, то ставим значение формы невалидным
-                    if ($validator->is_valid() === false) {
-                        $is_valid = false;
+            if ($this->is_received()) {
+                // проверяем корректность полученного CSRF токена
+                if ($this->check_csrf_token()) {
+                    $is_valid = true;
+                    // обходим массив полей
+                    /** @var $field_object \DMF\Core\Form\Field\BaseField */
+                    foreach ($this->fields() as $field_name => $field_object) {
+                        // валидируем поле и получаем объект валидатора
+                        $validator = $field_object->validate();
+                        // если валидатор невалиден, то ставим значение формы невалидным
+                        if ($validator->is_valid() === false) {
+                            $is_valid = false;
+                        }
                     }
+                    return $is_valid;
                 }
-                return $is_valid;
             }
             return false;
         }
