@@ -65,18 +65,23 @@
                 // обычное текстовое поле
                 case 'string':
                     $data = $this->convert_string_field();
+                    break;
                 // большое текстовое поле
                 case 'text':
                     $data = $this->convert_text_field();
+                    break;
                 // поле ввода даты и времени
                 case 'datetime':
                     $data = $this->convert_datetime_field();
+                    break;
                 // поле ввода булева значения
                 case 'boolean':
                     $data = $this->convert_boolean_field();
+                    break;
                 // по умолчанию считаем обычным текстовым полем
                 default:
                     $data = $this->convert_string_field();
+                    break;
             }
 
             $data['label'] = $this->get_field_label($name);
