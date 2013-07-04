@@ -60,7 +60,7 @@
                 // проверяем валидность формы
                 if ($form->is_valid()) {
                     // обновляем статью
-                    $this->model('Post')->update_by_pk($form->cleaned_data(), $post_id);
+                    $this->model('Post')->update_by_pk($post_id, $form->cleaned_data());
                     return $this->redirect('/post/' . $post_id . '/');
                 }
             }

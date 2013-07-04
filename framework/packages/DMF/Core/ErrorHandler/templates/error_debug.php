@@ -89,8 +89,6 @@
             <p><strong>Класс:</strong><?php echo $element['class']; ?></p>
 
             <p><strong>Функция/Метод:</strong><?php echo $element['function']; ?></p>
-
-            <p><strong>Тип функции/метода:</strong><?php echo $element['type']; ?></p>
         </div>
         <?php endforeach; ?>
     <?php else: ?>
