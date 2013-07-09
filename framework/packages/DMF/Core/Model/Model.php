@@ -4,6 +4,7 @@
 
     use DMF\Core\Component\Component;
     use DMF\Core\Model\Exception\DBError;
+    use DMF\Core\OS\File;
     use DMF\Core\OS\OS;
     use DMF\Core\Storage\Config;
 
@@ -148,7 +149,8 @@
             // Имя файл фикстуры, генерируется из имени модуля и имени модели
             $fixture_name = strtolower($this->get_module_name()) . '__' . strtolower($this->get_class_name()) . '.json';
             // Полный путь до файла с фикстурой
-            $fixture = OS::file_data(DATA_PATH . 'fixtures' . _SEP . $fixture_name, false, false);
+            $file = new File(DATA_PATH . 'fixtures' . _SEP . $fixture_name);
+            $fixture = $file->open('r')->read();
             // Если файл с фикстурой отсутствует, то ничего не делаем
             if ($fixture !== false) {
                 // Данные из файла, преобразованные в PHP массив
@@ -207,7 +209,8 @@
         {
             $fixture_name = strtolower($this->get_module_name()) . '__' . strtolower($this->get_class_name()) . '.json';
             $data = $this->dump_data();
-            OS::file_data(DATA_PATH . 'fixtures' . _SEP . $fixture_name)->write(json_encode($data, JSON_PRETTY_PRINT));
+            $file = new File(DATA_PATH . 'fixtures' . _SEP . $fixture_name);
+            $file->open('w+')->block()->write(json_encode($data, JSON_PRETTY_PRINT))->unblock()->close();
         }
 
         /**
