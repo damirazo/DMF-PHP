@@ -21,8 +21,6 @@
          * @param array $callbacks Массив функций
          */
         // TODO: Логика коллбеков не реализована
-
-
         public static function register_callbacks($callbacks = [])
         {
             self::$_callbacks = $callbacks;

@@ -3,14 +3,13 @@
     namespace DMF\Core\Component;
 
     use DMF\Core\Application\Application;
-    use SimpleXMLElement;
+    use DMF\Core\Document\Array2XML;
+    use DMF\Core\Http\Request;
+    use DMF\Core\Http\Response;
     use DMF\Core\Model\Database;
     use DMF\Core\Storage\Config;
     use DMF\Core\Storage\Session;
-    use DMF\Core\Http\Request;
-    use DMF\Core\Http\Response;
     use DMF\Core\Template\Template;
-    use DMF\Core\Document\Array2XML;
 
     /**
      * Базовый класс для большинства частей фреймворка
@@ -20,10 +19,8 @@
 
         /** @var \DMF\Core\Model\Database|null Ссылка на соединение с БД */
         public static $db = null;
-
         /** @var \DMF\Core\Application\Application|null */
         public static $app = null;
-
         /** @var array Кэш объектов моделей */
         protected static $_models = [];
 
@@ -52,6 +49,16 @@
         }
 
         /**
+         * Возвращает объект требуемой модели
+         * @param string $name  Имя модели
+         * @return mixed
+         */
+        public function model($name)
+        {
+            return $this->get_component($name, 'Model');
+        }
+
+        /**
          * Возвращает объект требуемого компонента
          * @param string $name Имя компонента
          * @param string $type Тип компонента (Form, Model)
@@ -65,8 +72,7 @@
                 // Модуль считаем текущим
                 $module = $this->get_module();
                 $component_name = $data[0];
-            }
-            // Если указаны оба параметра, то следовательно они являются именем модуля и компонента
+            } // Если указаны оба параметра, то следовательно они являются именем модуля и компонента
             else {
                 // Получаем модуль по его имени
                 $module = Application::get_instance()->get_module_by_name($data[0]);
@@ -77,13 +83,16 @@
         }
 
         /**
-         * Возвращает объект требуемой модели
-         * @param string $name  Имя модели
-         * @return mixed
+         * Возвращает объект требуемого модуля, либо текущего модуля
+         * @param string|null $name Имя требуемого модуля
+         * @return \DMF\Core\Module\Module|null
          */
-        public function model($name)
+        protected function get_module($name = null)
         {
-            return $this->get_component($name, 'Model');
+            if (is_null($name)) {
+                return Application::get_instance()->module;
+            }
+            return Application::get_instance()->get_module_by_name($name);
         }
 
         /**
@@ -103,15 +112,6 @@
         public function session()
         {
             return Session::get_instance();
-        }
-
-        /**
-         * Возвращает объект входящего запроса
-         * @return \DMF\Core\Http\Request|mixed|null
-         */
-        public function request()
-        {
-            return Request::get_instance();
         }
 
         /**
@@ -140,6 +140,7 @@
 
         /**
          * Возврат данных в виде JSON объекта
+         *
          * @param mixed $data Данные для представления в JSON
          * @return \DMF\Core\Http\Response
          */
@@ -150,12 +151,29 @@
 
         /**
          * Возврат данных в виде XML
+         *
          * @param mixed $data    Данные для представления в XML
          * @return \DMF\Core\Http\Response
          */
         public function xml($data)
         {
             return new Response($this->array2xml($data), 200, ['Content-type: application/xml']);
+        }
+
+        /**
+         * Преобразование массива в XML документ
+         *
+         * @param array  $data      Данные для генерации документа
+         * @param string $root_node Имя корневой ноды
+         * @param string $encoding  Кодировка документа
+         * @param string $version   Версия документа
+         * @return string
+         */
+        protected function array2xml($data, $root_node = 'root', $encoding = 'utf-8', $version = '1.0')
+        {
+            Array2XML::init($version, $encoding, true);
+            $document = Array2XML::createXML($root_node, $data);
+            return $document->saveXML();
         }
 
         /**
@@ -180,6 +198,15 @@
         }
 
         /**
+         * Возвращает объект входящего запроса
+         * @return \DMF\Core\Http\Request|mixed|null
+         */
+        public function request()
+        {
+            return Request::get_instance();
+        }
+
+        /**
          * Обработка переменной и удаление лишних символов
          * @param string $value Значение для обработки
          * @return string
@@ -199,16 +226,14 @@
         }
 
         /**
-         * Возвращает объект требуемого модуля, либо текущего модуля
-         * @param string|null $name Имя требуемого модуля
-         * @return \DMF\Core\Module\Module|null
+         * Возвращает имя класса, в контексте которого вызван
+         * @return string
          */
-        protected function get_module($name = null)
+        public function get_class_name()
         {
-            if (is_null($name)) {
-                return Application::get_instance()->module;
-            }
-            return Application::get_instance()->get_module_by_name($name);
+            $namespace = get_class($this);
+            $pieces = (mb_strpos($namespace, '\\')) ? explode('\\', $namespace) : explode('_', $namespace);
+            return $pieces[count($pieces) - 1];
         }
 
         /**
@@ -218,32 +243,6 @@
         protected function get_module_name()
         {
             return $this->get_module()->name;
-        }
-
-        /**
-         * Возвращает имя класса, в контексте которого вызван
-         * @return string
-         */
-        protected function get_class_name()
-        {
-            $namespace = get_class($this);
-            $pieces = (mb_strpos($namespace, '\\')) ? explode('\\', $namespace) : explode('_', $namespace);
-            return $pieces[count($pieces) - 1];
-        }
-
-        /**
-         * Преобразование массива в XML документ
-         * @param array  $data      Данные для генерации документа
-         * @param string $root_node Имя корневой ноды
-         * @param string $encoding  Кодировка документа
-         * @param string $version   Версия документа
-         * @return string
-         */
-        protected function array2xml($data, $root_node = 'root', $encoding = 'utf-8', $version = '1.0')
-        {
-            Array2XML::init($version, $encoding, true);
-            $document = Array2XML::createXML($root_node, $data);
-            return $document->saveXML();
         }
 
     }
