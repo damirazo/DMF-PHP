@@ -17,12 +17,31 @@
         public $table_name = null;
         /** @var string Имя класса для возвращаемой выборкой из БД сущности */
         public $entity_name = 'DMF.Entity';
+        /**
+         * Автосоздание таблицы для указанной модели в БД
+         * ВНИМАНИЕ! Создает запрос для проверки наличия указанной таблицы в БД при каждой инициализации модели,
+         * будучи установленной в true!
+         * @var bool Требуется ли создавать таблицу указанной модели в БД автоматически в случае ее отсутствия
+         */
+        public $table_auto_create = false;
+
+        /**
+         * Инициализация модели
+         */
+        public function __construct()
+        {
+            parent::__construct();
+            if ($this->table_auto_create && !$this->table_exists()) {
+                $this->create_table();
+            }
+        }
 
         /**
          * Обновление структуры таблицы в БД
          */
         public function update_table()
         {
+            // TODO: Реализовать щадящее обновление структуры таблицы
             $check_table = self::$db->query('SHOW TABLES LIKE :table', ['table' => $this->table_name()]);
             if ($check_table->num_rows() == 1) {
                 $this->drop_table();
@@ -53,6 +72,16 @@
         }
 
         /**
+         * Проверка наличия таблицы данной модели в БД
+         * @return bool
+         */
+        public function table_exists()
+        {
+            $result = self::$db->query('SHOW TABLES LIKE :table_name', ['table_name' => $this->table_name()]);
+            return !!($result->num_rows() == 1);
+        }
+
+        /**
          * Удаление таблицы
          * @return bool
          */
@@ -63,13 +92,16 @@
 
         /**
          * Создание новой таблицы
+         * @param bool $load_fixtures Требуется ли подгружать фикстуры при создании таблицы
          */
-        public function create_table()
+        public function create_table($load_fixtures = false)
         {
             // Выполнение запроса на создание таблицы в БД
             self::$db->exec($this->generate_sql_for_table());
-            // Загрузка фикстур
-            $this->load_fixtures();
+            if ($load_fixtures) {
+                // Загрузка фикстур
+                $this->load_fixtures();
+            }
         }
 
         /**
@@ -174,7 +206,7 @@
         public function dump_fixtures()
         {
             $fixture_name = strtolower($this->get_module_name()) . '__' . strtolower($this->get_class_name()) . '.json';
-            $data = $this->dump_data(10);
+            $data = $this->dump_data();
             OS::file_data(DATA_PATH . 'fixtures' . _SEP . $fixture_name)->write(json_encode($data, JSON_PRETTY_PRINT));
         }
 
