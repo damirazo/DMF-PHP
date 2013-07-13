@@ -1,13 +1,13 @@
 <?php
 
-    namespace DMF\Core\Router;
+    namespace DMF\Core\Application;
 
     use DMF\Core\Application\Exception\WrongArgsNumber;
 
     /**
      * Объектное представление для URI паттерна
      */
-    class Pattern
+    class RoutePattern
     {
 
         /** @var string Имя модуля */

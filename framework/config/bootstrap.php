@@ -12,9 +12,8 @@
     require_once CORE_PATH . 'ErrorHandler' . _SEP . 'ErrorHandler.php';
     /** Импортирование автозагрузчика */
     require_once CORE_PATH . 'Autoloader' . _SEP . 'Autoloader.php';
-
-    /** Активация перехвачика ошибок */
-    ErrorHandler::run();
+    /** Импорт маршрутов */
+    require_once 'routes.php';
 
     /**
      * Регистрация корневых пространств имен
@@ -32,9 +31,6 @@
             'Twig' => PACKAGES_PATH . 'Twig' . _SEP . 'lib' . _SEP . 'Twig'
         ]
     );
-
-    /** Импорт маршрутов */
-    require_once 'routes.php';
 
     /**
      * Регистрация списка модулей и их пространство имен

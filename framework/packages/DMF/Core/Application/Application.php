@@ -4,12 +4,13 @@
 
     use DMF\Core\Application\Exception\ControllerProxyNotFound;
     use DMF\Core\Application\Exception\ModuleNotFound;
+    use DMF\Core\Application\RoutePattern;
     use DMF\Core\Event\Event;
     use DMF\Core\Http\Exception\Http404;
     use DMF\Core\Http\Request;
     use DMF\Core\Module\Module;
     use DMF\Core\OS\OS;
-    use DMF\Core\Router\Router;
+    use DMF\Core\Router\Exception\RouteExists;
     use DMF\Core\Storage\Config;
 
     /**
@@ -20,6 +21,8 @@
 
         /** @var null|Application Инстанс объекта */
         private static $_instance = null;
+        /** @var array Список зарегистрированных маршрутов */
+        private static $_routes = [];
         /** @var null|array Объект с данными о текущем маршруте */
         public $route_object = null;
         /** @var array Список модулей */
@@ -46,6 +49,31 @@
         }
 
         /**
+         * Регистрация списка маршрутов
+         * @param array $routes Список маршрутов
+         * @throws \DMF\Core\Router\Exception\RouteExists
+         */
+        public static function routes($routes = [])
+        {
+            foreach ($routes as $pattern => $callable) {
+                if (!isset(self::$_routes[$pattern])) {
+                    self::$_routes[$pattern] = new RoutePattern($callable);
+                } else {
+                    throw new RouteExists('Маршрут ' . $pattern . ' уже был задан ранее для действия ' . $callable);
+                }
+            }
+        }
+
+        /**
+         * Проверка на то, запущен ли фреймворк через консоль
+         * @return bool
+         */
+        public static function is_cli()
+        {
+            return PHP_SAPI === 'cli';
+        }
+
+        /**
          * Регистрация списка модулей
          * @param array $modules Списрк модулей
          */
@@ -63,6 +91,12 @@
          */
         public function run()
         {
+            // Активация фреймворка через консоль
+            // для работы через командный интерфейс
+            if (self::is_cli()) {
+
+            }
+
             // Получаем request объект
             $this->request = Request::get_instance();
             // Получаем данные о маршруте
@@ -90,9 +124,8 @@
                 // Текущая строка запроса
                 $uri = $this->request->request_uri();
                 // Список зарегистрированных маршрутов
-                $routes = Router::data();
                 // Поиск совпадающих со строкой запроса маршрутов
-                foreach ($routes as $regexp => $pattern) {
+                foreach (self::$_routes as $regexp => $pattern) {
                     // Заменяем псевдонимы для regexp шаблона
                     $regexp = str_replace(
                         ['@int', '@str', '@alphanum', '@all'],

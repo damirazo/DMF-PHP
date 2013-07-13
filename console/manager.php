@@ -29,7 +29,7 @@
 
     // Если обнаружен лишь один аргумент, то прерываем работу консоли
     if (count($args) <= 1) {
-        die(c('Не указаны аргументы для выбора требуемого действия!'));
+        die(c('No arguments are specified to select the desired action!'));
     }
 
     // Название запрашиваемого действия
@@ -43,7 +43,7 @@
             break;
         // Указанное действие не реализовано
         default:
-            echo c('Действие ' . $action . ' не задано!');
+            echo c('Action ' . $action . ' is not specified!');
             break;
     }
 
