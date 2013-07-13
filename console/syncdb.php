@@ -1,14 +1,12 @@
 <?php
 
-    echo c('Starting synchronization of databases and models...');
+    print('Starting synchronization of databases and models...');
 
-    // Список зарегистрированных моделей
-    $registered_models = ['App\Example\Model\Post'];
+    // Список моделей, подлежащих синхронизации
+    $models = [];
 
-    // Если передано более двух аргументов, то значит были получены имена классов модели
-    if (count($args) == 2) {
-        $registered_models = [$args[2]];
+    // Если передан какой-либо аргумент, то считаем его названием модели и синхронизируем лишь ее
+    if (count($action_args) == 1) {
+        
     }
-
-    echo c('Models found: ' . count($registered_models));
 

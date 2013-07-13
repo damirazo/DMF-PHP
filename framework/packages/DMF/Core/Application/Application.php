@@ -65,15 +65,6 @@
         }
 
         /**
-         * Проверка на то, запущен ли фреймворк через консоль
-         * @return bool
-         */
-        public static function is_cli()
-        {
-            return PHP_SAPI === 'cli';
-        }
-
-        /**
          * Регистрация списка модулей
          * @param array $modules Списрк модулей
          */
@@ -91,62 +82,35 @@
          */
         public function run()
         {
+            // Получаем request объект
+            $this->request = Request::get_instance();
             // Активация фреймворка через консоль
             // для работы через командный интерфейс
             if (self::is_cli()) {
-
+                // Генерируем событие, что мы загрузились через консоль
+                // Все остальные параметры нам не нужны
+                Event::trigger('cli');
+            } else {
+                // Получаем данные о маршруте
+                $this->parse_route();
+                // Загрузка модуля
+                $this->load_module();
+                // Загрузка системных параметров
+                $this->loader();
+                // Генерация события загрузки системы
+                Event::trigger('app_ready');
+                // Загрузка контроллера и действия
+                $this->load_controller();
             }
-
-            // Получаем request объект
-            $this->request = Request::get_instance();
-            // Получаем данные о маршруте
-            $this->parse_route();
-            // Загрузка модуля
-            $this->load_module();
-            // Загрузка системных параметров
-            $this->loader();
-            // Генерация события загрузки системы
-            Event::trigger('boot');
-            // Загрузка контроллера и действия
-            $this->load_controller();
         }
 
         /**
-         * Разбивка URI и получение информации о маршруте
-         *
-         * @return array
-         * @throws \DMF\Core\Http\Exception\Http404
+         * Проверка на то, запущен ли фреймворк через консоль
+         * @return bool
          */
-        protected function parse_route()
+        public static function is_cli()
         {
-            // Проверяем не был ли текущий объект маршрута уже закеширован ранее
-            if (is_null($this->route_object)) {
-                // Текущая строка запроса
-                $uri = $this->request->request_uri();
-                // Список зарегистрированных маршрутов
-                // Поиск совпадающих со строкой запроса маршрутов
-                foreach (self::$_routes as $regexp => $pattern) {
-                    // Заменяем псевдонимы для regexp шаблона
-                    $regexp = str_replace(
-                        ['@int', '@str', '@alphanum', '@all'],
-                        ['[\d]+', '[\w]+', '[\w\d]+', '[\w\d\.\,\-\_\+]+'],
-                        $regexp
-                    );
-                    // Проверяем соответствие текущей строке запроса и паттерну маршрута
-                    if (preg_match('~^' . $regexp . '$~i', $uri, $arguments)) {
-                        $route_object = [
-                            'url'       => $this->request->request_uri(),
-                            'pattern'   => $pattern,
-                            'arguments' => array_slice($arguments, 1)
-                        ];
-                        $this->route_object = $route_object;
-                        return $route_object;
-                    }
-                }
-                throw new Http404('Страница ' . Request::get_instance()->url() . ' отсутствует на сайте!');
-            } else {
-                return $this->route_object;
-            }
+            return PHP_SAPI === 'cli';
         }
 
         /**
@@ -188,6 +152,44 @@
         protected function module_name()
         {
             return $this->parse_route()['pattern']->module_name;
+        }
+
+        /**
+         * Разбивка URI и получение информации о маршруте
+         *
+         * @return array
+         * @throws \DMF\Core\Http\Exception\Http404
+         */
+        protected function parse_route()
+        {
+            // Проверяем не был ли текущий объект маршрута уже закеширован ранее
+            if (is_null($this->route_object)) {
+                // Текущая строка запроса
+                $uri = $this->request->request_uri();
+                // Список зарегистрированных маршрутов
+                // Поиск совпадающих со строкой запроса маршрутов
+                foreach (self::$_routes as $regexp => $pattern) {
+                    // Заменяем псевдонимы для regexp шаблона
+                    $regexp = str_replace(
+                        ['@int', '@str', '@alphanum', '@all'],
+                        ['[\d]+', '[\w]+', '[\w\d]+', '[\w\d\.\,\-\_\+]+'],
+                        $regexp
+                    );
+                    // Проверяем соответствие текущей строке запроса и паттерну маршрута
+                    if (preg_match('~^' . $regexp . '$~i', $uri, $arguments)) {
+                        $route_object = [
+                            'url'       => $this->request->request_uri(),
+                            'pattern'   => $pattern,
+                            'arguments' => array_slice($arguments, 1)
+                        ];
+                        $this->route_object = $route_object;
+                        return $route_object;
+                    }
+                }
+                throw new Http404('Страница ' . Request::get_instance()->url() . ' отсутствует на сайте!');
+            } else {
+                return $this->route_object;
+            }
         }
 
         /**

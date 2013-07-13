@@ -18,7 +18,7 @@
          * @param string $event_name Имя события
          * @param string $callable Имя класса и метода события
          */
-        public static function add_listener($event_name, $callable)
+        public static function on($event_name, $callable)
         {
             self::$_events[$event_name][] = new Listener($callable);
         }
