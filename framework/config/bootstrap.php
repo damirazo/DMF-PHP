@@ -15,9 +15,6 @@
     use DMF\Core\Autoloader\Autoloader;
     use DMF\Core\ErrorHandler\ErrorHandler;
 
-    /** Импорт маршрутов */
-    require_once 'routes.php';
-
     /**
      * Регистрация корневых пространств имен
      * Формат записи:
@@ -36,6 +33,8 @@
 
     // Инициализация обработчика ошибок до инициализации приложения
     ErrorHandler::run();
+    /** Импорт маршрутов */
+    require_once 'routes.php';
 
     /**
      * Регистрация списка модулей и их пространство имен
