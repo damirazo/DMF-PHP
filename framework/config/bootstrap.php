@@ -3,14 +3,13 @@
     /**
      * Активация перехватчика ошибок и автозагрузчика
      * должна производится до момента запуска фреймворка и инициализации приложения
+     * Порядок следования импортов и запуска методов важен
      */
 
     /** Импортирование перехватчика ошибок */
     require_once CORE_PATH . 'ErrorHandler' . _SEP . 'ErrorHandler.php';
     /** Импортирование автозагрузчика */
     require_once CORE_PATH . 'Autoloader' . _SEP . 'Autoloader.php';
-    /** Импорт маршрутов */
-    require_once 'routes.php';
 
     use DMF\Core\Application\Application;
     use DMF\Core\Autoloader\Autoloader;
@@ -18,6 +17,9 @@
 
     // Инициализация обработчика ошибок до инициализации приложения
     ErrorHandler::run();
+
+    /** Импорт маршрутов */
+    require_once 'routes.php';
 
     /**
      * Регистрация корневых пространств имен
