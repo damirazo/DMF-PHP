@@ -6,7 +6,7 @@
      */
 
     // Загрузка компонента активации фреймворка
-    require_once '../framework/config/bootstrap.php';
+    require_once '../public/index.php';
 
     /** @var array $args Массив аргументов */
     $args = $_SERVER['argv'];
