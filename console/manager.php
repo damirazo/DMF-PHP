@@ -15,14 +15,14 @@
     $version = '0.1a';
 
     // Выводим отладочную информацию
-    print('--------------------------------------');
-    print('DMF Interactive Console (DMFIC) v ' . $version);
-    print('PHP ' . PHP_VERSION);
-    print('--------------------------------------');
+    echo '--------------------------------------';
+    echo 'DMF Interactive Console (DMFIC) v ' . $version;
+    echo 'PHP ' . PHP_VERSION;
+    echo '--------------------------------------';
 
     // Если обнаружен лишь один аргумент, то прерываем работу консоли
     if (count($args) <= 1) {
-        die(print('No arguments are specified to select the desired action!'));
+        exit('No arguments are specified to select the desired action!');
     }
 
     // Название запрашиваемого действия
@@ -39,8 +39,8 @@
             break;
         // Указанное действие не реализовано
         default:
-            print('Action ' . $action . ' is not specified!');
+            exit('Action ' . $action . ' is not specified!');
             break;
     }
 
-    print('--------------------------------------');
+    echo '--------------------------------------';
