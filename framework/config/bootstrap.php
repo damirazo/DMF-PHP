@@ -4,18 +4,20 @@
      * Активация перехватчика ошибок и автозагрузчика
      * должна производится до момента запуска фреймворка и инициализации приложения
      */
-    use DMF\Core\Application\Application;
-    use DMF\Core\Autoloader\Autoloader;
-    use DMF\Core\ErrorHandler\ErrorHandler;
 
     /** Импортирование перехватчика ошибок */
     require_once CORE_PATH . 'ErrorHandler' . _SEP . 'ErrorHandler.php';
-    // Инициализация обработчика ошибок до инициализации приложения
-    ErrorHandler::run();
     /** Импортирование автозагрузчика */
     require_once CORE_PATH . 'Autoloader' . _SEP . 'Autoloader.php';
     /** Импорт маршрутов */
     require_once 'routes.php';
+
+    use DMF\Core\Application\Application;
+    use DMF\Core\Autoloader\Autoloader;
+    use DMF\Core\ErrorHandler\ErrorHandler;
+
+    // Инициализация обработчика ошибок до инициализации приложения
+    ErrorHandler::run();
 
     /**
      * Регистрация корневых пространств имен
