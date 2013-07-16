@@ -70,7 +70,8 @@
                 if (!isset(self::$_routes[$pattern])) {
                     self::$_routes[$pattern] = new RoutePattern($callable);
                 } else {
-                    throw new RouteExists('Маршрут ' . $pattern . ' уже был задан ранее для действия ' . $callable);
+                    throw new RouteExists(
+                        sprintf('Маршрут %s уже был ранее задан для действия %s', $pattern, $callable));
                 }
             }
         }
@@ -174,6 +175,7 @@
          */
         protected function parse_route()
         {
+            //die($_SERVER['REQUEST_URI']);
             // Список замен ключей на соответствующие куски regexp шаблонов
             $replace_routes_patterns = [
                 '@int'      => '[\d]+',

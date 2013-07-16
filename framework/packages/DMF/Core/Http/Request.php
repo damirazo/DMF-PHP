@@ -85,8 +85,11 @@
             $new_segments = [];
             // Обходим массив сегментов
             foreach ($segments as $segment) {
-                // Если сегмент не пустой, то добавляем его в общий массив сегментов URi
-                if (!is_null($segment) && $segment != '') {
+                // Проверяем, что:
+                // Сегмент существует
+                // Сегмент не пустой
+                // Сегмент не содержит символ "?"
+                if (!is_null($segment) && $segment != '' && strpos($segment, '?') == false) {
                     $new_segments[] = $segment;
                 }
             }
