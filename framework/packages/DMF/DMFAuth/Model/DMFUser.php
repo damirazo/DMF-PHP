@@ -1,5 +1,12 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\DMFAuth\Model;
 
     use DMF\Core\Model\Field\BooleanField;
@@ -14,7 +21,12 @@
     use DMF\Core\Storage\Session;
 
     /**
-     * Базовая модель пользователя
+     * Class DMFUser
+     * Модель пользователя
+     * Список дефолтных полей можно расширить,
+     * переопределив метод custom_fields для возврата собственного списка полей
+     *
+     * @package DMF\DMFAuth\Model
      */
     class DMFUser extends Model
     {
@@ -30,7 +42,7 @@
          * Используется, чтобы добавить к базовой модели пользователя дополнительные поля
          * @return array
          */
-        public function _custom_fields()
+        public function custom_fields()
         {
             return [];
         }
@@ -52,7 +64,7 @@
                 'last_update'  => new DatetimeField(),
                 'status'       => new BooleanField()
             ];
-            return array_merge($this->_custom_fields(), $fields);
+            return array_merge($this->custom_fields(), $fields);
         }
 
         /**

@@ -1,9 +1,19 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Storage;
 
     /**
+     * Class Element
      * Элемент настроек
+     *
+     * @package DMF\Core\Storage
      */
     class Element
     {

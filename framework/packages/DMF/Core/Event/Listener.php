@@ -1,13 +1,23 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Event;
 
     use DMF\Core\Application\Application;
     use DMF\Core\OS\OS;
-    use DMF\Core\Application\Exception\WrongArgsNumber;
+    use DMF\Core\Application\Exception\IllegalArgument;
 
     /**
-     * Слушатель событий
+     * Class Listener
+     * Объект "слушатель" событий
+     *
+     * @package DMF\Core\Event
      */
     class Listener
     {
@@ -37,7 +47,7 @@
                 $this->event_method = $data[1];
             }
             else {
-                throw new WrongArgsNumber('Неверный формат записи вызова события!
+                throw new IllegalArgument('Неверный формат записи вызова события!
                     Требуется "[ИмяМодуля.]ИмяКласса.имяМетода", получено ' . $callable);
             }
         }

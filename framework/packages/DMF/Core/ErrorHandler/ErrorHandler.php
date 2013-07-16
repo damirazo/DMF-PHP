@@ -1,5 +1,12 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\ErrorHandler;
 
     use DMF\Core\Http\Request;
@@ -8,7 +15,10 @@
     use Exception;
 
     /**
-     * Перехват и вывод ошибок
+     * Class ErrorHandler
+     * Перехват ошибок и логгирование
+     *
+     * @package DMF\Core\ErrorHandler
      */
     class ErrorHandler
     {

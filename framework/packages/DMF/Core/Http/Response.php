@@ -1,9 +1,19 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Http;
 
     /**
-     * Класс для вывода контента пользователю
+     * Class Response
+     * Класс для формирования возвращаемого контента
+     *
+     * @package DMF\Core\Http
      */
     class Response
     {

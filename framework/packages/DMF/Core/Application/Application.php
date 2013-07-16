@@ -1,5 +1,12 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Application;
 
     use DMF\Core\Application\Exception\ControllerProxyNotFound;
@@ -10,11 +17,14 @@
     use DMF\Core\Http\Request;
     use DMF\Core\Module\Module;
     use DMF\Core\OS\OS;
-    use DMF\Core\Router\Exception\RouteExists;
+    use DMF\Core\Application\Exception\RouteExists;
     use DMF\Core\Storage\Config;
 
     /**
+     * Class Application
      * Базовый класс приложения
+     *
+     * @package DMF\Core\Application
      */
     class Application
     {
@@ -51,7 +61,8 @@
         /**
          * Регистрация списка маршрутов
          * @param array $routes Список маршрутов
-         * @throws \DMF\Core\Router\Exception\RouteExists
+         *
+         * @throws \DMF\Core\Application\Exception\RouteExists
          */
         public static function routes($routes = [])
         {
@@ -125,6 +136,7 @@
         /**
          * Создание объекта модуля
          * @param null|string $name Имя модуля
+         *
          * @return \DMF\Core\Module\Module
          * @throws Exception\ModuleNotFound
          */
@@ -162,6 +174,13 @@
          */
         protected function parse_route()
         {
+            // Список замен ключей на соответствующие куски regexp шаблонов
+            $replace_routes_patterns = [
+                '@int'      => '[\d]+',
+                '@str'      => '[\w]+',
+                '@alphanum' => '[\w\d]+',
+                '@all'      => '[\w\d\.\,\-\_\+]+',
+            ];
             // Проверяем не был ли текущий объект маршрута уже закеширован ранее
             if (is_null($this->route_object)) {
                 // Текущая строка запроса
@@ -170,17 +189,15 @@
                 // Поиск совпадающих со строкой запроса маршрутов
                 foreach (self::$_routes as $regexp => $pattern) {
                     // Заменяем псевдонимы для regexp шаблона
-                    $regexp = str_replace(
-                        ['@int', '@str', '@alphanum', '@all'],
-                        ['[\d]+', '[\w]+', '[\w\d]+', '[\w\d\.\,\-\_\+]+'],
-                        $regexp
-                    );
+                    foreach ($replace_routes_patterns as $k => $v) {
+                        $regexp = str_replace($k, $v, $regexp);
+                    }
                     // Проверяем соответствие текущей строке запроса и паттерну маршрута
                     if (preg_match('~^' . $regexp . '$~i', $uri, $arguments)) {
                         $route_object = [
                             'url'       => $this->request->request_uri(),
                             'pattern'   => $pattern,
-                            'arguments' => array_slice($arguments, 1)
+                            'arguments' => array_slice($arguments, 1),
                         ];
                         $this->route_object = $route_object;
                         return $route_object;
@@ -221,15 +238,13 @@
         protected function load_controller()
         {
             $route_object = $this->route_object;
-            $controller_namespace = $this->module->namespace .
-                    '\\Controller\\' . $route_object['pattern']->controller_name;
+            $controller_namespace = $this->module->namespace . '\\Controller\\' . $route_object['pattern']->controller_name;
             /** @var $controller \DMF\Core\Controller\Controller */
             $controller = new $controller_namespace();
             if (method_exists($controller, 'proxy')) {
                 return $controller->proxy($route_object['pattern']->action_name, $route_object['arguments']);
             } else {
-                throw new ControllerProxyNotFound('Для контроллера ' . $controller_namespace
-                . ' не задан прокси-метод!');
+                throw new ControllerProxyNotFound('Для контроллера ' . $controller_namespace . ' не задан прокси-метод!');
             }
         }
 

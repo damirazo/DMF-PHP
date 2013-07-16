@@ -1,11 +1,21 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Model\Field;
 
     use DMF\Core\Component\Component;
 
     /**
-     * Базовая модель для поля в БД
+     * Class BaseField
+     * Базовое описание поле модели в БД
+     *
+     * @package DMF\Core\Model\Field
      */
     abstract class BaseField extends Component
     {

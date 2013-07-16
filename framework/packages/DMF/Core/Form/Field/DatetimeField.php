@@ -1,10 +1,20 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Form\Field;
 
     /**
-     * Поле для выборки даты и времени
-     * На текущий момент корректно работает лишь с браузерами Opera, Chrome и Safari
+     * Class DatetimeField
+     * Поле для выборки значения даты
+     * Использует HTML5 теги
+     *
+     * @package DMF\Core\Form\Field
      */
     class DatetimeField extends InputField
     {

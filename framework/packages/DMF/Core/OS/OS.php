@@ -1,12 +1,21 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\OS;
 
     use DMF\Core\OS\Exception\FileNotFound;
 
     /**
-     * Класс для взаимодействия с операционной системой
-     * TODO: Завершить реализацию класса
+     * Class OS
+     * Класс для взаимодействия с ОС
+     *
+     * @package DMF\Core\OS
      */
     class OS
     {
@@ -56,21 +65,6 @@
         public static function join($path, $file)
         {
             return $path . _SEP . $file;
-        }
-
-        // TODO: Требуется реализация метода чтения файлов
-
-        public static function file_data($path, $as_array = false, $exception = true)
-        {
-            if (self::file_exists($path)) {
-                $file = fopen($path, 'r');
-                $data = fread($file, filesize($path));
-                fclose($file);
-                return $data;
-            } elseif ($exception) {
-                throw new FileNotFound('Файл ' . $path . ' не обнаружен!');
-            }
-            return false;
         }
 
     }

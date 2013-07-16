@@ -7,15 +7,15 @@
      * @author damirazo <me@damirazo.ru>
      */
 
-    namespace DMF\Core\Storage\Exception;
+    namespace DMF\Core\Application\Exception;
 
     /**
-     * Class IsFinalElement
-     * Указанный элемент запрещен к переопределению
+     * Class IllegalArgument
+     * Некорректное значение аргументов
      *
-     * @package DMF\Core\Storage\Exception
+     * @package DMF\Core\Application\Exception
      */
-    class IsFinalElement extends \Exception
+    class IllegalArgument extends BaseException
     {
 
     }

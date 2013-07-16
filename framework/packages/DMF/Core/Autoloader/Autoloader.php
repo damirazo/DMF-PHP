@@ -1,11 +1,21 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Autoloader;
 
     use DMF\Core\Autoloader\Exception\ClassNotFound;
 
     /**
-     * Автозагрузчик классов
+     * Class Autoloader
+     * Класс для автозагрузки компонентов приложения
+     *
+     * @package DMF\Core\Autoloader
      */
     class Autoloader
     {

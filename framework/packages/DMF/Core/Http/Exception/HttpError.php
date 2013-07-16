@@ -1,11 +1,23 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Http\Exception;
 
+    use DMF\Core\Application\Exception\BaseException;
+
     /**
-     * Базовое исключение для обработки ошибок HTTP
+     * Class HttpError
+     * Базовое исключение для возврата HTTP кодов
+     *
+     * @package DMF\Core\Http\Exception
      */
-    class HttpError extends \Exception
+    class HttpError extends BaseException
     {
 
         /** @var int Код HTTP состояния */

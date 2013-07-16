@@ -1,12 +1,22 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Model;
 
     use ArrayAccess;
     use DMF\Core\Component\Component;
 
     /**
-     * Базовая модуль для сущности из БД
+     * Class Entity
+     * Описание сущности, хранимой в БД
+     *
+     * @package DMF\Core\Model
      */
     class Entity extends Component implements \ArrayAccess, \Iterator
     {

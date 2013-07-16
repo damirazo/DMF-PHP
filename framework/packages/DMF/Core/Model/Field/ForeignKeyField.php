@@ -2,16 +2,18 @@
 
     /**
      * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
      *
-     * (c) damirazo <damirazo.kazan@gmail.com> 2012
-     * ForeignKeyField.php
-     * 12.12.12, 1:26
+     * @author damirazo <me@damirazo.ru>
      */
 
     namespace DMF\Core\Model\Field;
 
     /**
-     * Поле внешнего ключа
+     * Class ForeignKeyField
+     * Поле для хранения связи с внешней таблицей
+     *
+     * @package DMF\Core\Model\Field
      */
     class ForeignKeyField extends BaseField
     {

@@ -7,15 +7,17 @@
      * @author damirazo <me@damirazo.ru>
      */
 
-    namespace DMF\Core\Storage\Exception;
+    namespace DMF\Core\Controller\Exception;
+
+    use DMF\Core\Application\Exception\BaseException;
 
     /**
-     * Class IsFinalElement
-     * Указанный элемент запрещен к переопределению
+     * Class ActionNotFound
+     * Действие не обнаружено
      *
-     * @package DMF\Core\Storage\Exception
+     * @package DMF\Core\Controller\Exception
      */
-    class IsFinalElement extends \Exception
+    class ActionNotFound extends BaseException
     {
 
     }

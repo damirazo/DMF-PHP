@@ -10,12 +10,18 @@
     namespace DMF\Core\Application\Exception;
 
     /**
-     * Class ModuleNotFound
-     * Модуль не обнаружен
+     * Class BaseException
+     * Базовый класс для всех исключений фреймворка
      *
      * @package DMF\Core\Application\Exception
      */
-    class ModuleNotFound extends BaseException
+    class BaseException extends \Exception
     {
+
+        /** Инициализация исключения */
+        public function __construct($message="", $code=0, \Exception $previous=null)
+        {
+            parent::__construct($message, $code, $previous);
+        }
 
     }

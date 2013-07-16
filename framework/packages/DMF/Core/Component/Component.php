@@ -1,5 +1,12 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Component;
 
     use DMF\Core\Application\Application;
@@ -12,7 +19,10 @@
     use DMF\Core\Template\Template;
 
     /**
-     * Базовый класс для большинства частей фреймворка
+     * Class Component
+     * Базовый компонент основных частей фреймворка
+     *
+     * @package DMF\Core\Component
      */
     class Component
     {

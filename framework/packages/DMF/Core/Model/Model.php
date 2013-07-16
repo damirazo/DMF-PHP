@@ -1,5 +1,12 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Model;
 
     use DMF\Core\Component\Component;
@@ -9,7 +16,10 @@
     use DMF\Core\Storage\Config;
 
     /**
-     * Базовая модель
+     * Class Model
+     * Модель БД
+     *
+     * @package DMF\Core\Model
      */
     class Model extends Component
     {

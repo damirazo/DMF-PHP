@@ -1,11 +1,21 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Http;
 
     use DMF\Core\Storage\Config;
 
     /**
+     * Class Request
      * Класс для работы с входящими запросами
+     *
+     * @package DMF\Core\Http
      */
     class Request
     {

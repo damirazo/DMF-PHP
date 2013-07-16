@@ -1,11 +1,21 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Application;
 
-    use DMF\Core\Application\Exception\WrongArgsNumber;
+    use DMF\Core\Application\Exception\IllegalArgument;
 
     /**
-     * Объектное представление для URI паттерна
+     * Class RoutePattern
+     * Объект маршрута
+     *
+     * @package DMF\Core\Application
      */
     class RoutePattern
     {
@@ -26,8 +36,9 @@
         }
 
         /**
+         * Парсинг переданного в качестве экшена значения
          * @param $callable
-         * @throws \DMF\Core\Application\Exception\WrongArgsNumber
+         * @throws \DMF\Core\Application\Exception\IllegalArgument
          */
         private function parse_callable($callable)
         {
@@ -38,7 +49,7 @@
                 $this->action_name = $data[2];
             }
             else {
-                throw new WrongArgsNumber('Неверный формат строки вызова контроллера! ' .
+                throw new IllegalArgument('Неверный формат строки вызова контроллера! ' .
                         'Правильный формат: "module.controller.action"');
             }
         }

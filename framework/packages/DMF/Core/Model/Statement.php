@@ -1,9 +1,19 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Model;
 
     /**
-     * Объект для работы с ответом от \PDO
+     * Class Statement
+     * Обработка ответов и состояния БД
+     *
+     * @package DMF\Core\Model
      */
     class Statement
     {

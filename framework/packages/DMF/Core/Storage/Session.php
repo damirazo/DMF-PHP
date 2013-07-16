@@ -2,16 +2,18 @@
 
     /**
      * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
      *
-     * (c) damirazo <damirazo.kazan@gmail.com> 2012
-     * Session.php
-     * 22.11.12, 22:22
+     * @author damirazo <me@damirazo.ru>
      */
 
     namespace DMF\Core\Storage;
 
     /**
+     * Class Session
      * Класс для работы с сессиями
+     *
+     * @package DMF\Core\Storage
      */
     class Session
     {

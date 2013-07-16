@@ -1,11 +1,21 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Storage;
 
     use DMF\Core\Security\Crypt;
 
     /**
+     * Class Cookie
      * Класс для работы с cookies
+     *
+     * @package DMF\Core\Storage
      */
     class Cookie
     {

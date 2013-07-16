@@ -1,9 +1,19 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Form\Field;
 
     /**
-     * Поле электронной почты
+     * Class EmailField
+     * Поле значения электронной почты
+     *
+     * @package DMF\Core\Form\Field
      */
     class EmailField extends InputField
     {

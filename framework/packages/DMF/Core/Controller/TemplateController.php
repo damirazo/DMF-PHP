@@ -1,9 +1,21 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Controller;
 
     /**
-     * Контроллер, упрощающий работу с шаблонами
+     * Class TemplateController
+     * Контроллер для упрощения работы с шаблонами
+     * Пытается найти шаблон, соответствующий названию экшена,
+     * передает ему массив данных, полученных от экшена
+     *
+     * @package DMF\Core\Controller
      */
     class TemplateController extends Controller
     {

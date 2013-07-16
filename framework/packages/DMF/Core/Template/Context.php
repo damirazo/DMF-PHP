@@ -1,11 +1,21 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Template;
 
     use DMF\Core\Template\Exception\ContextElementExists;
 
     /**
+     * Class Context
      * Шаблонный контекст
+     *
+     * @package DMF\Core\Template
      */
     class Context
     {

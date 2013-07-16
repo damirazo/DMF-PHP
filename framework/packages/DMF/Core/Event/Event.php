@@ -1,11 +1,21 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Event;
 
     use DMF\Core\Component\Component;
 
     /**
-     * Базовый объект управления событиями
+     * Class Event
+     * Базовый объект событий
+     *
+     * @package DMF\Core\Event
      */
     class Event extends Component
     {

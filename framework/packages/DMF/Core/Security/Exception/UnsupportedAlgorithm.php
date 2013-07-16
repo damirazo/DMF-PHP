@@ -7,15 +7,17 @@
      * @author damirazo <me@damirazo.ru>
      */
 
-    namespace DMF\Core\Storage\Exception;
+    namespace DMF\Core\Security\Exception;
+
+    use DMF\Core\Application\Exception\BaseException;
 
     /**
-     * Class IsFinalElement
-     * Указанный элемент запрещен к переопределению
+     * Class UnsupportedAlgorithm
+     * Алгоритм не поддерживается
      *
-     * @package DMF\Core\Storage\Exception
+     * @package DMF\Core\Security\Exception
      */
-    class IsFinalElement extends \Exception
+    class UnsupportedAlgorithm extends BaseException
     {
 
     }

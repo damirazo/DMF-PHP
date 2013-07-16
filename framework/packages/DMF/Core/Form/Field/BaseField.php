@@ -1,5 +1,12 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Form\Field;
 
     use DMF\Core\Component\Component;
@@ -7,7 +14,10 @@
     use DMF\Core\Form\Validator;
 
     /**
-     * Базовый объект поля
+     * Class BaseField
+     * Базовое поле формы
+     *
+     * @package DMF\Core\Form\Field
      */
     abstract class BaseField extends Component
     {

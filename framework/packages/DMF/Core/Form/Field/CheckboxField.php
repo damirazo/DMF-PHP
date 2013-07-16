@@ -1,9 +1,19 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Form\Field;
 
     /**
-     * Поле с чекбоксами
+     * Class CheckboxField
+     * Объект поля с чекбоксом
+     *
+     * @package DMF\Core\Form\Field
      */
     class CheckboxField extends BaseField
     {

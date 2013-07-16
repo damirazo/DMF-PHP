@@ -1,9 +1,16 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Controller;
 
     use DMF\Core\Component\Component;
-    use DMF\Core\Controller\Exception\ActionNotFoundException;
+    use DMF\Core\Controller\Exception\ActionNotFound;
     use DMF\Core\Http\Request;
     use DMF\Core\Storage\Config;
 
@@ -18,7 +25,7 @@
          * @param string $action Имя действия
          * @param mixed  $args   Список аргументов, переданных действию
          * @return mixed
-         * @throws Exception\ActionNotFoundException
+         * @throws Exception\ActionNotFound
          */
         public function proxy($action, $args)
         {
@@ -32,7 +39,7 @@
                 return $this->call_controller($action, $args);
             }
             // если метод не обнаружен, то генерируем исключение
-            throw new ActionNotFoundException('Действие ' . $action . ' не обнаружено');
+            throw new ActionNotFound('Действие ' . $action . ' не обнаружено');
         }
 
         /**

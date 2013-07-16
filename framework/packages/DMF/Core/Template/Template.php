@@ -1,5 +1,12 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Template;
 
     use DMF\Core\Application\Application;
@@ -8,7 +15,10 @@
     use DMF\Core\Template\Exception\TemplateNotFound;
 
     /**
+     * Class Template
      * Базовый класс для реализации шаблонов
+     *
+     * @package DMF\Core\Template
      */
     class Template
     {

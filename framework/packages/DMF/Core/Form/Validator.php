@@ -1,9 +1,20 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Form;
 
     /**
-     * Класс валидатора поля
+     * Class Validator
+     * Валидатор поля формы
+     * Используется для проверки корректности заполненности поля.
+     *
+     * @package DMF\Core\Form
      */
     class Validator
     {

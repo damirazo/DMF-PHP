@@ -1,9 +1,19 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Form\Field;
 
     /**
-     * Простое текстовое поле
+     * Class InputField
+     * Строковое поле
+     *
+     * @package DMF\Core\Form\Field
      */
     class InputField extends BaseField
     {

@@ -1,9 +1,19 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Http\Exception;
 
     /**
-     * Отправка ошибки 404
+     * Class Http404
+     * Исключение для отправки 404 ошибки
+     *
+     * @package DMF\Core\Http\Exception
      */
     class Http404 extends HttpError
     {

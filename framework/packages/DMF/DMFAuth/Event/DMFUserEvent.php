@@ -1,5 +1,12 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\DMFAuth\Event;
 
     use DMF\Core\Event\Event;
@@ -7,7 +14,10 @@
     use DMF\Core\Storage\Session;
 
     /**
-     * Обработка событий пользователя
+     * Class DMFUserEvent
+     * Обработка пользовательских событий
+     *
+     * @package DMF\DMFAuth\Event
      */
     class DMFUserEvent extends Event
     {

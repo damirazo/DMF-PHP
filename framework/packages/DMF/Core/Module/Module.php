@@ -1,11 +1,21 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Module;
 
     use DMF\Core\Autoloader\Autoloader;
 
     /**
-     * Базовый класс модуля
+     * Class Module
+     * Базовый класс описания модуля
+     *
+     * @package DMF\Core\Module
      */
     class Module
     {

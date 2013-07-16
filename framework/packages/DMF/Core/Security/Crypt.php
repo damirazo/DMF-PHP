@@ -2,10 +2,9 @@
 
     /**
      * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
      *
-     * (c) damirazo <damirazo.kazan@gmail.com> 2012
-     * Crypt.php
-     * 07.11.12, 23:41
+     * @author damirazo <me@damirazo.ru>
      */
 
     namespace DMF\Core\Security;
@@ -14,7 +13,10 @@
     use DMF\Core\Security\Exception\UnsupportedAlgorithmException;
 
     /**
-     * Класс для работы с шифрованными и хэшированными данными
+     * Class Crypt
+     * Шифрование и хэширование данных
+     *
+     * @package DMF\Core\Security
      */
     class Crypt
     {

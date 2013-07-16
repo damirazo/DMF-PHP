@@ -2,16 +2,18 @@
 
     /**
      * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
      *
-     * (c) damirazo <damirazo.kazan@gmail.com> 2012
-     * PrimaryKeyField.php
-     * 21.11.12, 17:17
+     * @author damirazo <me@damirazo.ru>
      */
 
     namespace DMF\Core\Model\Field;
 
     /**
-     * Поле первичного ключа
+     * Class PrimaryKeyField
+     * Поле для хранения первичного ключа
+     *
+     * @package DMF\Core\Model\Field
      */
     class PrimaryKeyField extends BaseField
     {

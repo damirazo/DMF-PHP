@@ -1,11 +1,21 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\DMFAuth\Model;
 
     use DMF\Core\Model\Entity;
 
     /**
-     * Базовая сущность объекта пользователя
+     * Class DMFUserEntity
+     * Сущность авторизованного пользователя
+     *
+     * @package DMF\DMFAuth\Model
      */
     class DMFUserEntity extends Entity
     {

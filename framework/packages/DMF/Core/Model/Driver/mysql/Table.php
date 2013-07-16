@@ -1,9 +1,22 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Model\Driver\mysql;
 
     use DMF\Core\Model\Driver\base\TableDriver;
 
+    /**
+     * Class Table
+     * Описание логики таблиц MySQL
+     *
+     * @package DMF\Core\Model\Driver\mysql
+     */
     class Table extends TableDriver
     {
 

@@ -2,16 +2,18 @@
 
     /**
      * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
      *
-     * (c) damirazo <damirazo.kazan@gmail.com> 2012
-     * CharField.php
-     * 21.11.12, 17:20
+     * @author damirazo <me@damirazo.ru>
      */
 
     namespace DMF\Core\Model\Field;
 
     /**
-     * Поле для хранение строки
+     * Class CharField
+     * Поле для хранения строкового значения
+     *
+     * @package DMF\Core\Model\Field
      */
     class CharField extends BaseField
     {

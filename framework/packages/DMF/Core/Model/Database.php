@@ -1,11 +1,21 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Model;
 
     use DMF\Core\Storage\Config;
 
     /**
-     * Класс-обертка для работы с БД
+     * Class Database
+     * Обертка над PDO
+     *
+     * @package DMF\Core\Model
      */
     class Database extends \PDO
     {

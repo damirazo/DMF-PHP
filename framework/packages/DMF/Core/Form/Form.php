@@ -1,5 +1,12 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Form;
 
     use DMF\Core\Application\Application;
@@ -8,7 +15,10 @@
     use DMF\Core\Storage\Cookie;
 
     /**
-     * Базовый класс для форм
+     * Class Form
+     * Базовый класс формы
+     *
+     * @package DMF\Core\Form
      */
     class Form extends Component
     {

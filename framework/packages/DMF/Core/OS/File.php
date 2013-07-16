@@ -1,10 +1,21 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\OS;
     use DMF\Core\OS\Exception\FileNotFound;
 
     /**
-     * Класс-обертка над файловым дескриптором
+     * Class File
+     * Обертка над файловым дескриптором
+     * Поддерживает цепочный вызов методов
+     *
+     * @package DMF\Core\OS
      */
     class File
     {

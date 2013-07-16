@@ -1,12 +1,22 @@
 <?php
 
+    /**
+     * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
+     *
+     * @author damirazo <me@damirazo.ru>
+     */
+
     namespace DMF\Core\Storage;
 
     use DMF\Core\Storage\Exception\IsFinalElement;
     use DMF\Core\Storage\Element;
 
     /**
-     * Хранение конфигурационных настроек
+     * Class Config
+     * Хранение конфигурационных параметров
+     *
+     * @package DMF\Core\Storage
      */
     class Config
     {

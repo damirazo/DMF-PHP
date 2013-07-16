@@ -2,16 +2,18 @@
 
     /**
      * Этот файл часть фреймворка DM Framework
+     * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
      *
-     * (c) damirazo <damirazo.kazan@gmail.com> 2012
-     * BooleanField.php
-     * 21.11.12, 17:21
+     * @author damirazo <me@damirazo.ru>
      */
 
     namespace DMF\Core\Model\Field;
 
     /**
-     * Поле для хранения булева значения
+     * Class BooleanField
+     * Поле для хранения логического значения
+     *
+     * @package DMF\Core\Model\Field
      */
     class BooleanField extends BaseField
     {
