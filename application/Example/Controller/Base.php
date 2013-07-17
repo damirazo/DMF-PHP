@@ -15,7 +15,6 @@
         public function index()
         {
             return $this->render('index');
-
         }
 
         /** Список примеров */
