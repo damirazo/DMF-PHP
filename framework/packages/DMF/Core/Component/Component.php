@@ -37,9 +37,12 @@
         /** Конструктор */
         public function __construct()
         {
-            // Создание подключения к БД
-            if (is_null(self::$db)) {
-                self::$db = new Database();
+            // Проверяем, что БД для указанного проекта используются
+            if ($this->config('database')['enable']) {
+                // Создание подключения к БД
+                if (is_null(self::$db)) {
+                    self::$db = new Database();
+                }
             }
             // Создание экземпляра приложения
             if (is_null(self::$app)) {
@@ -65,44 +68,7 @@
          */
         public function model($name)
         {
-            return $this->get_component($name, 'Model');
-        }
-
-        /**
-         * Возвращает объект требуемого компонента
-         * @param string $name Имя компонента
-         * @param string $type Тип компонента (Form, Model)
-         * @return mixed
-         */
-        protected function get_component($name, $type)
-        {
-            $data = explode('.', $name);
-            // Если указан лишь один параметр в строке, то считаем его именем конмонента
-            if (count($data) < 2) {
-                // Модуль считаем текущим
-                $module = $this->get_module();
-                $component_name = $data[0];
-            } // Если указаны оба параметра, то следовательно они являются именем модуля и компонента
-            else {
-                // Получаем модуль по его имени
-                $module = Application::get_instance()->get_module_by_name($data[0]);
-                $component_name = $data[1];
-            }
-            $component_namespace = $module->namespace . '\\' . $type . '\\' . $component_name;
-            return new $component_namespace();
-        }
-
-        /**
-         * Возвращает объект требуемого модуля, либо текущего модуля
-         * @param string|null $name Имя требуемого модуля
-         * @return \DMF\Core\Module\Module|null
-         */
-        protected function get_module($name = null)
-        {
-            if (is_null($name)) {
-                return Application::get_instance()->module;
-            }
-            return Application::get_instance()->get_module_by_name($name);
+            return self::$app->get_component($name, ComponentTypes::Model);
         }
 
         /**
@@ -112,7 +78,7 @@
          */
         public function form($name)
         {
-            return $this->get_component($name, 'Form');
+            return self::$app->get_component($name, ComponentTypes::Form);
         }
 
         /**
@@ -252,7 +218,7 @@
          */
         protected function get_module_name()
         {
-            return $this->get_module()->name;
+            return self::$app->module->name;
         }
 
     }

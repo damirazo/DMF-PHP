@@ -9,6 +9,7 @@
 
     namespace DMF\Core\Module;
 
+    use DMF\Core\Application\Application;
     use DMF\Core\Autoloader\Autoloader;
 
     /**
@@ -22,12 +23,14 @@
 
         /** @var string Имя модуля */
         public $name;
-
         /** @var string Пространство имен модуля */
         public $namespace;
-
         /** @var string Путь до модуля */
         public $path;
+        /** @var array  */
+        private $models = [];
+        /** @var  \DMF\Core\Application\Application Инстанс приложения */
+        protected static $app = null;
 
         /** Конструктор */
         public function __construct($module_name, $module_namespace)
@@ -35,6 +38,9 @@
             $this->name = $module_name;
             $this->namespace = $module_namespace;
             $this->path = $this->resolve_path($module_namespace) . _SEP;
+            if (is_null(self::$app)) {
+                self::$app = Application::get_instance();
+            }
         }
 
         /**
@@ -45,6 +51,11 @@
         private function resolve_path($namespace)
         {
             return Autoloader::get_path($namespace);
+        }
+
+        public function get_models()
+        {
+
         }
 
     }

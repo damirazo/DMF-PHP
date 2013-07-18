@@ -22,6 +22,7 @@
 
         /**
          * Проверка существования директории
+         *
          * @param string $path Путь до директории
          * @return bool
          */
@@ -48,6 +49,7 @@
 
         /**
          * Проверка существования файла и доступности его для чтения
+         *
          * @param string $path Путь до файла
          * @return bool
          */
@@ -58,6 +60,7 @@
 
         /**
          * Возвращает рассчитанный путь
+         *
          * @param string $path Путь до директории
          * @param string $file Имя файла
          * @return string
@@ -65,6 +68,20 @@
         public static function join($path, $file)
         {
             return $path . _SEP . $file;
+        }
+
+        /**
+         * Ищет все файлы, подходящие под указанный шаблон
+         * Пример:
+         * OS::search('/var/www/*.log')
+         * Вернет все файлы, имеющие расширение log, находящиеся в указанной директории
+         *
+         * @param $pattern Шаблон для поиска
+         * @return array
+         */
+        public static function search($pattern)
+        {
+            return glob($pattern);
         }
 
     }

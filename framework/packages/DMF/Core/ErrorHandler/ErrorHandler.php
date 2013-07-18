@@ -68,32 +68,38 @@
             $error_file = str_replace(PROJECT_PATH, '{PROJECT_PATH}' . _SEP, $file);
             $error_templates_path = CORE_PATH . 'ErrorHandler' . _SEP . 'templates';
 
-            // Даем доступ к информации об ошибке лишь определенным ip адресам
-            if (self::is_debug()) {
-                // формируем стек вызовов
-                $error_stack = self::backtrace(debug_backtrace());
-                // контейнер для информации об ошибке
-                $error = [
-                    'message' => $message,
-                    'path'    => $error_file,
-                    'line'    => $line,
-                    'stack'   => $error_stack,
-                    'code'    => $http_code,
-                    'type'    => $type
-                ];
-                // импортируем шаблон для отображения страницы ошибки
-                require_once OS::join($error_templates_path, 'error_debug.php');
+            // В консольном режиме возвращаем лишь данные об ошибке
+            if (PHP_SAPI == 'cli') {
+                exit($message . PHP_EOL . $error_file . ':' . $line . PHP_EOL);
             } else {
-                $error = [
-                    'message' => $message,
-                    'code'    => $http_code
-                ];
-                require_once OS::join($error_templates_path, 'error.php');
+                // Даем доступ к информации об ошибке лишь определенным ip адресам
+                if (self::is_debug()) {
+                    // формируем стек вызовов
+                    $error_stack = self::backtrace(debug_backtrace());
+                    // контейнер для информации об ошибке
+                    $error = [
+                        'message' => $message,
+                        'path'    => $error_file,
+                        'line'    => $line,
+                        'stack'   => $error_stack,
+                        'code'    => $http_code,
+                        'type'    => $type
+                    ];
+                    // импортируем шаблон для отображения страницы ошибки
+                    require_once OS::join($error_templates_path, 'error_debug.php');
+                } else {
+                    $error = [
+                        'message' => $message,
+                        'code'    => $http_code
+                    ];
+                    require_once OS::join($error_templates_path, 'error.php');
+                }
+
+                // записываем в лог информацию об ошибке
+                self::log($message, $type, $error_file, $line, $http_code);
+                exit();
             }
 
-            // записываем в лог информацию об ошибке
-            self::log($message, $type, $error_file, $line, $http_code);
-            exit();
         }
 
         /**

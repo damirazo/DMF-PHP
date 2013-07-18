@@ -61,7 +61,6 @@
         /**
          * Регистрация списка маршрутов
          * @param array $routes Список маршрутов
-         *
          * @throws \DMF\Core\Application\Exception\RouteExists
          */
         public static function routes($routes = [])
@@ -78,7 +77,7 @@
 
         /**
          * Регистрация списка модулей
-         * @param array $modules Списрк модулей
+         * @param array $modules Список модулей
          */
         public function register_modules(array $modules = [])
         {
@@ -126,48 +125,6 @@
         }
 
         /**
-         * Загрузка модуля и информации о нем
-         * @throws Exception\ModuleNotFound
-         */
-        protected function load_module()
-        {
-            $this->module = $this->get_module_by_name();
-        }
-
-        /**
-         * Создание объекта модуля
-         * @param null|string $name Имя модуля
-         *
-         * @return \DMF\Core\Module\Module
-         * @throws Exception\ModuleNotFound
-         */
-        public function get_module_by_name($name = null)
-        {
-            $module_name = is_null($name) ? $this->module_name() : $name;
-            // Проверяем регистрацию модуля
-            if (isset($this->modules[$module_name])) {
-                $module = $this->modules[$module_name];
-                // Проверяем существование папки с модулем
-                if (OS::dir_exists($module->path)) {
-                    return $module;
-                } else {
-                    throw new ModuleNotFound('Модуль ' . $module_name . ' не найден по указанному пути!');
-                }
-            } else {
-                throw new ModuleNotFound('Модуль ' . $module_name . ' не зарегистрирован!');
-            }
-        }
-
-        /**
-         * Возвращает имя требуемого модуля
-         * @return string
-         */
-        protected function module_name()
-        {
-            return $this->parse_route()['pattern']->module_name;
-        }
-
-        /**
          * Разбивка URI и получение информации о маршруте
          *
          * @return array
@@ -175,7 +132,6 @@
          */
         protected function parse_route()
         {
-            //die($_SERVER['REQUEST_URI']);
             // Список замен ключей на соответствующие куски regexp шаблонов
             $replace_routes_patterns = [
                 '@int'      => '[\d]+',
@@ -209,6 +165,62 @@
             } else {
                 return $this->route_object;
             }
+        }
+
+        /**
+         * Загрузка модуля и информации о нем
+         * @throws Exception\ModuleNotFound
+         */
+        protected function load_module()
+        {
+            $this->module = $this->get_module_by_name();
+        }
+
+        /**
+         * Создание объекта модуля
+         * @param null|string $name Имя модуля
+         * @return \DMF\Core\Module\Module
+         * @throws Exception\ModuleNotFound
+         */
+        public function get_module_by_name($name = null)
+        {
+            $module_name = is_null($name) ? $this->module_name() : $name;
+            // Проверяем регистрацию модуля
+            if (isset($this->modules[$module_name])) {
+                $module = $this->modules[$module_name];
+                // Проверяем существование папки с модулем
+                if (OS::dir_exists($module->path)) {
+                    return $module;
+                } else {
+                    throw new ModuleNotFound('Модуль ' . $module_name . ' не найден по указанному пути!');
+                }
+            } else {
+                throw new ModuleNotFound('Модуль ' . $module_name . ' не зарегистрирован!');
+            }
+        }
+
+        /**
+         * Возвращает объект требуемого компонента
+         * @param string $name Имя компонента
+         * @param string $type Тип компонента. Типы перечислены в классе DMF\Core\Component\ComponentTypes.
+         * @return mixed
+         */
+        public function get_component($name, $type)
+        {
+            $data = explode('.', $name);
+            $module = $this->get_module_by_name($data[0]);
+            $component_name = $data[1];
+            $component_namespace = $module->namespace . '\\' . $type . '\\' . $component_name;
+            return new $component_namespace();
+        }
+
+        /**
+         * Возвращает имя требуемого модуля
+         * @return string
+         */
+        protected function module_name()
+        {
+            return $this->parse_route()['pattern']->module_name;
         }
 
         /**

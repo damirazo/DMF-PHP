@@ -1,26 +1,26 @@
 server {
-    listen   	80;
-    root 		/path/to/public;
+	listen   	80;
+	root 		/path/to/public;
 
 	error_page 403 = /path/to/403.html;
 	error_page 404 = /path/to/404.html;
-      
-    access_log 	    /path/to/dmf/logs/nginx.access.log;
-	error_log 	    /path/to/dmf/logs/nginx.error.log;
+	  
+	access_log 		/path/to/dmf/logs/nginx.access.log;
+	error_log 		/path/to/dmf/logs/nginx.error.log;
 
-    server_name 	localhost;
-	index		    index.php;
+	server_name 	localhost;
+	index			index.php;
 
-    location / {
-	    if (!-e $request_filename) {
+	location / {
+		if (!-e $request_filename) {
 		rewrite  ^(.*)  /index.php?route=$1  last;
-	    }
+		}
 	}
 
 	location /index.php {
 		fastcgi_pass 	unix:/var/run/php5-fpm.sock;
-        fastcgi_index 	index.php;
+		fastcgi_index 	index.php;
 
-		include 	    fastcgi_params;
+		include 		fastcgi_params;
 	}
 }
