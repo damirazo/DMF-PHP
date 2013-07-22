@@ -14,6 +14,7 @@
      */
     function format($str, $args = [])
     {
+        // TODO: Под консоль windows требуется перекодирование сообщений в кодировку cp866
         $data = array_merge([$str . PHP_EOL, $args]);
         call_user_func_array('printf', $data);
     }

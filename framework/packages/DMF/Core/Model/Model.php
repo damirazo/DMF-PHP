@@ -313,12 +313,12 @@
         {
             $segments = explode('.', $this->entity_name);
             if (count($segments) == 1) {
-                return $this->get_module()->namespace . '\\Model\\' . $segments[0];
+                return $this->get_module()->namespace . '\\Entity\\' . $segments[0];
             } else {
                 if ($segments[0] == 'DMF') {
                     return '\\DMF\\Core\\Model\\Entity';
                 }
-                return $this->get_module($segments[0])->namespace . '\\Model\\' . $segments[1];
+                return $this->get_module($segments[0])->namespace . '\\Entity\\' . $segments[1];
             }
         }
 
