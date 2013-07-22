@@ -7,4 +7,8 @@
      * @author damirazo <me@damirazo.ru>
      */
 
-    format('Команда не реализована...');
+    format('Список доступных команд:');
+
+    foreach ($commands as $command_name => $command_info) {
+        format('"%s": %s', [$command_name, $command_info[1]]);
+    }
