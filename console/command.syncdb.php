@@ -35,8 +35,7 @@
         foreach ($all_modules as $module) {
             $modules[] = $module->name . '.*';
         }
-    }
-    // Обновление структуры указанных модулей
+    } // Обновление структуры указанных модулей
     else {
         foreach ($action_args as $arg) {
             $modules[] = $arg;
@@ -55,10 +54,9 @@
             foreach ($model_files_list as $path) {
                 $path_segments = explode(_SEP, $path);
                 $file_name = str_replace('.php', '', end($path_segments));
-                $models[] = $app->get_component($module_name.'.'.$file_name, ComponentTypes::Model);
+                $models[] = $app->get_component($module_name . '.' . $file_name, ComponentTypes::Model);
             }
-        }
-        // Если имя модели жестко прописано, то используем нативный способ доступа к ним
+        } // Если имя модели жестко прописано, то используем нативный способ доступа к ним
         else {
             $models[] = $app->get_component($module_signature, ComponentTypes::Model);
         }
@@ -74,7 +72,7 @@
         format('Обработка модели: %s', $model->get_class_name());
 
         # Создание таблицы в БД
-        $model->create_table();
+        $model->update_table();
         format('Создана таблица: %s', $model->table_name());
 
         # Загрузка фикстур

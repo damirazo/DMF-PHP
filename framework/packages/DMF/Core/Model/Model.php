@@ -32,6 +32,7 @@
          * Автосоздание таблицы для указанной модели в БД
          * ВНИМАНИЕ! Создает запрос для проверки наличия указанной таблицы в БД при каждой инициализации модели,
          * будучи установленной в true!
+         *
          * @var bool Требуется ли создавать таблицу указанной модели в БД автоматически в случае ее отсутствия
          */
         public $table_auto_create = false;
@@ -47,17 +48,17 @@
             }
         }
 
+        //#############################################################################################################
+        //# Описание модели
+        //#############################################################################################################
+
         /**
-         * Обновление структуры таблицы в БД
+         * Возвращает текущую схему БД
+         * @return array
          */
-        public function update_table()
+        public function scheme()
         {
-            // TODO: Реализовать щадящее обновление структуры таблицы
-            $check_table = self::$db->query('SHOW TABLES LIKE :table', ['table' => $this->table_name()]);
-            if ($check_table->num_rows() == 1) {
-                $this->drop_table();
-            }
-            $this->create_table();
+            return [];
         }
 
         /**
@@ -73,6 +74,47 @@
         }
 
         /**
+         * Возвращает имя первичного ключа таблицы
+         * @return bool|int|string
+         */
+        public function primary_key()
+        {
+            foreach ($this->scheme() as $field_name => $field_object) {
+                if ($field_object instanceof \DMF\Core\Model\Field\PrimaryKeyField) {
+                    return $field_name;
+                }
+            }
+            return 'id';
+        }
+
+        /**
+         * Возвращает массив, содержащий имена полей БД
+         * @return array
+         */
+        public function fields()
+        {
+            return array_keys($this->scheme());
+        }
+
+        /**
+         * Возвращает полный путь до класса сущности
+         * @return string
+         */
+        public function entity_namespace()
+        {
+            $segments = explode('.', $this->entity_name);
+            if (count($segments) == 1) {
+                return self::$app->get_module_by_name()->namespace . '\\Entity\\' . $segments[0];
+            } else {
+                // Возвращаем сущность, используемую по умолчанию
+                if ($segments[0] == 'DMF') {
+                    return '\\DMF\\Core\\Model\\Entity';
+                }
+                return self::$app->get_module_by_name($segments[0])->namespace . '\\Entity\\' . $segments[1];
+            }
+        }
+
+        /**
          * Возвращает строку с префиксом к имени таблицы
          * Возможно переопределить в дочернем классе для использования собственных префиксов
          * @return mixed
@@ -82,23 +124,48 @@
             return $this->config('database')['prefix'];
         }
 
+        //#############################################################################################################
+        //# Работа с таблицей в БД
+        //#############################################################################################################
+
         /**
-         * Проверка наличия таблицы данной модели в БД
-         * @return bool
+         * Обновление структуры таблицы в БД
          */
-        public function table_exists()
+        public function update_table()
         {
-            $result = self::$db->query('SHOW TABLES LIKE :table_name', ['table_name' => $this->table_name()]);
-            return !!($result->num_rows() == 1);
+            // Проверяем наличие указанной таблицы в БД
+            $check_table = self::$db->query('SHOW TABLES LIKE :table', ['table' => $this->table_name()]);
+            // Если таблица отсутствует, то создаем ее
+            if ($check_table->num_rows() < 1) {
+                // Фикстуры при создании таблицы будут подгружаться самостоятельно
+                $this->create_table(true);
+                $this->create_migration();
+            } else {
+                // FIXME: Найти способ избавиться от костыля с нахождением объекта модуля
+                // FIXME: при вызове его из другого модуля
+                $class_info = new \ReflectionClass($this);
+                $model_file = $class_info->getFileName();
+                $model_dir = implode('/', array_slice(explode('/', str_replace('.php', '', $model_file)), 1, -1));
+                $migrations_dir = $model_dir . _SEP . 'migrations';
+                // Проверим наличие папки с миграциями
+                if (OS::dir_exists($migrations_dir)) {
+                    // Проверим наличие файла миграций для текущей таблицы
+                    $migration_file = OS::file_exists(OS::join($migrations_dir, $this->table_name() . '.json'));
+                    if ($migration_file) {
+                        $file = new File($migration_file);
+                        $data = json_decode($file->open()->read());
+                        // Сравниваем схему в миграции с текущей схемой модели
+                    }
+                }
+            }
         }
 
         /**
-         * Удаление таблицы
-         * @return bool
+         * Создание файла миграции для текущей схемы модели
          */
-        public function drop_table()
+        public function create_migration()
         {
-            self::$db->exec('DROP TABLE IF EXISTS ' . $this->table_name());
+
         }
 
         /**
@@ -127,27 +194,33 @@
         }
 
         /**
-         * Возвращает массив полей в таблице
-         * @return array
+         * Проверка наличия таблицы данной модели в БД
+         * @return bool
          */
-        protected function sql_from_fields()
+        public function table_exists()
         {
-            $scheme = $this->scheme();
-            $fields = [];
-            /** @var $field_object \DMF\Core\Model\Field\BaseField */
-            foreach ($scheme as $field_name => $field_object) {
-                $fields[] = trim($field_object->create_sql($field_name));
-            }
-            return $fields;
+            $result = self::$db->query('SHOW TABLES LIKE :table_name', ['table_name' => $this->table_name()]);
+            return !!($result->num_rows() == 1);
         }
 
         /**
-         * Возвращает текущую схему БД
-         * @return array
+         * Удаление таблицы
+         * @return bool
          */
-        public function scheme()
+        public function drop_table()
         {
-            return [];
+            self::$db->exec('DROP TABLE IF EXISTS ' . $this->table_name());
+        }
+
+        /**
+         * Получение данных из БД и выгрузка их в файл фикстур
+         */
+        public function dump_fixtures()
+        {
+            $fixture_name = strtolower($this->get_module_name()) . '__' . strtolower($this->get_class_name()) . '.json';
+            $data = $this->dump_data();
+            $file = new File(DATA_PATH . 'fixtures' . _SEP . $fixture_name);
+            $file->open('w+')->block()->write(json_encode($data, JSON_PRETTY_PRINT))->unblock()->close();
         }
 
         /**
@@ -183,44 +256,18 @@
         }
 
         /**
-         * Создание нового объекта в БД
-         * @param array $data Данные для создания объекта
-         * @return int ID созданной записи
-         */
-        public function create($data)
-        {
-            $fields = $this->fields();
-            $sql = [];
-            $params = [];
-            foreach ($data as $key => $value) {
-                if (in_array($key, $fields)) {
-                    $sql[] = $key . '=:u_' . $key;
-                    $params['u_' . $key] = $value;
-                }
-            }
-            $result_code = 'INSERT INTO ' . $this->table_name() . ' SET ' . implode(', ', $sql);
-            $query = self::$db->query($result_code, $params);
-            return $query->last_insert_id();
-        }
-
-        /**
-         * Возвращает массив, содержащий имена полей БД
+         * Возвращает массив полей в таблице
          * @return array
          */
-        public function fields()
+        protected function sql_from_fields()
         {
-            return array_keys($this->scheme());
-        }
-
-        /**
-         * Получение данных из БД и выгрузка их в файл фикстур
-         */
-        public function dump_fixtures()
-        {
-            $fixture_name = strtolower($this->get_module_name()) . '__' . strtolower($this->get_class_name()) . '.json';
-            $data = $this->dump_data();
-            $file = new File(DATA_PATH . 'fixtures' . _SEP . $fixture_name);
-            $file->open('w+')->block()->write(json_encode($data, JSON_PRETTY_PRINT))->unblock()->close();
+            $scheme = $this->scheme();
+            $fields = [];
+            /** @var $field_object \DMF\Core\Model\Field\BaseField */
+            foreach ($scheme as $field_name => $field_object) {
+                $fields[] = trim($field_object->create_sql($field_name));
+            }
+            return $fields;
         }
 
         /**
@@ -244,115 +291,19 @@
         }
 
         /**
-         * Возвращает имя первичного ключа таблицы
-         * @return bool|int|string
-         */
-        public function primary_key()
-        {
-            foreach ($this->scheme() as $field_name => $field_object) {
-                if ($field_object instanceof \DMF\Core\Model\Field\PrimaryKeyField) {
-                    return $field_name;
-                }
-            }
-            return 'id';
-        }
-
-        /**
-         * Возвращает все записи в указанной модели
-         * @param string|array $fields Список возвращаемых полей
-         * @return EntityCollection Коллекция всех сущностей модели
-         */
-        public function get_all($fields = '*')
-        {
-            if (is_array($fields)) {
-                $fields = implode(', ', $fields);
-            }
-            $data = self::$db->query('SELECT ' . $fields . ' FROM ' . $this->table_name());
-            return new EntityCollection($this, $data->fetch_all());
-        }
-
-        /**
-         * Возвращает пустую коллекцию указанной модели
-         * @return EntityCollection Пустая коллекция сущностей
-         */
-        public function get_empty()
-        {
-            return new EntityCollection($this);
-        }
-
-        /**
-         * Возвращает один объект, выбранный по первичному ключу
-         * @param int   $pk     Первичный ключ
-         * @param array $fields Список выбираемых из таблицы полей
-         * @return Entity Сущность
-         */
-        public function get_by_pk($pk, $fields = [])
-        {
-            // Список выбираемых из таблицы полей (по умолчанию все поля)
-            $select_fields = (count($fields) > 0) ? $fields : $this->fields();
-            // Выполнение запроса к БД
-            $data = self::$db->query(
-                'SELECT ' . implode(', ', $select_fields) . ' FROM ' . $this->table_name() . ' WHERE '
-                . $this->primary_key() . '=:pk LIMIT 1',
-                ['pk' => (int)$pk]
-            );
-            // Если элемент обнаружен, то добавляем его в сущность
-            if ($data->num_rows() == 1) {
-                $entity = $data->fetch_one();
-                $entity_namespace = $this->entity_namespace();
-                return new $entity_namespace($this, $entity);
-            }
-            return false;
-        }
-
-        /**
-         * Возвращает полный путь до класса сущности
-         * @return string
-         */
-        public function entity_namespace()
-        {
-            $segments = explode('.', $this->entity_name);
-            if (count($segments) == 1) {
-                return $this->get_module()->namespace . '\\Entity\\' . $segments[0];
-            } else {
-                if ($segments[0] == 'DMF') {
-                    return '\\DMF\\Core\\Model\\Entity';
-                }
-                return $this->get_module($segments[0])->namespace . '\\Entity\\' . $segments[1];
-            }
-        }
-
-        /**
-         * Выборка массива объектов для определенной страницы
-         * @param array $order_by  Поле для сортировки
-         * @param array $condition Условия для выборки
-         * @param int   $limit     Количество объектов
-         * @param array $fields    Список выбираемых полей
-         * @return EntityCollection Коллекция сущностей
-         */
-        public function get_by_condition($condition = [], $order_by = [], $limit = null, $fields = [])
-        {
-            // Список выбираемых из таблицы полей (по умолчанию все поля)
-            $select_fields = (count($fields) > 0) ? $fields : $this->fields();
-            // Формирование SQL для условия выборки
-            $sql_condition = $this->generate_condition_sql($condition);
-            // Выполнение запроса к БД
-            $sql = 'SELECT ' . implode(', ', $select_fields) . ' FROM ' . $this->table_name()
-                    . $sql_condition['query']
-                    . $this->generate_order_sql($order_by)
-                    . $this->generate_limit_sql($limit);
-            // Препарирование параметров выборки
-            $data = self::$db->query($sql, $sql_condition['params']);
-            // Если найдена хотя бы 1 запись,
-            // то создаем из нее объект сущности и добавляем в коллекцию сущностей
-            if ($data->num_rows() > 0) {
-                return new EntityCollection($this, $data->fetch_all());
-            }
-            return new EntityCollection($this);
-        }
-
-        /**
          * Генерация параметризированного SQL кода
+         * Используется для формирования условий при генерации запроса.
+         * Возвращает массив из 2 параметров.
+         * query: содержит готовый SQL запрос с переменными
+         * params: содержит список замен переменных на значения
+         * Пример использования:
+         *   $this->get_by_condition([
+         *     'id'               => 25,
+         *     'created_at__gte'  => date('d.m.Y', time()),
+         *     '~status__in'      => [1, 2, 5],
+         *   ]);
+         * Сгенерирует запрос, примерно соответствующий следующему:
+         * SELECT * FROM field WHERE id = 25 AND created_at >= '25.12.1935' OR status IN(1, 2, 5)
          *
          * @param array $condition Список параметров для выборки
          * @return array
@@ -387,12 +338,12 @@
                     $cond = $data[1];
                     switch ($cond) {
                         /** Проверка на точное совпадение */
-                        case 'equal':
+                        case 'eq':
                             $result['queries'][] = $precond . $field_name . '=:' . $field_name;
                             $result['params'][$field_name] = $value;
                             break;
                         /** Проверка на точное различие */
-                        case 'not_equal':
+                        case 'neq':
                             $result['queries'][] = $precond . $field_name . '!=:' . $field_name;
                             $result['params'][$field_name] = $value;
                             break;
@@ -509,6 +460,116 @@
             return ' LIMIT ' . $limit;
         }
 
+        //#############################################################################################################
+        //# Методы ORM
+        //#############################################################################################################
+
+        /**
+         * Создание нового объекта в БД
+         * @param array $data Данные для создания объекта
+         * @return int ID созданной записи
+         */
+        public function create($data)
+        {
+            $fields = $this->fields();
+            $sql = [];
+            $params = [];
+            foreach ($data as $key => $value) {
+                if (in_array($key, $fields)) {
+                    $sql[] = $key . '=:u_' . $key;
+                    $params['u_' . $key] = $value;
+                }
+            }
+            $result_code = 'INSERT INTO ' . $this->table_name() . ' SET ' . implode(', ', $sql);
+            $query = self::$db->query($result_code, $params);
+            return $query->last_insert_id();
+        }
+
+        /**
+         * Возвращает все записи в указанной модели
+         * @param string|array $fields Список возвращаемых полей
+         * @return EntityCollection Коллекция всех сущностей модели
+         */
+        public function get_all($fields = '*')
+        {
+            if (is_array($fields)) {
+                $fields = implode(', ', $fields);
+            }
+            $data = self::$db->query('SELECT ' . $fields . ' FROM ' . $this->table_name());
+            return new EntityCollection($this, $data->fetch_all());
+        }
+
+        /**
+         * Возвращает пустую коллекцию указанной модели
+         * @return EntityCollection Пустая коллекция сущностей
+         */
+        public function get_empty()
+        {
+            return new EntityCollection($this);
+        }
+
+        /**
+         * Возвращает один объект, выбранный по первичному ключу
+         * @param int   $pk     Первичный ключ
+         * @param array $fields Список выбираемых из таблицы полей
+         * @return Entity Сущность
+         */
+        public function get_by_pk($pk, $fields = [])
+        {
+            // Список выбираемых из таблицы полей (по умолчанию все поля)
+            $select_fields = (count($fields) > 0) ? $fields : $this->fields();
+            // Выполнение запроса к БД
+            $data = self::$db->query(
+                'SELECT :fields FROM :table_name WHERE :primary_key=:pk LIMIT 1',
+                [
+                    'fields'      => implode(', ', $select_fields),
+                    'table_name'  => $this->table_name(),
+                    'primary_key' => $this->primary_key(),
+                    'pk'          => (int)$pk,
+                ]
+            );
+            // Если элемент обнаружен, то добавляем его в сущность
+            if ($data->num_rows() == 1) {
+                $entity = $data->fetch_one();
+                $entity_namespace = $this->entity_namespace();
+                return new $entity_namespace($this, $entity);
+            }
+            return false;
+        }
+
+        /**
+         * Выборка массива объектов для определенной страницы
+         * @param array $order_by  Поле для сортировки
+         * @param array $condition Условия для выборки
+         * @param int   $limit     Количество объектов
+         * @param array $fields    Список выбираемых полей
+         * @return EntityCollection Коллекция сущностей
+         */
+        public function get_by_condition($condition = [], $order_by = [], $limit = null, $fields = [])
+        {
+            // Список выбираемых из таблицы полей (по умолчанию все поля)
+            $select_fields = (count($fields) > 0) ? $fields : $this->fields();
+            // Формирование SQL для условия выборки
+            $sql_condition = $this->generate_condition_sql($condition);
+            // Выполнение запроса к БД
+            $sql = 'SELECT :fields FROM :table_name:condition:order:limit';
+            // Препарирование параметров выборки
+            $data = self::$db->query($sql, array_merge($sql_condition['params']),
+                [
+                    'fields'     => implode(', ', $select_fields),
+                    'table_name' => $this->table_name(),
+                    'condition'  => $sql_condition['query'],
+                    'order'      => $this->generate_order_sql($order_by),
+                    'limit'      => $this->generate_limit_sql($limit),
+                ]);
+            // Если найдена хотя бы 1 запись,
+            // то создаем из нее объект сущности и добавляем в коллекцию сущностей
+            if ($data->num_rows() > 0) {
+                return new EntityCollection($this, $data->fetch_all());
+            }
+            return new EntityCollection($this);
+        }
+
         /**
          * Возвращает количество записей в БД с указанным условием
          * @param string|array $fields    Поле/поля для выборки
@@ -547,7 +608,7 @@
             }
             $params['pk'] = $pk;
             $result_code = 'UPDATE ' . $this->table_name() . ' SET ' . implode(', ', $sql)
-                    . ' WHERE ' . $this->primary_key() . '=:pk';
+                . ' WHERE ' . $this->primary_key() . '=:pk';
             self::$db->query($result_code, $params)->send();
         }
 
