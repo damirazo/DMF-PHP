@@ -33,7 +33,7 @@
         {
             parent::__construct($params);
             $data = explode('.', $chained_field);
-            $this->chained_module = (count($data) > 1) ? $data[1] : $this->get_module_name();
+            $this->chained_module = (count($data) > 1) ? $data[1] : $this->loaded_module()->name;
             $this->chained_model = $data[0];
         }
 

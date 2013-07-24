@@ -69,7 +69,7 @@
     // Синхронизация моделей
     /** @var $model \DMF\Core\Model\Model */
     foreach ($models as $model) {
-        format('Обработка модели: %s', $model->get_class_name());
+        format('Обработка модели: %s', $model->class_name());
 
         # Создание таблицы в БД
         $model->update_table();

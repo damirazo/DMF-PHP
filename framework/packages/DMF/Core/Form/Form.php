@@ -306,7 +306,7 @@
          */
         public function name()
         {
-            return strtolower($this->get_class_name());
+            return strtolower($this->class_name());
         }
 
         /**

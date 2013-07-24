@@ -44,7 +44,7 @@
             $result = [];
             /** @var \DMF\Core\Model\Field\BaseField $field */
             foreach ($this->scheme as $field) {
-                $field_driver_cls = $namespace . '\\Field\\' . $field->get_class_name();
+                $field_driver_cls = $namespace . '\\Field\\' . $field->class_name();
                 /** @var \DMF\Core\Model\Driver\base\FieldDriver $field_driver */
                 $field_driver = new $field_driver_cls($field);
                 $result[] = $field_driver->get_sql();

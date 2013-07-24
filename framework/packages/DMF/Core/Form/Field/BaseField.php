@@ -195,7 +195,7 @@
          */
         protected function generate_label()
         {
-            return ucfirst(strtolower($this->get_class_name()));
+            return ucfirst(strtolower($this->class_name()));
         }
 
         /**

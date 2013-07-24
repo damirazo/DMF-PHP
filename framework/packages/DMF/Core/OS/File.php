@@ -67,16 +67,8 @@
         public function read($limit = false)
         {
             $data = fread($this->file_handler, $limit || $this->size());
+            $this->close();
             return $data;
-        }
-
-        /**
-         * Возвращает размер открытого файла
-         * @return int
-         */
-        public function size()
-        {
-            return filesize($this->file_path);
         }
 
         /**
@@ -85,7 +77,28 @@
          */
         public function read_as_array()
         {
+            $this->close();
             return file($this->file_path);
+        }
+
+        /**
+         * Чтение информации в формате json и преобразование в массив
+         * @return mixed
+         */
+        public function read_as_json()
+        {
+            $data = $this->read();
+            return json_decode($data);
+        }
+
+        /**
+         * Возвращает размер открытого файла
+         * @return int
+         */
+        public function size()
+        {
+            $this->close();
+            return filesize($this->file_path);
         }
 
         /**

@@ -68,7 +68,7 @@
         public function table_name()
         {
             if (is_null($this->table_name)) {
-                return $this->table_prefix() . strtolower($this->get_class_name()) . 's';
+                return $this->table_prefix() . strtolower($this->class_name()) . 's';
             }
             return $this->table_prefix() . $this->table_name;
         }
@@ -141,27 +141,65 @@
                 $this->create_table(true);
                 $this->create_migration();
             } else {
-                // FIXME: Найти способ избавиться от костыля с нахождением объекта модуля
-                // FIXME: при вызове его из другого модуля
-                $class_info = new \ReflectionClass($this);
-                $model_file = $class_info->getFileName();
-                $model_dir = implode('/', array_slice(explode('/', str_replace('.php', '', $model_file)), 1, -1));
-                $migrations_dir = $model_dir . _SEP . 'migrations';
-                // Проверим наличие папки с миграциями
+                // Объект модуля, в котором определена текущая модель
+                $module = $this->module();
+                $migrations_dir = $module->path . 'Model' . _SEP . 'migrations' . _SEP;
+                // Проверяем были ли уже создана папка с миграциями
                 if (OS::dir_exists($migrations_dir)) {
-                    // Проверим наличие файла миграций для текущей таблицы
-                    $migration_file = OS::file_exists(OS::join($migrations_dir, $this->table_name() . '.json'));
-                    if ($migration_file) {
+                    $migration_file = $migrations_dir . $this->class_name() . '.json';
+                    if (OS::file_exists($migration_file)) {
                         $file = new File($migration_file);
-                        $data = json_decode($file->open()->read());
-                        // Сравниваем схему в миграции с текущей схемой модели
+                        $data = $file->open()->read_as_json();
+                        $changes = $this->check_structure($data);
+                        if ($changes['total'] > 0) {
+                            // Необходимо обновить структуру модели в БД
+                            // Для этого требуется сгенерировать SQL код для каждой из ситуаций
+                        }
                     }
                 }
             }
         }
 
         /**
+         * Проверка текущей схемы модели и сравнение ее с состоянием, сохраненным в миграции
+         * @param array $migration_data Схема миграции
+         * @return array
+         */
+        public function check_structure($migration_data)
+        {
+            // Массив для хранения информации об изменениях в схеме модели
+            $changes = [
+                // Общее число изменений
+                'total'         => 0,
+                // Список добавленных полей
+                'add_field'     => [],
+                // Список удаленных полей
+                'remove_field'  => [],
+                // Список измененных полей
+                'changed_field' => [],
+            ];
+            $migration_fields = $migration_data['fields'];
+            foreach ($this->scheme() as $field_name => $field_data) {
+                // Проверка поля из схемы модели на существование
+                if (!isset($migration_fields[$field_name])) {
+                    $changes['total'] += 1;
+                    $changes['add_field'][$field_name] = $field_data;
+                }
+                // Проверка поля на изменение
+                // Проверка поля на удаление
+            }
+            return $changes;
+        }
+
+        /**
          * Создание файла миграции для текущей схемы модели
+         * Структура файла миграции:
+         * fields:
+         *      Список всех полей, где в качестве ключа выступает имя поля,
+         *      а в качестве значение - текущие настройки поля.
+         * hash:
+         *      Хэш на основе информации о полях. Использует md5 хэш от сериализованной в json схемы модели.
+         *      Используется для быстрой проверки наличия или отсутствия изменений в схеме модели.
          */
         public function create_migration()
         {
@@ -217,7 +255,7 @@
          */
         public function dump_fixtures()
         {
-            $fixture_name = strtolower($this->get_module_name()) . '__' . strtolower($this->get_class_name()) . '.json';
+            $fixture_name = strtolower($this->loaded_module()->name) . '__' . strtolower($this->class_name()) . '.json';
             $data = $this->dump_data();
             $file = new File(DATA_PATH . 'fixtures' . _SEP . $fixture_name);
             $file->open('w+')->block()->write(json_encode($data, JSON_PRETTY_PRINT))->unblock()->close();
@@ -230,7 +268,7 @@
         public function load_fixtures()
         {
             // Имя файл фикстуры, генерируется из имени модуля и имени модели
-            $fixture_name = strtolower($this->get_module_name()) . '__' . strtolower($this->get_class_name()) . '.json';
+            $fixture_name = strtolower($this->loaded_module()->name) . '__' . strtolower($this->class_name()) . '.json';
             // Полный путь до файла с фикстурой
             $file = new File(DATA_PATH . 'fixtures' . _SEP . $fixture_name);
             $fixture = $file->open('r')->read();

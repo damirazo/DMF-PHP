@@ -202,23 +202,63 @@
         }
 
         /**
-         * Возвращает имя класса, в контексте которого вызван
+         * Возвращает namespace текущего компонента в виде строки
+         *
          * @return string
          */
-        public function get_class_name()
+        public function class_namespace()
         {
-            $namespace = get_class($this);
-            $pieces = (mb_strpos($namespace, '\\')) ? explode('\\', $namespace) : explode('_', $namespace);
-            return $pieces[count($pieces) - 1];
+            return get_class($this);
         }
 
         /**
-         * Возвращает имя модуля, в котором инициализирован дочерний класс
-         * @return mixed
+         * Возвращает namespace текущего компонента, разбитый на отдельные части
+         *
+         * @return array
          */
-        protected function get_module_name()
+        public function parsed_namespace()
         {
-            return self::$app->module->name;
+            $namespace = $this->class_namespace();
+            // Проверяем, что у нас используется реальный неймспейс
+            if (mb_strpos($namespace, '\\')) {
+                list($root_namespace, $module_name, $component_type, $component_name) = explode('\\', $namespace);
+                return [
+                    'root_namespace' => $root_namespace,
+                    'module_name'    => $module_name,
+                    'component_type' => $component_type,
+                    'component_name' => $component_name,
+                ];
+            } else {
+                // Работа с псевдонеймспейсами пока не поддерживается
+                return [];
+            }
+        }
+
+        /**
+         * Возвращает имя класса, в контексте которого вызван
+         * @return string
+         */
+        public function class_name()
+        {
+            return $this->parsed_namespace()['component_name'];
+        }
+
+        /**
+         * Возвращает реальный модуль, в пределах которого определен компонент
+         * @return \DMF\Core\Module\Module
+         */
+        public function module()
+        {
+            return self::$app->get_module_by_name($this->parsed_namespace()['module_name']);
+        }
+
+        /**
+         * Возвращает объект модуля, в контексте которого выполняется фреймворк в текущий момент
+         * @return \DMF\Core\Module\Module|null
+         */
+        public function loaded_module()
+        {
+            return self::$app->module;
         }
 
     }
