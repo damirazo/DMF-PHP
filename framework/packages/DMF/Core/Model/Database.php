@@ -25,7 +25,7 @@
         {
             $db_config = Config::get('database');
             if ($db_config['enable']) {
-                $dsn = 'mysql:host=' . $db_config['host'] . ';dbname=' . $db_config['name'];
+                $dsn = $db_config['driver'] . ':host=' . $db_config['host'] . ';dbname=' . $db_config['name'];
                 parent::__construct($dsn, $db_config['user'], $db_config['password']);
                 $this->exec('SET NAMES utf8');
             }

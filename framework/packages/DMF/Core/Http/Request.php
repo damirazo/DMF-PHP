@@ -64,8 +64,8 @@
             }
             // в противном случае высчитываем сами
             $protocol = (isset($_SERVER['HTTPS'])
-                    && $_SERVER['HTTPS'] != 'off'
-                    && !empty($_SERVER['HTTPS'])) ? 'https' : 'http';
+                && $_SERVER['HTTPS'] != 'off'
+                && !empty($_SERVER['HTTPS'])) ? 'https' : 'http';
 
             return $protocol . '://' . $_SERVER['HTTP_HOST'];
         }
@@ -121,6 +121,7 @@
          */
         public function client_ip()
         {
+            $ip = false;
             if (isset($_SERVER['HTTP_CLIENT_IP'])) {
                 $ip = $_SERVER['HTTP_CLIENT_IP'];
             } elseif (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
@@ -129,13 +130,14 @@
                 $ip = $_SERVER['HTTP_X_REAL_IP'];
             } elseif (isset($_SERVER['REMOTE_ADDR'])) {
                 $ip = $_SERVER['REMOTE_ADDR'];
-            } else {
-                $ip = '0.0.0.0';
             }
-            if (filter_var($ip, FILTER_VALIDATE_IP)) {
+            if (strpos($ip, ';') != -1) {
+                $ip = explode(';', $ip)[0];
+            }
+            if ($ip && filter_var($ip, FILTER_VALIDATE_IP)) {
                 return $ip;
             }
-            return false;
+            return '0.0.0.0';
         }
 
         /**
@@ -144,7 +146,7 @@
          * @param bool|mixed $default Значение по умолчанию
          * @return bool
          */
-        public function _post($name, $default = false)
+        public function POST($name, $default = null)
         {
             if (isset($_POST[$name])) {
                 return $_POST[$name];
@@ -158,7 +160,7 @@
          * @param bool|mixed $default Значение по умолчанию
          * @return bool
          */
-        public function _get($name, $default = false)
+        public function GET($name, $default = null)
         {
             if (isset($_GET[$name])) {
                 return $_GET[$name];
@@ -172,7 +174,7 @@
          * @param bool|mixed $default Значение по умолчанию
          * @return bool
          */
-        public function _request($name, $default = false)
+        public function REQUEST($name, $default = null)
         {
             if (isset($_REQUEST[$name])) {
                 return $_REQUEST[$name];
@@ -186,7 +188,7 @@
          */
         public function get_method()
         {
-            return (isset($_SERVER['REQUEST_METHOD'])) ? $_SERVER['REQUEST_METHOD'] : 'unknown';
+            return (isset($_SERVER['REQUEST_METHOD'])) ? $_SERVER['REQUEST_METHOD'] : false;
         }
 
         /**
@@ -197,7 +199,7 @@
         public function is_ajax()
         {
             return !!(!empty($_SERVER['HTTP_X_REQUESTED_WITH'])
-                    && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest');
+                && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest');
         }
 
         /** Запрет на копирование объекта */
