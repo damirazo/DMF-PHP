@@ -10,6 +10,7 @@
     namespace DMF\Core\Application;
 
     use DMF\Core\Application\Exception\ControllerProxyNotFound;
+    use DMF\Core\Application\Exception\IllegalArgument;
     use DMF\Core\Application\Exception\ModuleNotFound;
     use DMF\Core\Application\RoutePattern;
     use DMF\Core\Event\Event;
@@ -205,12 +206,20 @@
          * @param string $name Имя компонента
          * @param string $type Тип компонента. Типы перечислены в классе DMF\Core\Component\ComponentTypes.
          * @return mixed
+         * @throws \DMF\Core\Application\Exception\IllegalArgument
          */
         public function get_component($name, $type)
         {
             $data = explode('.', $name);
-            $module = $this->get_module_by_name($data[0]);
-            $component_name = $data[1];
+            if (count($data) == 1) {
+                $module_name = null;
+                $component_name = $data[0];
+            } else if (count($data) == 2) {
+                list($module_name, $component_name) = $data;
+            } else {
+                throw new IllegalArgument('Некорректный формат записи имени компонента!');
+            }
+            $module = $this->get_module_by_name($module_name);
             $component_namespace = $module->namespace . '\\' . $type . '\\' . $component_name;
             return new $component_namespace();
         }

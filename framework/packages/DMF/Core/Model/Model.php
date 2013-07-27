@@ -557,15 +557,11 @@
             // Список выбираемых из таблицы полей (по умолчанию все поля)
             $select_fields = (count($fields) > 0) ? $fields : $this->fields();
             // Выполнение запроса к БД
-            $data = self::$db->query(
-                'SELECT :fields FROM :table_name WHERE :primary_key=:pk LIMIT 1',
-                [
-                    'fields'      => implode(', ', $select_fields),
-                    'table_name'  => $this->table_name(),
-                    'primary_key' => $this->primary_key(),
-                    'pk'          => (int)$pk,
-                ]
-            );
+            $sql = 'SELECT ' . implode(', ', $select_fields)
+                . ' FROM ' . $this->table_name()
+                . ' WHERE ' . $this->primary_key() . '=' . (int)$pk
+                . ' LIMIT 1';
+            $data = self::$db->query($sql);
             // Если элемент обнаружен, то добавляем его в сущность
             if ($data->num_rows() == 1) {
                 $entity = $data->fetch_one();
@@ -590,16 +586,13 @@
             // Формирование SQL для условия выборки
             $sql_condition = $this->generate_condition_sql($condition);
             // Выполнение запроса к БД
-            $sql = 'SELECT :fields FROM :table_name:condition:order:limit';
+            $sql = 'SELECT ' . implode(', ', $select_fields)
+                . ' FROM ' . $this->table_name()
+                . $sql_condition['query']
+                . $this->generate_order_sql($order_by)
+                . $this->generate_limit_sql($limit);
             // Препарирование параметров выборки
-            $data = self::$db->query($sql, array_merge($sql_condition['params']),
-                [
-                    'fields'     => implode(', ', $select_fields),
-                    'table_name' => $this->table_name(),
-                    'condition'  => $sql_condition['query'],
-                    'order'      => $this->generate_order_sql($order_by),
-                    'limit'      => $this->generate_limit_sql($limit),
-                ]);
+            $data = self::$db->query($sql, $sql_condition['params']);
             // Если найдена хотя бы 1 запись,
             // то создаем из нее объект сущности и добавляем в коллекцию сущностей
             if ($data->num_rows() > 0) {
