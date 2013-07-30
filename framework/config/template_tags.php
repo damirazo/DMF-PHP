@@ -1,5 +1,5 @@
 <?php
-
+    
     /**
      * Этот файл часть фреймворка DM Framework
      * Любое использование в коммерческих целях допустимо лишь при разрешении автора.
@@ -7,14 +7,12 @@
      * @author damirazo <me@damirazo.ru>
      */
 
-    use DMF\Core\Application\Application;
+    use DMF\Core\Template\Tag;
+    use DMF\Core\Template\Tag\UrlTag\UrlTagTokenParser;
 
     /**
-     * Отображение форматированной строки
+     * Тег "url"
+     * Используется для подстановки url,
+     * связанного с указанным экшеном
      */
-    function format()
-    {
-        $args = func_get_args();
-        $args[0] = $args[0] . PHP_EOL;
-        call_user_func_array('printf', $args);
-    }
+    Tag::register(new UrlTagTokenParser());

@@ -34,6 +34,8 @@
         private static $_instance = null;
         /** @var array Список зарегистрированных маршрутов */
         private static $_routes = [];
+        /** @var array Список зарегистрированных маршрутов с ключом в виде пути до действия */
+        private static $_routes_by_path = [];
         /** @var null|array Объект с данными о текущем маршруте */
         public $route_object = null;
         /** @var array Список модулей */
@@ -42,6 +44,15 @@
         public $module = null;
         /** @var \DMF\Core\Http\Request */
         private $request;
+
+        /**
+         * Список констант для идентификации ОС, на которой запущен сервер
+         */
+        const WINDOWS = 'windows';
+        const LINUX = 'linux';
+        const FREEBSD = 'freebsd';
+        const MACOSX = 'macosx';
+        const UNKNOWN = 'unknown';
 
         /** Запрет на создание объекта */
         private function __construct()
@@ -68,12 +79,28 @@
         {
             foreach ($routes as $pattern => $callable) {
                 if (!isset(self::$_routes[$pattern])) {
-                    self::$_routes[$pattern] = new RoutePattern($callable);
+                    $route = new RoutePattern($callable, $pattern);
+                    self::$_routes[$pattern] = $route;
+                    self::$_routes_by_path[$callable] = $route;
                 } else {
                     throw new RouteExists(
                         sprintf('Маршрут %s уже был ранее задан для действия %s', $pattern, $callable));
                 }
             }
+        }
+
+        /**
+         * Возвращает экземпляр объекта RoutePattern, содержащего информацию о маршруте, для указанного пути до экшена
+         *
+         * @param string $path Путь до экшена в формате Модуль.Контроллер.Экшен
+         * @return bool|RoutePattern
+         */
+        public static function get_route_by_path($path)
+        {
+            if (isset(self::$_routes_by_path[$path])) {
+                return self::$_routes_by_path[$path];
+            }
+            return false;
         }
 
         /**
@@ -124,6 +151,27 @@
         public static function is_cli()
         {
             return PHP_SAPI === 'cli';
+        }
+
+        /**
+         * Возвращает информацию о ОС, на которой запущен сервер
+         * @return bool
+         */
+        public static function get_os()
+        {
+            $php_os = strtolower(PHP_OS);
+            $os_markers = [
+                'windows' => Application::WINDOWS,
+                'linux'   => Application::LINUX,
+                'freebsd' => Application::FREEBSD,
+                'macosx'  => Application::MACOSX,
+            ];
+            foreach ($os_markers as $marker => $value) {
+                if (strpos($php_os, $marker) !== -1) {
+                    return $value;
+                }
+            }
+            return Application::UNKNOWN;
         }
 
         /**
@@ -244,6 +292,8 @@
             OS::import(CONFIG_PATH . 'events.php');
             // Загрузка глобального шаблонного контекста
             OS::import(CONFIG_PATH . 'context.php');
+            // Загрузка кастомных шаблонных тегов
+            OS::import(CONFIG_PATH . 'template_tags.php');
 
             // Обход списка зарегистрированных модулей и загрузка их параметров
             foreach ($this->modules as $module_name => $module_namespace) {
@@ -251,6 +301,7 @@
                 OS::import($module->path . 'config.php', false);
                 OS::import($module->path . 'events.php', false);
                 OS::import($module->path . 'context.php', false);
+                OS::import($module->path . 'template_tags.php', false);
             }
         }
 

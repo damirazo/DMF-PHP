@@ -13,6 +13,7 @@
     use DMF\Core\Http\Response;
     use DMF\Core\OS\OS;
     use DMF\Core\Template\Exception\TemplateNotFound;
+    use DMF\Core\Template\Tag\UrlTag\UrlTagTokenParser;
 
     /**
      * Class Template
@@ -25,18 +26,19 @@
 
         /** @var string Имя шаблона */
         protected $template_name;
-
         /** @var array Массив данных для шаблона */
         protected $data;
-
         /** @var int Код HTTP ответа */
         protected $http_response_code;
 
+        /** @var string Расширение у шаблонов */
+        public static $template_extension = 'twig';
+
         /**
          * Инициализация объекта шаблона
-         * @param string      $template_name      Имя шаблона
-         * @param array       $data               Массив данных для шаблона
-         * @param int         $http_response_code Код HTTP ответа
+         * @param string $template_name      Имя шаблона
+         * @param array  $data               Массив данных для шаблона
+         * @param int    $http_response_code Код HTTP ответа
          */
         public function __construct($template_name, $data = [], $http_response_code = 200)
         {
@@ -56,8 +58,7 @@
             $debug = DEBUG;
             $app = Application::get_instance();
             if (OS::file_exists(
-                APP_PATH . $app->module->name . _SEP . 'View' . _SEP . $this->template_name . '.twig'
-            )) {
+                APP_PATH . $app->module->name . _SEP . 'View' . _SEP . $this->template_name . '.twig')) {
                 // Объект загрузчика
                 $loader = new \Twig_Loader_Filesystem(
                     APP_PATH . Application::get_instance()->module->name . _SEP . 'View'
@@ -67,15 +68,21 @@
                     'cache' => DATA_PATH . 'cache' . _SEP . 'templates',
                     'debug' => $debug
                 ]);
+
                 // Глобальные переменные
                 foreach (Context::data() as $name => $value) {
                     $twig->addGlobal($name, $value);
                 }
+
+                // Кастомные теги
+                foreach (Tag::$data as $tag) {
+                    $twig->addTokenParser($tag);
+                }
+
                 // Возвращаем отрендеренный шаблон
-                $response = $twig->render($this->template_name . '.twig', $this->data);
+                $response = $twig->render($this->template_name . '.' . self::$template_extension, $this->data);
                 return new Response($response, $this->http_response_code);
-            }
-            else {
+            } else {
                 throw new TemplateNotFound('Шаблон ' . $this->template_name . ' отсутствует!');
             }
         }
