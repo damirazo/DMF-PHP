@@ -23,7 +23,7 @@
         /** @var string Путь к файлу */
         protected $file_path;
         /** @var null|resource */
-        protected $file_handler = null;
+        public $file_handler = null;
 
         /**
          * Инициализация объекта
@@ -32,11 +32,7 @@
          */
         public function __construct($file_path)
         {
-            if (OS::file_exists($file_path)) {
-                $this->file_path = $file_path;
-            } else {
-                throw new FileNotFound('Указанный файл отсутствует!');
-            }
+            $this->file_path = $file_path;
         }
 
         /**
@@ -66,7 +62,7 @@
          */
         public function read($limit = false)
         {
-            $data = fread($this->file_handler, $limit || $this->size());
+            $data = fread($this->file_handler, !$limit ? $this->size() : $limit);
             $this->close();
             return $data;
         }
@@ -97,7 +93,6 @@
          */
         public function size()
         {
-            $this->close();
             return filesize($this->file_path);
         }
 

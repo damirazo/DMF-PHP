@@ -20,10 +20,8 @@
     abstract class BaseField extends Component
     {
 
-        /**
-         * @var array Массив параметров поля
-         */
-        protected $_params = [];
+        /** @var array Массив параметров поля */
+        public $params = [];
 
         /**
          * Инициализация поля
@@ -31,43 +29,46 @@
          */
         public function __construct($params = [])
         {
-            $this->_params = $params;
+            $this->params = $params;
         }
 
         /**
          * Создание поля в БД
          * @param string $name Название поля
-         *
          * @return string
          */
-        public function create_sql($name)
+        public function sql($name)
         {
-            return '';
+            return sprintf('`%s` %s %s %s',
+                $name,
+                $this->sql_type(),
+                $this->sql_nullable(),
+                $this->sql_default()
+            );
         }
 
         /**
          * Возвращает параметр с именем $name или значение $default
-         * @param string $name    Имя параметра
-         * @param bool   $default Значение по умолчанию
-         *
+         * @param string          $name    Имя параметра
+         * @param bool|null|mixed $default Значение по умолчанию
          * @return bool
          */
-        public function get_param($name, $default = false)
+        public function get_param($name, $default = null)
         {
-            if (isset($this->_params[$name])) {
-                return $this->_params[$name];
+            if (isset($this->params[$name])) {
+                return $this->params[$name];
             }
-
             return $default;
         }
 
         /**
          * Возвращает хэш текущих настроек поля
+         * @param string $name Название таблицы в БД
          * @return string
          */
-        public function __toString()
+        public function hash($name)
         {
-            return md5($this->name().'+'.serialize($this->_params));
+            return md5($name . '+' . serialize($this->params));
         }
 
         /**
@@ -94,7 +95,37 @@
          */
         public function default_value()
         {
-            return false;
+            return $this->get_param('default');
+        }
+
+        /**
+         * Формирование части SQL запроса со значением по умолчанию
+         *
+         * @return string
+         */
+        public function sql_default()
+        {
+            return !is_null($this->get_param('default')) ? 'DEFAULT ' . $this->default_value() : '';
+        }
+
+        /**
+         * Формирование части SQL запроса с информацией о возможности хранения нулевого значения
+         *
+         * @return string
+         */
+        public function sql_nullable()
+        {
+            return !$this->get_param('nullable') ? 'NOT NULL ' : 'NULL';
+        }
+
+        /**
+         * Формирование части SQL запроса с типом данного поля
+         *
+         * @return string
+         */
+        public function sql_type()
+        {
+            return 'VARCHAR(255)';
         }
 
     }

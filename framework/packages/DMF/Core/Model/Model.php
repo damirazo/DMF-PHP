@@ -26,6 +26,8 @@
 
         /** @var null|string Имя таблицы в БД */
         public $table_name = null;
+        /** @var null|string Префикс для имени текущей таблицы в БД. По умолчанию используется глобальный. */
+        public $table_prefix = null;
         /** @var string Имя класса для возвращаемой выборкой из БД сущности */
         public $entity_name = 'DMF.Entity';
         /**
@@ -35,7 +37,11 @@
          *
          * @var bool Требуется ли создавать таблицу указанной модели в БД автоматически в случае ее отсутствия
          */
-        public $table_auto_create = false;
+        public $auto_create = false;
+        /** @var string Движок, используемый при создании таблиц БД */
+        public $table_engine = 'InnoDB';
+        /** @var string Кодировка для таблиц БД по умолчанию */
+        public $table_encoding = 'utf8';
 
         /**
          * Инициализация модели
@@ -43,7 +49,8 @@
         public function __construct()
         {
             parent::__construct();
-            if ($this->table_auto_create && !$this->table_exists()) {
+            // Создание таблицы
+            if ($this->auto_create && !$this->table_exists()) {
                 $this->create_table();
             }
         }
@@ -121,7 +128,10 @@
          */
         protected function table_prefix()
         {
-            return $this->config('database')['prefix'];
+            if (is_null($this->table_prefix)) {
+                return $this->config('database')['prefix'];
+            }
+            return $this->table_prefix;
         }
 
         //#############################################################################################################
@@ -150,10 +160,13 @@
                     if (OS::file_exists($migration_file)) {
                         $file = new File($migration_file);
                         $data = $file->open()->read_as_json();
-                        $changes = $this->check_structure($data);
+                        $changes = $this->check_table($data);
+
                         if ($changes['total'] > 0) {
-                            // Необходимо обновить структуру модели в БД
-                            // Для этого требуется сгенерировать SQL код для каждой из ситуаций
+                            $this->add_fields($changes['added_fields']);
+                            $this->remove_fields(array_keys($changes['removed_fields']));
+                            $this->change_fields($changes['changed_fields']);
+                            $this->create_migration();
                         }
                     }
                 }
@@ -165,45 +178,70 @@
          * @param array $migration_data Схема миграции
          * @return array
          */
-        public function check_structure($migration_data)
+        public function check_table($migration_data)
         {
             // Массив для хранения информации об изменениях в схеме модели
             $changes = [
                 // Общее число изменений
-                'total'         => 0,
+                'total'          => 0,
                 // Список добавленных полей
-                'add_field'     => [],
+                'added_fields'   => [],
                 // Список удаленных полей
-                'remove_field'  => [],
+                'removed_fields' => [],
                 // Список измененных полей
-                'changed_field' => [],
+                'changed_fields' => [],
             ];
-            $migration_fields = $migration_data['fields'];
+            /** @var $field_data \DMF\Core\Model\Field\BaseField */
             foreach ($this->scheme() as $field_name => $field_data) {
                 // Проверка поля из схемы модели на существование
-                if (!isset($migration_fields[$field_name])) {
+                if (!isset($migration_data->{$field_name})) {
                     $changes['total'] += 1;
-                    $changes['add_field'][$field_name] = $field_data;
+                    $changes['added_fields'][$field_name] = $field_data;
+                    continue;
                 }
                 // Проверка поля на изменение
-                // Проверка поля на удаление
+                $migration_field = $migration_data->{$field_name};
+                if ($migration_field->hash != $field_data->hash($field_name)) {
+                    $changes['total'] += 1;
+                    $changes['changed_fields'][$field_name] = $field_data;
+                    continue;
+                }
+            }
+            // Проверка поля на удаление
+            foreach ($migration_data as $field_name => $field_data) {
+                if (!array_key_exists($field_name, $this->scheme())) {
+                    $changes['total'] += 1;
+                    $changes['removed_fields'][$field_name] = $field_data;
+                    continue;
+                }
             }
             return $changes;
         }
 
         /**
          * Создание файла миграции для текущей схемы модели
-         * Структура файла миграции:
-         * fields:
-         *      Список всех полей, где в качестве ключа выступает имя поля,
-         *      а в качестве значение - текущие настройки поля.
-         * hash:
-         *      Хэш на основе информации о полях. Использует md5 хэш от сериализованной в json схемы модели.
-         *      Используется для быстрой проверки наличия или отсутствия изменений в схеме модели.
          */
         public function create_migration()
         {
-
+            $scheme = $this->scheme();
+            $result = [];
+            /** @var $field_object \DMF\Core\Model\Field\BaseField */
+            foreach ($scheme as $field_name => $field_object) {
+                $params = $field_object->params;
+                $result[$field_name] = $params;
+                $result[$field_name]['hash'] = md5($field_name . '+' . serialize($params));
+                $result[$field_name]['type'] = $field_object->class_namespace();
+            }
+            $data = json_encode($result, JSON_PRETTY_PRINT);
+            // Объект модуля, в котором определена текущая модель
+            $module = $this->module();
+            $migrations_dir = $module->path . 'Model' . _SEP . 'migrations' . _SEP;
+            if (!OS::dir_exists($migrations_dir)) {
+                mkdir($migrations_dir);
+            }
+            $migration_file = $migrations_dir . $this->class_name() . '.json';
+            $file = new File($migration_file);
+            $file->open('w+')->block()->write($data)->unblock()->close();
         }
 
         /**
@@ -221,13 +259,64 @@
         }
 
         /**
+         * Добавление в таблицу полей, указанных в параметре
+         * @param array $data Список добавляемых полей и их параметров
+         * @return string
+         */
+        public function add_fields($data)
+        {
+            if (count($data) > 0) {
+                $result_fields = [];
+                /** @var $field_data \DMF\Core\Model\Field\BaseField */
+                foreach ($data as $field_name => $field_data) {
+                    $result_fields[] = $field_data->sql($field_name);
+                }
+                $query = 'ALTER TABLE `' . $this->table_name() . '` ADD ' . implode(', ADD ', $result_fields) . ';';
+                self::$db->query($query);
+            }
+        }
+
+        /**
+         * Удаление из таблицы полей с указанными именами
+         * @param array $data Список имен удаляемых полей
+         * @return string
+         */
+        public function remove_fields($data)
+        {
+            if (count($data) > 0) {
+                $query = 'ALTER TABLE `' . $this->table_name() . '` DROP ' . implode(', DROP ', $data) . ';';
+                self::$db->query($query);
+            }
+        }
+
+        /**
+         * Изменение полей в таблице
+         * @param array $data Список значений измененных полей
+         * @return string
+         */
+        public function change_fields($data)
+        {
+            if (count($data) > 0) {
+                $result_fields = [];
+                /** @var $field_params \DMF\Core\Model\Field\BaseField */
+                foreach ($data as $field_name => $field_params) {
+                    $result_fields[] = $field_params->sql($field_name);
+                }
+                $query = 'ALTER TABLE `' . $this->table_name() . ' MODIFY COLUMN '
+                    . implode(', MODIFY COLUMN ', $result_fields) . ';';
+                self::$db->query($query);
+            }
+        }
+
+        /**
          * Возвращает SQL код, необходимый для создания текущей схемы таблицы
          */
         public function generate_sql_for_table()
         {
             $query = 'CREATE TABLE IF NOT EXISTS `' . $this->table_name() . '` (' . PHP_EOL;
             $fields = $this->sql_from_fields();
-            $query .= implode(',' . PHP_EOL, $fields) . PHP_EOL . ') ENGINE=InnoDB DEFAULT CHARSET=utf8';
+            $query .= implode(',' . PHP_EOL, $fields) . PHP_EOL . ') ENGINE=' . $this->table_engine
+                . ' DEFAULT CHARSET=' . $this->table_encoding;
             return $query;
         }
 
@@ -269,13 +358,12 @@
         {
             // Имя файл фикстуры, генерируется из имени модуля и имени модели
             $fixture_name = strtolower($this->loaded_module()->name) . '__' . strtolower($this->class_name()) . '.json';
-            // Полный путь до файла с фикстурой
-            $file = new File(DATA_PATH . 'fixtures' . _SEP . $fixture_name);
-            $fixture = $file->open('r')->read();
+            $fixture_path = DATA_PATH . 'fixtures' . _SEP . $fixture_name;
             // Если файл с фикстурой отсутствует, то ничего не делаем
-            if ($fixture !== false) {
-                // Данные из файла, преобразованные в PHP массив
-                $data = json_decode($fixture);
+            if (OS::file_exists($fixture_path)) {
+                // Полный путь до файла с фикстурой
+                $file = new File($fixture_path);
+                $data = $file->open('r+')->read_as_json();
                 // Выполнение сохранения объектов из БД в транзакции с откатом при ошибке
                 try {
                     self::$db->beginTransaction();
@@ -303,7 +391,7 @@
             $fields = [];
             /** @var $field_object \DMF\Core\Model\Field\BaseField */
             foreach ($scheme as $field_name => $field_object) {
-                $fields[] = trim($field_object->create_sql($field_name));
+                $fields[] = trim($field_object->sql($field_name));
             }
             return $fields;
         }

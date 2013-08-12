@@ -18,50 +18,22 @@
     class IntegerField extends BaseField
     {
 
-        /**
-         * Возвращает строку, содержащую код для создания данного поля
-         * @param string $name Имя поля
-         *
-         * @return string
-         *
-         * Используемые параметры и их значения по умолчанию:
-         * nullable: false
-         * default: false
-         */
-        public function create_sql($name)
-        {
-            $nullable = ($this->get_param('nullable', false) === true) ? 'NULL' : 'NOT NULL';
-            $default = $this->get_param('default', false);
-            $default_value = $default === false ? '' : 'DEFAULT '.$default;
-
-            return '`' . $name . '` INT(' . $this->get_param('length', 11) . ') '.$nullable.' '.$default_value;
-        }
-
-        /**
-         * Возвращает тип поля
-         * @return string
-         */
-        public function type()
-        {
-            return 'integer';
-        }
-
-        /**
-         * Возвращает длину поля
-         * @return int
-         */
+        /** {@inheritdoc} */
         public function length()
         {
             return $this->get_param('length', 11);
         }
 
-        /**
-         * Возвращает значение по умолчанию
-         * @return mixed
-         */
-        public function default_value()
+        /** {@inheritdoc} */
+        public function type()
         {
-            return $this->get_param('default', false);
+            return 'integer';
+        }
+
+        /** {@inheritdoc} */
+        public function sql_type()
+        {
+            return 'INT(' . $this->length() . ')';
         }
 
     }

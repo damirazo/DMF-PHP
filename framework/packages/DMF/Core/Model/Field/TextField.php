@@ -18,28 +18,22 @@
     class TextField extends BaseField
     {
 
-        public function create_sql($name)
+        /** {@inheritdoc} */
+        public function length()
         {
-            $nullable = $this->get_param('nullable', false) === true ? 'NULL' : 'NOT NULL';
-            return '`'.$name.'` TEXT '.$nullable;
+            return 1;
         }
 
-        /**
-         * Возвращает тип поля
-         * @return string
-         */
+        /** {@inheritdoc} */
         public function type()
         {
             return 'text';
         }
 
-        /**
-         * Возвращает длину поля
-         * @return int
-         */
-        public function length()
+        /** {@inheritdoc} */
+        public function sql_type()
         {
-            return 1;
+            return 'TEXT';
         }
 
     }

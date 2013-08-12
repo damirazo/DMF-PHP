@@ -18,52 +18,22 @@
     class CharField extends BaseField
     {
 
-        /**
-         * Возвращает строку, содержащую код для создания данного поля
-         * @param string $name Имя поля
-         *
-         * @return string
-         *
-         * Используемые параметры и их значения по умолчанию:
-         * nullable: false
-         * default: false
-         * length: 255
-         */
-        public function create_sql($name)
-        {
-            $nullable = ($this->get_param('nullable', false) === true) ? 'NULL' : 'NOT NULL';
-            $default = $this->get_param('default', false);
-            $default_value = $default === false ? '' : 'DEFAULT "'.$default.'"';
-
-            return '`' . $name . '` VARCHAR(' . $this->get_param('length', 255) . ') ' . $nullable . ' '
-                . $default_value;
-        }
-
-        /**
-         * Возвращает тип поля
-         * @return string
-         */
-        public function type()
-        {
-            return 'string';
-        }
-
-        /**
-         * Возвращает длину поля
-         * @return int
-         */
+        /** {@inheritdoc} */
         public function length()
         {
             return $this->get_param('length', 255);
         }
 
-        /**
-         * Возвращает значение по умолчанию
-         * @return mixed
-         */
-        public function default_value()
+        /** {@inheritdoc} */
+        public function type()
         {
-            return $this->get_param('default', false);
+            return 'string';
+        }
+
+        /** {@inheritdoc} */
+        public function sql_type()
+        {
+            return 'VARCHAR(' . $this->length() . ')';
         }
 
     }

@@ -18,29 +18,30 @@
     class PrimaryKeyField extends BaseField
     {
 
-        public function create_sql($name)
+        /** {@inheritdoc} */
+        public function sql($name)
         {
-            $autoincrement = ($this->get_param('auto_increment', true) === true) ? 'AUTO_INCREMENT' : '';
-
-            return '`' . $name . '` INT(11) NOT NULL ' . $autoincrement . ' PRIMARY KEY';
+            $sql = parent::sql($name);
+            $autoincrement = $this->get_param('auto_increment', true) ? 'AUTO_INCREMENT' : '';
+            return $sql . $autoincrement . ' PRIMARY KEY';
         }
 
-        /**
-         * Возвращает тип поля
-         * @return string
-         */
+        /** {@inheritdoc} */
+        public function length()
+        {
+            return 11;
+        }
+
+        /** {@inheritdoc} */
         public function type()
         {
             return 'primary_key';
         }
 
-        /**
-         * Возвращает длину поля
-         * @return int
-         */
-        public function length()
+        /** {@inheritdoc} */
+        public function sql_type()
         {
-            return 11;
+            return 'INT(11)';
         }
 
     }

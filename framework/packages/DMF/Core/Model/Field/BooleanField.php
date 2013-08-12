@@ -18,47 +18,28 @@
     class BooleanField extends BaseField
     {
 
-        /**
-         * Возвращает строку, содержащую код для создания данного поля
-         * @param string $name Имя поля
-         *
-         * @return string
-         *
-         * Используемые параметры и их значения по умолчанию:
-         * default: true
-         */
-        public function create_sql($name)
-        {
-            $default = 'DEFAULT ' . (($this->get_param('default', true) === true) ? '1' : '0');
-
-            return '`' . $name . '` TINYINT(1) ' . $default;
-        }
-
-        /**
-         * Возвращает тип поля
-         * @return string
-         */
-        public function type()
-        {
-            return 'boolean';
-        }
-
-        /**
-         * Возвращает длину поля
-         * @return int
-         */
+        /** {@inheritdoc} */
         public function length()
         {
             return 1;
         }
 
-        /**
-         * Возвращает значение по умолчанию
-         * @return mixed
-         */
+        /** {@inheritdoc} */
         public function default_value()
         {
-            return $this->get_param('default', true);
+            return $this->get_param('default') ? 1 : 0;
+        }
+
+        /** {@inheritdoc} */
+        public function type()
+        {
+            return 'boolean';
+        }
+
+        /** {@inheritdoc} */
+        public function sql_type()
+        {
+            return 'TINYINT(1)';
         }
 
     }

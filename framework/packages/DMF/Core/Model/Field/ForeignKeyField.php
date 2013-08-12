@@ -12,6 +12,7 @@
     /**
      * Class ForeignKeyField
      * Поле для хранения связи с внешней таблицей
+     * TODO: Требуется исправить и дописать
      *
      * @package DMF\Core\Model\Field
      */
@@ -37,32 +38,22 @@
             $this->chained_model = $data[0];
         }
 
-        /**
-         * {@inheritdoc}
-         */
-        public function create_sql($name)
+        /** {@inheritdoc} */
+        public function length()
         {
-            $nullable = ($this->get_param('nullable', false) === true) ? 'NULL' : 'NOT NULL';
-            $default = $this->get_param('default', false);
-            $default_value = $default === false ? '' : 'DEFAULT ' . $default;
-
-            return '`' . $name . '` INT(11) ' . $nullable . ' ' . $default_value;
+            return 11;
         }
 
-        /**
-         * {@inheritdoc}
-         */
+        /** {@inheritdoc} */
         public function type()
         {
             return 'foreign_key';
         }
 
-        /**
-         * {@inheritdoc}
-         */
-        public function length()
+        /** {@inheritdoc} */
+        public function sql_type()
         {
-            return 11;
+            return 'INT(11)';
         }
 
     }
