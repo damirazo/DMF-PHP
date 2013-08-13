@@ -36,6 +36,7 @@
             $data = explode('.', $chained_field);
             $this->chained_module = (count($data) > 1) ? $data[1] : $this->loaded_module()->name;
             $this->chained_model = $data[0];
+            $this->chained_field = $chained_field;
         }
 
         /** {@inheritdoc} */

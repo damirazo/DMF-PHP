@@ -21,6 +21,9 @@
     class Entity extends Component implements \ArrayAccess, \Iterator
     {
 
+        /** @var bool Внесены ли изменения в сущность */
+        public $is_modified = false;
+
         /** @var null|Model Связанная модель */
         protected $model = null;
 
@@ -36,8 +39,8 @@
         /** @var null|string Имя поля первичного ключа */
         protected $pk_name = null;
 
-        /** @var bool Внесены ли изменения в сущность */
-        public $is_modified = false;
+        /** @var array Кэш объектов связанных моделей */
+        protected $relation_cache = [];
 
         /**
          * Конструктор сущности
@@ -62,7 +65,7 @@
             if ($this->is_modified) {
                 self::$db->query(
                     'UPDATE ' . $this->table . ' SET '
-                            . $this->get_update_condition() . ' WHERE ' . $this->pk_name . '=' . $this->pk,
+                    . $this->get_update_condition() . ' WHERE ' . $this->pk_name . '=' . $this->pk,
                     $this->data
                 )->send();
             }
@@ -176,10 +179,30 @@
          */
         public function __get($name)
         {
+            $value = null;
+            $model_fields = $this->model->scheme();
+            $field = $model_fields[$name];
+
             if (isset($this->data[$name])) {
-                return $this->data[$name];
+                $value = $this->data[$name];
             }
-            return null;
+
+            // Если указана связь на другую таблицу,
+            // то извлекаем соответствующую запись
+            /** @var $field \DMF\Core\Model\Field\BaseField */
+            if ($field->type() == 'foreign_key') {
+                if (isset($this->relation_cache[$name])) {
+                    return $this->relation_cache[$name];
+                } else {
+                    /** @var $related_model \DMF\Core\Model\Model */
+                    $related_model = $this->model($field->chained_field);
+                    $record = $related_model->get_by_pk((int)$value);
+                    $this->relation_cache[$name] = $record;
+                    return $record;
+                }
+            }
+
+            return $value;
         }
 
         /**

@@ -64,7 +64,7 @@
         /**
          * Возвращает объект требуемой модели
          * @param string $name  Имя модели
-         * @return mixed
+         * @return \DMF\Core\Model\Model
          */
         public function model($name)
         {
