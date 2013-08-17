@@ -72,11 +72,18 @@
         format('Обработка модели: %s', $model->class_name());
 
         # Создание таблицы в БД
-        $model->update_table();
+        format('Выполняется обновление таблицы...');
+        $update_statement = $model->update_table();
+        if (!$update_statement['status']) {
+            format($update_statement['message']);
+            // TODO: Реализовать подтверждение выполнения операции
+        }
         format('Создана таблица: %s', $model->table_name());
 
         # Загрузка фикстур
-        format('Загрузка фикстур временно недоступна...');
+        format('Выполняется загрузка фикстур...');
+        $fixtures_count = $model->load_fixtures();
+        format('Успешно загружено фикстур: %d', $fixtures_count);
 
         format('Синхронизация таблицы завершена...');
         format('##################################');

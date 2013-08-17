@@ -11,6 +11,7 @@
 
     use DMF\Core\Component\Component;
     use DMF\Core\Model\Exception\DBError;
+    use DMF\Core\Model\Exception\RecordDoesNotExists;
     use DMF\Core\OS\File;
     use DMF\Core\OS\OS;
     use DMF\Core\Storage\Config;
@@ -140,21 +141,24 @@
 
         /**
          * Обновление структуры таблицы в БД
+         * @param bool $prepare_migration Применить миграции, в случае необходимости
+         * @return array
          */
-        public function update_table()
+        public function update_table($prepare_migration = false)
         {
             // Проверяем наличие указанной таблицы в БД
             $check_table = self::$db->query('SHOW TABLES LIKE :table', ['table' => $this->table_name()]);
+            $statement = ['status' => true, 'message' => ''];
             // Если таблица отсутствует, то создаем ее
             if ($check_table->num_rows() < 1) {
                 // Фикстуры при создании таблицы будут подгружаться самостоятельно
-                $this->create_table(true);
+                $this->create_table();
                 $this->create_migration();
             } else {
                 // Объект модуля, в котором определена текущая модель
                 $module = $this->module();
                 $migrations_dir = $module->path . 'Model' . _SEP . 'migrations' . _SEP;
-                // Проверяем были ли уже создана папка с миграциями
+                // Проверяем была ли уже создана папка с миграциями
                 if (OS::dir_exists($migrations_dir)) {
                     $migration_file = $migrations_dir . $this->class_name() . '.json';
                     if (OS::file_exists($migration_file)) {
@@ -163,14 +167,26 @@
                         $changes = $this->check_table($data);
 
                         if ($changes['total'] > 0) {
-                            $this->add_fields($changes['added_fields']);
-                            $this->remove_fields(array_keys($changes['removed_fields']));
-                            $this->change_fields($changes['changed_fields']);
-                            $this->create_migration();
+                            if ($prepare_migration) {
+                                $this->add_fields($changes['added_fields']);
+                                $this->remove_fields(array_keys($changes['removed_fields']));
+                                $this->change_fields($changes['changed_fields']);
+                                $this->create_migration();
+                            } else {
+                                $statement['status'] = false;
+                                $statement['message'] = sprintf(
+                                    'Обнаружено %d изменений в таблице. Из них:' . PHP_EOL
+                                    . '\tДобавлено новых полей: %d' . PHP_EOL
+                                    . '\tИзменено полей: %d' . PHP_EOL
+                                    . '\tУдалено полей: %d' . PHP_EOL
+                                    . 'Введите Yes для применения данных изменений, в противном случае введите N.'
+                                );
+                            }
                         }
                     }
                 }
             }
+            return $statement;
         }
 
         /**
@@ -246,16 +262,11 @@
 
         /**
          * Создание новой таблицы
-         * @param bool $load_fixtures Требуется ли подгружать фикстуры при создании таблицы
          */
-        public function create_table($load_fixtures = false)
+        public function create_table()
         {
             // Выполнение запроса на создание таблицы в БД
             self::$db->exec($this->generate_sql_for_table());
-            if ($load_fixtures) {
-                // Загрузка фикстур
-                $this->load_fixtures();
-            }
         }
 
         /**
@@ -359,6 +370,7 @@
             // Имя файл фикстуры, генерируется из имени модуля и имени модели
             $fixture_name = strtolower($this->loaded_module()->name) . '__' . strtolower($this->class_name()) . '.json';
             $fixture_path = DATA_PATH . 'fixtures' . _SEP . $fixture_name;
+            $fixtures_count = 0;
             // Если файл с фикстурой отсутствует, то ничего не делаем
             if (OS::file_exists($fixture_path)) {
                 // Полный путь до файла с фикстурой
@@ -370,6 +382,7 @@
                     // Обходим массив и добавляем каждый элемент в БД
                     foreach ($data as $element) {
                         $this->create($element);
+                        $fixtures_count += 1;
                     }
                     self::$db->commit();
                 } catch (\Exception $e) {
@@ -379,6 +392,7 @@
                         Текст ошибки: ' . $e->getMessage());
                 }
             }
+            return $fixtures_count;
         }
 
         /**
@@ -639,24 +653,29 @@
          * @param int   $pk     Первичный ключ
          * @param array $fields Список выбираемых из таблицы полей
          * @return Entity Сущность
+         * @throws RecordDoesNotExists
          */
         public function get_by_pk($pk, $fields = [])
         {
-            // Список выбираемых из таблицы полей (по умолчанию все поля)
-            $select_fields = (count($fields) > 0) ? $fields : $this->fields();
-            // Выполнение запроса к БД
-            $sql = 'SELECT ' . implode(', ', $select_fields)
-                . ' FROM ' . $this->table_name()
-                . ' WHERE ' . $this->primary_key() . '=' . (int)$pk
-                . ' LIMIT 1';
+            $sql = sprintf(
+                'SELECT %s FROM `%s` WHERE `%s`=%d',
+                implode(', ', (count($fields) > 0) ? $fields : $this->fields()),
+                $this->table_name(),
+                $this->primary_key(),
+                (int)$pk
+            );
             $data = self::$db->query($sql);
+            $data_count = $data->num_rows();
             // Если элемент обнаружен, то добавляем его в сущность
-            if ($data->num_rows() == 1) {
+            if ($data_count == 1) {
                 $entity = $data->fetch_one();
                 $entity_namespace = $this->entity_namespace();
                 return new $entity_namespace($this, $entity);
+            } elseif ($data_count < 1) {
+                // Если запись с указанным id отсутствует,
+                // то генерируем соответствующее исключение
+                throw new RecordDoesNotExists($this, $pk);
             }
-            return false;
         }
 
         /**

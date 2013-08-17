@@ -11,6 +11,7 @@
 
     use ArrayAccess;
     use DMF\Core\Component\Component;
+    use DMF\Core\Model\Exception\RecordDoesNotExists;
 
     /**
      * Class Entity
@@ -63,25 +64,8 @@
         {
             // Если сущность не была изменена, то игнорируем ее сохранение
             if ($this->is_modified) {
-                self::$db->query(
-                    'UPDATE ' . $this->table . ' SET '
-                    . $this->get_update_condition() . ' WHERE ' . $this->pk_name . '=' . $this->pk,
-                    $this->data
-                )->send();
+                $this->model->update_by_pk($this->pk, $this->data);
             }
-        }
-
-        /**
-         * Возвращает строку с сохраняемыми значениями
-         * @return string
-         */
-        protected function get_update_condition()
-        {
-            $condition = [];
-            foreach ($this->data as $key => $value) {
-                $condition[] = $key . '=:' . $key;
-            }
-            return implode(', ', $condition);
         }
 
         /**
@@ -173,24 +157,37 @@
         }
 
         /**
+         * Возвращает поле с требуемым именем у данной сущности
+         * @param string $name Название поля
+         * @return bool|\DMF\Core\Model\Field\BaseField
+         */
+        public function get_field_by_name($name)
+        {
+            $scheme = $this->model->scheme();
+            if (isset($scheme[$name])) {
+                return $scheme[$name];
+            }
+            return false;
+        }
+
+        /**
          * Получение свойства с требуемым именем
          * @param string $name Имя свойства
-         * @return null|mixed
+         * @return null|\DMF\Core\Model\Entity
          */
         public function __get($name)
         {
-            $value = null;
-            $model_fields = $this->model->scheme();
-            $field = $model_fields[$name];
+            /** @var $field \DMF\Core\Model\Field\ForeignkeyField */
+            $field = $this->get_field_by_name($name);
 
+            $value = null;
             if (isset($this->data[$name])) {
                 $value = $this->data[$name];
             }
 
             // Если указана связь на другую таблицу,
             // то извлекаем соответствующую запись
-            /** @var $field \DMF\Core\Model\Field\BaseField */
-            if ($field->type() == 'foreign_key') {
+            if ($field instanceof \DMF\Core\Model\Field\ForeignKeyField) {
                 if (isset($this->relation_cache[$name])) {
                     return $this->relation_cache[$name];
                 } else {
@@ -207,11 +204,27 @@
 
         /**
          * Установка свойства с требуемым именем
-         * @param string $name  Имя свойства
-         * @param mixed  $value Значение свойства
+         * @param string                     $name  Имя свойства
+         * @param int|\DMF\Core\Model\Entity $value Значение свойства
+         * @throws RecordDoesNotExists
          */
         public function __set($name, $value)
         {
+            /** @var $field \DMF\Core\Model\Field\ForeignkeyField */
+            $field = $this->get_field_by_name($name);
+
+            // Для полей со связью требуется проверить существование связанного объекта
+            if ($field instanceof \DMF\Core\Model\Field\ForeignKeyField) {
+                $relation = $this->model($field->chained_field);
+                $pk = is_int($value) ? $value : $value->pk;
+                try {
+                    $relation->get_by_pk($pk);
+                } catch (RecordDoesNotExists $exception) {
+                    // Если связанный объект не найден, то выбрасываем исключение
+                    throw $exception;
+                }
+            }
+
             if (isset($this->data[$name])) {
                 $this->data[$name] = $value;
                 $this->is_modified = true;
