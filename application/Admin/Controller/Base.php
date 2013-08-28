@@ -22,10 +22,12 @@
          */
         public function proxy($action, $args)
         {
-            if ($this->model('DMFAuth.DMFUser')->check_auth()) {
+            /** @var \DMF\DMFAuth\Model\DMFUser $user_model */
+            $user_model = $this->model('DMFAuth.DMFUser');
+            if ($user_model->check_auth()) {
                 return parent::proxy($action, $args);
             } else {
-                return $this->call_controller('user_login');
+                return $this->action('user_login');
             }
         }
 
@@ -35,6 +37,7 @@
          */
         public function user_login()
         {
+            $debug = $this->config(['debug', '22']);
             return $this->string('Здесь будет страница с запросом авторизации пользователя...');
         }
 

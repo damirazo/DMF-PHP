@@ -15,6 +15,7 @@
     use DMF\Core\Http\Response;
     use DMF\Core\Model\Database;
     use DMF\Core\Storage\Config;
+    use DMF\Core\Storage\Exception\IsNotArray;
     use DMF\Core\Storage\Session;
     use DMF\Core\Template\Template;
 
@@ -38,7 +39,7 @@
         public function __construct()
         {
             // Проверяем, что БД для указанного проекта используются
-            if ($this->config('database')['enable']) {
+            if ($this->config(['database', 'enable'])) {
                 // Создание подключения к БД
                 if (is_null(self::$db)) {
                     self::$db = new Database();
@@ -55,9 +56,21 @@
          * @param string $name    Имя настройки
          * @param mixed  $default Значение по умолчанию
          * @return bool|mixed
+         * @throws
          */
         public function config($name, $default = false)
         {
+            if (is_array($name) && count($name) == 2) {
+                $var = Config::get($name[0], $default);
+                if (is_array($var)) {
+                    if (isset($var[$name[1]])) {
+                        $value = $var[$name[1]];
+                        return $value;
+                    }
+                } else {
+                    throw new IsNotArray('Параметр конфигурации "' . $name[0] . '" не является массивом!');
+                }
+            }
             return Config::get($name, $default);
         }
 
@@ -214,20 +227,25 @@
         /**
          * Возвращает namespace текущего компонента, разбитый на отдельные части
          *
+         * @param bool|string $return Имя возвращаемого параметра
          * @return array
          */
-        public function parsed_namespace()
+        public function parsed_namespace($return = false)
         {
             $namespace = $this->class_namespace();
             // Проверяем, что у нас используется реальный неймспейс
             if (mb_strpos($namespace, '\\')) {
                 list($root_namespace, $module_name, $component_type, $component_name) = explode('\\', $namespace);
-                return [
+                $data = [
                     'root_namespace' => $root_namespace,
                     'module_name'    => $module_name,
                     'component_type' => $component_type,
                     'component_name' => $component_name,
                 ];
+                if ($return && isset($data[$return])) {
+                    return $data[$return];
+                }
+                return $data;
             } else {
                 // Работа с псевдонеймспейсами пока не поддерживается
                 return [];
@@ -240,7 +258,7 @@
          */
         public function class_name()
         {
-            return $this->parsed_namespace()['component_name'];
+            return $this->parsed_namespace('component_name');
         }
 
         /**
@@ -249,7 +267,7 @@
          */
         public function module()
         {
-            return self::$app->get_module_by_name($this->parsed_namespace()['module_name']);
+            return self::$app->get_module_by_name($this->parsed_namespace('module_name'));
         }
 
         /**

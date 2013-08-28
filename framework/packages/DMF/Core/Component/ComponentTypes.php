@@ -22,5 +22,7 @@
         const Model = 'Model';
         /** Формы */
         const Form = 'Form';
+        /** Контроллеры */
+        const Controller = 'Controller';
 
     }

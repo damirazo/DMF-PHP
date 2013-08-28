@@ -36,6 +36,8 @@
         private static $_routes = [];
         /** @var array Список зарегистрированных маршрутов с ключом в виде пути до действия */
         private static $_routes_by_path = [];
+        /** @var array Список созданных экземпляров компонентов */
+        private static $_component_cache = [];
         /** @var null|array Объект с данными о текущем маршруте */
         public $route_object = null;
         /** @var array Список модулей */
@@ -44,15 +46,6 @@
         public $module = null;
         /** @var \DMF\Core\Http\Request */
         private $request;
-
-        /**
-         * Список констант для идентификации ОС, на которой запущен сервер
-         */
-        const WINDOWS = 'windows';
-        const LINUX = 'linux';
-        const FREEBSD = 'freebsd';
-        const MACOSX = 'macosx';
-        const UNKNOWN = 'unknown';
 
         /** Запрет на создание объекта */
         private function __construct()
@@ -154,27 +147,6 @@
         }
 
         /**
-         * Возвращает информацию о ОС, на которой запущен сервер
-         * @return bool
-         */
-        public static function get_os()
-        {
-            $php_os = strtolower(PHP_OS);
-            $os_markers = [
-                'windows' => Application::WINDOWS,
-                'linux'   => Application::LINUX,
-                'freebsd' => Application::FREEBSD,
-                'macosx'  => Application::MACOSX,
-            ];
-            foreach ($os_markers as $marker => $value) {
-                if (strpos($php_os, $marker) !== -1) {
-                    return $value;
-                }
-            }
-            return Application::UNKNOWN;
-        }
-
-        /**
          * Разбивка URI и получение информации о маршруте
          *
          * @return array
@@ -267,16 +239,24 @@
             } else {
                 throw new IllegalArgument('Некорректный формат записи имени компонента!');
             }
+
             $module = $this->get_module_by_name($module_name);
             $component_namespace = $module->namespace . '\\' . $type . '\\' . $component_name;
-            return new $component_namespace();
+
+            if (array_key_exists($component_namespace, self::$_component_cache)) {
+                return self::$_component_cache[$component_namespace];
+            } else {
+                $component = new $component_namespace();
+                self::$_component_cache[$component_namespace] = $component;
+                return $component;
+            }
         }
 
         /**
          * Возвращает имя требуемого модуля
          * @return string
          */
-        protected function module_name()
+        public function module_name()
         {
             return $this->parse_route()['pattern']->module_name;
         }
