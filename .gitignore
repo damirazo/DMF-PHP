@@ -1,9 +1,6 @@
 .idea/*
 *.json
 
-framework/packages/*
-!.gitkeep
-
 framework/config/config.local.php
 
 framework/data/cache/templates/*

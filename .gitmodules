@@ -1,7 +1,6 @@
 [submodule "framework/packages/DMF"]
 	path = framework/packages/DMF
-	url = git://github.com/damirazo/DMF-Core
-
+	url = https://github.com/damirazo/DMF-Core.git
 [submodule "framework/packages/Twig"]
 	path = framework/packages/Twig
-	url = git://github.com/fabpot/Twig.git
+	url = https://github.com/fabpot/Twig.git
