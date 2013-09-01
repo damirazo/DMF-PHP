@@ -7,17 +7,17 @@
      * @author damirazo <me@damirazo.ru>
      */
 
-    namespace DMF\DMFAuth\Model;
+    namespace DMF\Auth\Entity;
 
     use DMF\Core\Model\Entity;
 
     /**
-     * Class DMFGuestEntity
+     * Class GuestEntity
      * Описание сущности неавторизованного пользователя
      *
-     * @package DMF\DMFAuth\Model
+     * @package DMF\Auth\Model
      */
-    class DMFGuestEntity extends Entity
+    class GuestEntity extends Entity
     {
 
         /**

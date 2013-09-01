@@ -7,7 +7,7 @@
      * @author damirazo <me@damirazo.ru>
      */
 
-    namespace DMF\DMFAuth\Model;
+    namespace DMF\Auth\Model;
 
     use DMF\Core\Model\Field\BooleanField;
     use DMF\Core\Model\Field\CharField;
@@ -19,22 +19,23 @@
     use DMF\Core\Storage\Config;
     use DMF\Core\Storage\Cookie;
     use DMF\Core\Storage\Session;
+    use DMF\Auth\Entity\GuestEntity;
 
     /**
-     * Class DMFUser
+     * Class User
      * Модель пользователя
      * Список дефолтных полей можно расширить,
      * переопределив метод custom_fields для возврата собственного списка полей
      *
-     * @package DMF\DMFAuth\Model
+     * @package DMF\Auth\Model
      */
-    class DMFUser extends Model
+    class User extends Model
     {
 
         /** @var string Название таблицы (без префикса) */
         public $table_name = 'users';
         /** @var string Имя возвращаемой сущности */
-        public $entity_name = 'DMFAuth.DMFUserEntity';
+        public $entity_name = 'Auth.UserEntity';
 
 
         /**
@@ -190,6 +191,7 @@
         /**
          * Создание пользователя
          * @param array $data Массив параметров для создания
+         * @return null
          */
         public function create($data = [])
         {
@@ -226,6 +228,7 @@
 
         /**
          * Создание пользователя с использованием ORM
+         *
          * @param $data
          */
         public function create_user($data)
@@ -264,11 +267,11 @@
 
         /**
          * Возвращает объект текущего пользователя или объект гостя
-         * @return bool|DMFGuestEntity|mixed
+         * @return bool|\DMF\Auth\Entity\GuestEntity|mixed
          */
         public function get_user()
         {
-            return ($this->authenticate()) ? $this->authenticate() : new DMFGuestEntity($this, []);
+            return ($this->authenticate()) ? $this->authenticate() : new GuestEntity($this, []);
         }
 
         /**

@@ -7,7 +7,7 @@
      * @author damirazo <me@damirazo.ru>
      */
 
-    namespace DMF\DMFAuth\Model;
+    namespace DMF\Auth\Entity;
 
     use DMF\Core\Model\Entity;
 
@@ -15,9 +15,9 @@
      * Class DMFUserEntity
      * Сущность авторизованного пользователя
      *
-     * @package DMF\DMFAuth\Model
+     * @package DMF\Auth\Model
      */
-    class DMFUserEntity extends Entity
+    class UserEntity extends Entity
     {
 
         /**

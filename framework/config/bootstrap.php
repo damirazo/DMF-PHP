@@ -44,7 +44,7 @@
         'Example' => 'App\\Example',
         'Doc'     => 'App\\Doc',
         'Admin'   => 'App\\Admin',
-        'DMFAuth' => 'DMF\\DMFAuth'
+        'Auth'    => 'DMF\\Auth'
     ]);
 
     /** Импорт маршрутов */

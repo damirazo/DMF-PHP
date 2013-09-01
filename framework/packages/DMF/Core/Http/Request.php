@@ -188,7 +188,7 @@
          */
         public function get_method()
         {
-            return (isset($_SERVER['REQUEST_METHOD'])) ? $_SERVER['REQUEST_METHOD'] : false;
+            return (isset($_SERVER['REQUEST_METHOD'])) ? strtolower($_SERVER['REQUEST_METHOD']) : 'unknown';
         }
 
         /**

@@ -42,9 +42,5 @@
             /* Документация */
             '/doc/'                           => 'Doc.Base.index',
             '/doc/([\w\d\-]+).html/'          => 'Doc.Base.page',
-
-            // Просмотр лога ошибок фреймворка за текущий день
-            '/admin/logs/today/'              => 'Admin.Base.current_access_log',
-            '/admin/login/'                   => 'Admin.Base.user_login',
         ]
     );

@@ -128,7 +128,7 @@
             }
 
             // Создание демонстрационных таблиц в БД
-            $this->model('DMFAuth.DMFUser')->_create_table();
+            $this->model('Auth.DMFUser')->_create_table();
             $this->model('Post')->_create_table();
 
             return $this->string('Таблицы успешно создана!');
@@ -142,7 +142,7 @@
             // проверяем факт отправки формы и валидность полученных данных
             if ($form->is_valid()) {
                 // создаем новый объект пользователя и сохраняем его в БД
-                $this->model('DMFAuth.DMFUser')->create($form->cleaned_data());
+                $this->model('Auth.DMFUser')->create($form->cleaned_data());
                 // возвращаемся на главную страницу
                 return $this->redirect('');
             }
@@ -155,7 +155,7 @@
         {
             $form = $this->form('Login');
             if ($form->is_valid()) {
-                $this->model('DMFAuth.DMFUser')->login($form->value('username'), $form->value('password'));
+                $this->model('Auth.DMFUser')->login($form->value('username'), $form->value('password'));
                 return $this->redirect('user');
             }
             return $this->render('login', ['form' => $form]);
@@ -164,7 +164,7 @@
         /** Информация о пользователе с указанным ID */
         public function user($user_id)
         {
-            $user = $this->model('DMFAuth.DMFUser')->get_by_pk($user_id);
+            $user = $this->model('Auth.DMFUser')->get_by_pk($user_id);
             if ($user) {
                 return $this->string($user->username);
             }

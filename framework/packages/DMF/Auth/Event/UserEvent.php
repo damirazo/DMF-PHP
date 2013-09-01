@@ -7,19 +7,19 @@
      * @author damirazo <me@damirazo.ru>
      */
 
-    namespace DMF\DMFAuth\Event;
+    namespace DMF\Auth\Event;
 
     use DMF\Core\Event\Event;
     use DMF\Core\Template\Context;
     use DMF\Core\Storage\Session;
 
     /**
-     * Class DMFUserEvent
+     * Class UserEvent
      * Обработка пользовательских событий
      *
-     * @package DMF\DMFAuth\Event
+     * @package DMF\Auth\Event
      */
-    class DMFUserEvent extends Event
+    class UserEvent extends Event
     {
 
         /**
@@ -27,7 +27,8 @@
          */
         public function authenticate()
         {
-            $user = $this->model('DMFAuth.DMFUser')->authenticate();
+            /** @var $user \DMF\Auth\Model\User $user */
+            $user = $this->model('Auth.User')->authenticate();
             Context::add('user', $user);
         }
 

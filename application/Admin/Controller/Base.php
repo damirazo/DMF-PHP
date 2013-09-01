@@ -22,8 +22,8 @@
          */
         public function proxy($action, $args)
         {
-            /** @var \DMF\DMFAuth\Model\DMFUser $user_model */
-            $user_model = $this->model('DMFAuth.DMFUser');
+            /** @var \DMF\Auth\Model\User $user_model */
+            $user_model = $this->model('Auth.User');
             if ($user_model->check_auth()) {
                 return parent::proxy($action, $args);
             } else {

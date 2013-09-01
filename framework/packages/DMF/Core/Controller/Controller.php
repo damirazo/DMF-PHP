@@ -31,17 +31,28 @@
          */
         public function proxy($action, $args)
         {
-            // метод получения запроса
-            $method = strtolower($this->request()->get_method());
-            // вначале проверяем наличия требуемого метода с префиксом в виде метода запроса
+            $action_name = $this->find_action($action);
+            return $this->action($action_name, $args);
+        }
+
+        /**
+         * Поиск действия с подходящим именем
+         * @param string $action Имя действия
+         * @return string
+         * @throws Exception\ActionNotFound
+         */
+        public function find_action($action)
+        {
+            $method = $this->request()->get_method();
             if (method_exists($this, $action . '__' . $method)) {
-                return call_user_func_array([$this, $action . '__' . $method], $args);
-            } // затем ищем метод по точному имени
-            elseif (method_exists($this, $action)) {
-                return $this->action($action, $args);
+                $action_name = $action . '__' . $method;
+            } elseif (method_exists($this, $action)) {
+                $action_name = $action;
+            } else {
+                // если метод не обнаружен, то генерируем исключение
+                throw new ActionNotFound(sprintf('Действие %s не обнаружено!', $action));
             }
-            // если метод не обнаружен, то генерируем исключение
-            throw new ActionNotFound('Действие ' . $action . ' не обнаружено');
+            return $action_name;
         }
 
         /**

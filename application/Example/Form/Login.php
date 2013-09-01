@@ -31,7 +31,7 @@
         {
             /** @var $password_field \DMF\Core\Form\Field\BaseField */
             $password_field = $this->field('password');
-            if (!$this->model('DMFAuth.DMFUser')->is_exists($value, $password_field->value())) {
+            if (!$this->model('Auth.DMFUser')->is_exists($value, $password_field->value())) {
                 return 'Пользователя с указанным именем и паролем не обнаружено!';
             }
             return false;
