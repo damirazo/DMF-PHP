@@ -8,6 +8,7 @@
      */
 
     namespace DMF\Core\OS;
+
     use DMF\Core\OS\Exception\FileNotFound;
 
     /**
@@ -79,6 +80,7 @@
 
         /**
          * Чтение информации в формате json и преобразование в массив
+         *
          * @return mixed
          */
         public function read_as_json()
@@ -103,7 +105,24 @@
          */
         public function write($data)
         {
-            fwrite($this->file_handler, $data);
+            if (is_array($data)) {
+                foreach ($data as $line) {
+                    fwrite($this->file_handler, $line . PHP_EOL);
+                }
+            } else {
+                fwrite($this->file_handler, $data);
+            }
+            return $this;
+        }
+
+        /**
+         * Запись в файл одной текстовой строки
+         * @param string $line Строка с текстом
+         * @return $this
+         */
+        public function write_line($line)
+        {
+            fwrite($this->file_handler, $line.PHP_EOL);
             return $this;
         }
 

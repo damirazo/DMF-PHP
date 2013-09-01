@@ -6,6 +6,9 @@ framework/config/config.local.php
 framework/data/cache/templates/*
 !.gitkeep
 
+framework/data/cache/classes/*
+!.gitkeep
+
 framework/data/migrations/*
 !.gitkeep
 

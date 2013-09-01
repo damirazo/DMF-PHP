@@ -25,7 +25,7 @@
     Config::set(
         'database', [
             // Включение поддержки БД
-            'enable'   => true,
+            'enable'   => false,
             // Хост БД
             'host'     => '127.0.0.1',
             // Порт БД
@@ -48,6 +48,4 @@
     Config::set('scaffolding_password', '123456qwerty');
 
     /** Импортирование локального конфига для переопределения системных настроек */
-    if (DEBUG) {
-        OS::import(CONFIG_PATH . 'config.local.php', false);
-    }
+    OS::import(CONFIG_PATH . 'config.local.php', false);

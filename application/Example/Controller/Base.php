@@ -3,6 +3,7 @@
     namespace App\Example\Controller;
 
     use DMF\Core\Controller\Controller;
+    use DMF\Core\Http\Exception\HttpError;
     use DMF\Core\Model\Entity;
 
     /**

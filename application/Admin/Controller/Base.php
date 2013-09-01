@@ -37,7 +37,6 @@
          */
         public function user_login()
         {
-            $debug = $this->config(['debug', '22']);
             return $this->string('Здесь будет страница с запросом авторизации пользователя...');
         }
 

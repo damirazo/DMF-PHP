@@ -22,7 +22,6 @@
 
         /**
          * Проверка существования директории
-         *
          * @param string $path Путь до директории
          * @return bool
          */
@@ -36,20 +35,21 @@
          *
          * @param string  $path      Путь до файла
          * @param boolean $exception Требуется ли выбрасывать исключение, если файл отсутствует
+         * @param null|string Кастомное сообщение об отсутствии файла
          * @throws Exception\FileNotFound
          */
-        public static function import($path, $exception = true)
+        public static function import($path, $exception = true, $exc_message = null)
         {
             if (self::file_exists($path)) {
                 require_once $path;
             } elseif ($exception) {
-                throw new FileNotFound('Файл ' . $path . ' не обнаружен!');
+                $msg = (is_null($exc_message)) ? 'Файл %s не обнаружен!' : $exc_message;
+                throw new FileNotFound(sprintf($msg, $path));
             }
         }
 
         /**
          * Проверка существования файла и доступности его для чтения
-         *
          * @param string $path Путь до файла
          * @return bool
          */
@@ -60,7 +60,6 @@
 
         /**
          * Возвращает рассчитанный путь
-         *
          * @param string $path Путь до директории
          * @param string $file Имя файла
          * @return string

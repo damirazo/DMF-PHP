@@ -17,6 +17,7 @@
     use DMF\Core\Http\Exception\Http404;
     use DMF\Core\Http\Request;
     use DMF\Core\Module\Module;
+    use DMF\Core\OS\File;
     use DMF\Core\OS\OS;
     use DMF\Core\Application\Exception\RouteExists;
     use DMF\Core\Storage\Config;
@@ -41,7 +42,7 @@
         /** @var null|array Объект с данными о текущем маршруте */
         public $route_object = null;
         /** @var array Список модулей */
-        public $modules = [];
+        public static $modules = [];
         /** @var null|\DMF\Core\Module\Module */
         public $module = null;
         /** @var \DMF\Core\Http\Request */
@@ -68,7 +69,7 @@
          * @param array $routes Список маршрутов
          * @throws \DMF\Core\Application\Exception\RouteExists
          */
-        public static function routes($routes = [])
+        public static function register_routes($routes = [])
         {
             foreach ($routes as $pattern => $callable) {
                 if (!isset(self::$_routes[$pattern])) {
@@ -106,7 +107,7 @@
             foreach ($modules as $module_name => $module_namespace) {
                 $data[$module_name] = new Module($module_name, $module_namespace);
             }
-            $this->modules = $data;
+            self::$modules = $data;
         }
 
         /**
@@ -189,6 +190,42 @@
             }
         }
 
+        public static function load_routes()
+        {
+            // Путь до скомпилированного файла с маршрутами
+            $cache_file = DATA_PATH . 'cache' . _SEP . 'classes' . _SEP . 'routes.php';
+            // Если файл с маршрутами уже существует и режим разработки отключен, то загружаем его
+            if (!DEBUG && OS::file_exists($cache_file)) {
+                OS::import($cache_file);
+                return;
+            }
+
+            // Загрузка файла с глобальными маршрутами
+            OS::import(CONFIG_PATH . 'routes.php', false);
+            // Загрузка файлов с маршрутами из всех зарегистрированных модулей
+            foreach (self::$modules as $module_name => $module) {
+                OS::import($module->path . 'routes.php', false);
+            }
+
+            // Запись маршрутов в файл
+            $file = new File($cache_file);
+            $file->open('w+');
+            $file->block();
+            $file->write_line('<?php');
+            $file->write_line('/** Данный файл сгенерирован автоматически */');
+            $file->write_line('use \DMF\Core\Application\Application;');
+            $file->write_line('Application::register_routes([');
+            $str = [];
+            foreach (self::$_routes as $path => $route) {
+                $str[] = sprintf('"%s" => "%s",', $path, $route->callable);
+            }
+            $file->write($str);
+            $file->write_line(']);');
+            $file->unblock();
+            $file->close();
+
+        }
+
         /**
          * Загрузка модуля и информации о нем
          * @throws Exception\ModuleNotFound
@@ -208,8 +245,8 @@
         {
             $module_name = is_null($name) ? $this->module_name() : $name;
             // Проверяем регистрацию модуля
-            if (isset($this->modules[$module_name])) {
-                $module = $this->modules[$module_name];
+            if (isset(self::$modules[$module_name])) {
+                $module = self::$modules[$module_name];
                 // Проверяем существование папки с модулем
                 if (OS::dir_exists($module->path)) {
                     return $module;
@@ -276,7 +313,7 @@
             OS::import(CONFIG_PATH . 'template_tags.php');
 
             // Обход списка зарегистрированных модулей и загрузка их параметров
-            foreach ($this->modules as $module_name => $module_namespace) {
+            foreach (self::$modules as $module_name => $module_namespace) {
                 $module = $this->get_module_by_name($module_name);
                 OS::import($module->path . 'config.php', false);
                 OS::import($module->path . 'events.php', false);

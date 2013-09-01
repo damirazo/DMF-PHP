@@ -32,7 +32,7 @@
         public function proxy($action, $args)
         {
             // метод получения запроса
-            $method = strtolower(Request::get_instance()->get_method());
+            $method = strtolower($this->request()->get_method());
             // вначале проверяем наличия требуемого метода с префиксом в виде метода запроса
             if (method_exists($this, $action . '__' . $method)) {
                 return call_user_func_array([$this, $action . '__' . $method], $args);

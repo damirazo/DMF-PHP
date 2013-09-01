@@ -33,8 +33,6 @@
 
     // Инициализация обработчика ошибок до инициализации приложения
     ErrorHandler::run();
-    /** Импорт маршрутов */
-    require_once 'routes.php';
 
     /**
      * Регистрация списка модулей и их пространство имен
@@ -48,6 +46,9 @@
         'Admin'   => 'App\\Admin',
         'DMFAuth' => 'DMF\\DMFAuth'
     ]);
+
+    /** Импорт маршрутов */
+    Application::load_routes();
 
     /** Активация приложения */
     Application::get_instance()->run();
