@@ -3,6 +3,7 @@
 
 application/*
 !.gitkeep
+!application/HelloWorld/*
 
 framework/config/config.local.php
 

@@ -50,7 +50,11 @@
                 $action_name = $action;
             } else {
                 // если метод не обнаружен, то генерируем исключение
-                throw new ActionNotFound(sprintf('Действие %s не обнаружено!', $action));
+                throw new ActionNotFound(
+                    sprintf('Действие %s.%s.%s не обнаружено!',
+                    $this->module()->name,
+                    $this->class_name(),
+                    $action));
             }
             return $action_name;
         }
