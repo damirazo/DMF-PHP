@@ -16,7 +16,7 @@ framework/data/cache/classes/*
 framework/data/migrations/*
 !.gitkeep
 
-frameworl/data/fixtures/*
+framework/data/fixtures/*
 !.gitkeep
 
 logs/*
