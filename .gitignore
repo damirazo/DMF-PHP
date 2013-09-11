@@ -1,6 +1,9 @@
 .idea/*
 *.json
 
+application/*
+!.gitkeep
+
 framework/config/config.local.php
 
 framework/data/cache/templates/*
@@ -13,4 +16,7 @@ framework/data/migrations/*
 !.gitkeep
 
 logs/*
+!.gitkeep
+
+public/static/*
 !.gitkeep
