@@ -10,5 +10,5 @@
     use DMF\Core\Application\Application;
 
     Application::register_routes([
-        '/' => 'HelloWorld.Base.index',
+        '/hello' => 'HelloWorld.Base.index',
     ]);

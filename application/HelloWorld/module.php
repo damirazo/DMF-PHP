@@ -10,7 +10,7 @@
     use DMF\Core\Application\Application;
 
     Application::register_module('HelloWorld', [
-        'namespace'    => 'App\\HelloWorld',
-        'author'       => 'damirazo',
-        'version'      => '0.1',
+        'namespace' => 'App\\HelloWorld',
+        'author'    => 'damirazo',
+        'version'   => '0.1',
     ]);

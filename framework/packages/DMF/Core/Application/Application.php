@@ -9,14 +9,17 @@
 
     namespace DMF\Core\Application;
 
+    use DMF\Core\Application\Exception\BaseException;
     use DMF\Core\Application\Exception\ControllerProxyNotFound;
     use DMF\Core\Application\Exception\IllegalArgument;
+    use DMF\Core\Application\Exception\IncorrectResponseFormat;
     use DMF\Core\Application\Exception\ModuleNotFound;
     use DMF\Core\Application\RoutePattern;
     use DMF\Core\Autoloader\Autoloader;
     use DMF\Core\Event\Event;
     use DMF\Core\Http\Exception\Http404;
     use DMF\Core\Http\Request;
+    use DMF\Core\Http\Response;
     use DMF\Core\Module\Module;
     use DMF\Core\OS\File;
     use DMF\Core\OS\OS;
@@ -40,8 +43,8 @@
         private static $_routes_by_path = [];
         /** @var array Список созданных экземпляров компонентов */
         private static $_component_cache = [];
-        /** @var null|array Объект с данными о текущем маршруте */
-        public $route_object = null;
+        /** @var null|\DMF\Core\Application\Route Объект с данными о текущем маршруте */
+        public $route = null;
         /** @var array Список модулей */
         public static $modules = [];
         /** @var null|\DMF\Core\Module\Module */
@@ -159,7 +162,7 @@
         /**
          * Разбивка URI и получение информации о маршруте
          *
-         * @return array
+         * @return \DMF\Core\Application\Route
          * @throws \DMF\Core\Http\Exception\Http404
          */
         protected function parse_route()
@@ -172,7 +175,7 @@
                 '@all'      => '[\w\d\.\,\-\_\+]+',
             ];
             // Проверяем не был ли текущий объект маршрута уже закеширован ранее
-            if (is_null($this->route_object)) {
+            if (is_null($this->route)) {
                 // Текущая строка запроса
                 $uri = $this->request->request_uri();
                 // Список зарегистрированных маршрутов
@@ -184,18 +187,18 @@
                     }
                     // Проверяем соответствие текущей строке запроса и паттерну маршрута
                     if (preg_match('~^' . $regexp . '$~i', $uri, $arguments)) {
-                        $route_object = [
-                            'url'       => $this->request->request_uri(),
-                            'pattern'   => $pattern,
-                            'arguments' => array_slice($arguments, 1),
-                        ];
-                        $this->route_object = $route_object;
+                        $route_object = new Route(
+                            $this->request->request_uri(),
+                            $pattern,
+                            array_slice($arguments, 1)
+                        );
+                        $this->route = $route_object;
                         return $route_object;
                     }
                 }
                 throw new Http404('Страница ' . Request::get_instance()->url() . ' отсутствует на сайте!');
             } else {
-                return $this->route_object;
+                return $this->route;
             }
         }
 
@@ -347,7 +350,7 @@
          */
         public function module_name()
         {
-            return $this->parse_route()['pattern']->module_name;
+            return $this->parse_route()->pattern->module_name;
         }
 
         /**
@@ -376,19 +379,30 @@
 
         /**
          * Загрузка контроллера
+         * @throws \DMF\Core\Application\Exception\ControllerProxyNotFound
+         * @throws \DMF\Core\Application\Exception\IncorrectResponseFormat
          * @return mixed
-         * @throws Exception\ControllerProxyNotFound
          */
         protected function load_controller()
         {
-            $route_object = $this->route_object;
-            $controller_namespace = $this->module->namespace . '\\Controller\\' . $route_object['pattern']->controller_name;
+            $controller_namespace = $this->module->namespace
+                . '\\Controller\\'
+                . $this->route->pattern->controller_name;
             /** @var $controller \DMF\Core\Controller\Controller */
             $controller = new $controller_namespace();
             if (method_exists($controller, 'proxy')) {
-                return $controller->proxy($route_object['pattern']->action_name, $route_object['arguments']);
+                $data = $controller->proxy($this->route->pattern->action_name, $this->route->arguments);
+                if (!$data instanceof Response) {
+                    throw new IncorrectResponseFormat(
+                        sprintf(
+                            'Действие %s не вернуло значение в формате Response!',
+                            $this->route->pattern->callable));
+                } else {
+                    return $data;
+                }
             } else {
-                throw new ControllerProxyNotFound('Для контроллера ' . $controller_namespace . ' не задан прокси-метод!');
+                throw new ControllerProxyNotFound(
+                    'Для контроллера ' . $controller_namespace . ' не задан прокси-метод!');
             }
         }
 
