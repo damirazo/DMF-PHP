@@ -20,6 +20,9 @@
     class Database extends \PDO
     {
 
+        /** @var int Количество выполненных запросов к БД */
+        public static $queries_count = 0;
+
         /** Инициализация подключения */
         public function __construct()
         {
@@ -48,6 +51,7 @@
             if ($error[0] != '0000') {
                 throw new \Exception('[DB] ' . $error[2]);
             }
+            self::$queries_count += 1;
             return new Statement($this, $q);
         }
 

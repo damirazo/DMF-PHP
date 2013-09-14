@@ -31,14 +31,6 @@
         public $table_prefix = null;
         /** @var string Имя класса для возвращаемой выборкой из БД сущности */
         public $entity_name = 'DMF.Entity';
-        /**
-         * Автосоздание таблицы для указанной модели в БД
-         * ВНИМАНИЕ! Создает запрос для проверки наличия указанной таблицы в БД при каждой инициализации модели,
-         * будучи установленной в true!
-         *
-         * @var bool Требуется ли создавать таблицу указанной модели в БД автоматически в случае ее отсутствия
-         */
-        public $auto_create = false;
         /** @var string Движок, используемый при создании таблиц БД */
         public $table_engine = 'InnoDB';
         /** @var string Кодировка для таблиц БД по умолчанию */
@@ -46,14 +38,17 @@
 
         /**
          * Инициализация модели
+         * В случае, если при инициализации модели был передан массив параметров:
+         * будет создана соответсвующая ей сущность
          */
-        public function __construct()
+        public function __construct($data = null)
         {
             parent::__construct();
-            // Создание таблицы
-            if ($this->auto_create && !$this->table_exists()) {
-                $this->create_table();
+            if (is_array($data)) {
+                $entity = $this->entity_namespace();
+                return new $entity($this, $data);
             }
+            return true;
         }
 
         //#############################################################################################################
@@ -328,6 +323,7 @@
             $fields = $this->sql_from_fields();
             $query .= implode(',' . PHP_EOL, $fields) . PHP_EOL . ') ENGINE=' . $this->table_engine
                 . ' DEFAULT CHARSET=' . $this->table_encoding;
+            //exit('<pre>' . print_r($query, true) . '</pre>');
             return $query;
         }
 
@@ -600,6 +596,17 @@
             return ' LIMIT ' . $limit;
         }
 
+        /**
+         * Возвращение сущности, связанной с текущей моделью
+         * @param array $data Данные для заполнения сущности
+         * @return mixed
+         */
+        public function entity(array $data = [])
+        {
+            $entity_namespace = $this->entity_namespace();
+            return new $entity_namespace($this, $data);
+        }
+
         //#############################################################################################################
         //# Методы ORM
         //#############################################################################################################
@@ -669,8 +676,7 @@
             // Если элемент обнаружен, то добавляем его в сущность
             if ($data_count == 1) {
                 $entity = $data->fetch_one();
-                $entity_namespace = $this->entity_namespace();
-                return new $entity_namespace($this, $entity);
+                return $this->entity($entity);
             } elseif ($data_count < 1) {
                 // Если запись с указанным id отсутствует,
                 // то генерируем соответствующее исключение

@@ -62,6 +62,17 @@
         }
 
         /**
+         * Является ли указанное поле обязательным для заполнения
+         * В случае, если значение поля содержит значение по умолчанию - поле является необязательным для заполнения,
+         * т.к. в данном случае в пустое поле будет подставлено значение по умолчанию
+         * @return bool
+         */
+        public function is_required()
+        {
+            return $this->get_param('required', false) && is_null($this->get_param('default'));
+        }
+
+        /**
          * Возвращает хэш текущих настроек поля
          * @param string $name Название таблицы в БД
          * @return string
@@ -105,7 +116,7 @@
          */
         public function sql_default()
         {
-            return !is_null($this->get_param('default')) ? 'DEFAULT ' . $this->default_value() : '';
+            return !is_null($this->get_param('default')) ? 'DEFAULT "' . $this->default_value() . '"' : '';
         }
 
         /**

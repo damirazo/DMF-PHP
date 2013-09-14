@@ -12,6 +12,7 @@
     use ArrayAccess;
     use DMF\Core\Component\Component;
     use DMF\Core\Model\Exception\RecordDoesNotExists;
+    use DMF\Core\Model\Exception\RequiredFieldNotExists;
 
     /**
      * Class Entity
@@ -24,22 +25,18 @@
 
         /** @var bool Внесены ли изменения в сущность */
         public $is_modified = false;
-
-        /** @var null|Model Связанная модель */
-        protected $model = null;
-
-        /** @var array Массив данных сущности */
-        protected $data = [];
-
-        /** @var null|string Имя таблицы */
-        protected $table = null;
-
+        /** @var array Список полей сущности */
+        public $fields = [];
+        /** @var null|string Имя поля первичного ключа */
+        public $pk_name = null;
         /** @var null|int ID сущности в БД */
         protected $pk = null;
-
-        /** @var null|string Имя поля первичного ключа */
-        protected $pk_name = null;
-
+        /** @var null|Model Связанная модель */
+        protected $model = null;
+        /** @var array Массив данных сущности */
+        protected $data = [];
+        /** @var null|string Имя таблицы */
+        protected $table = null;
         /** @var array Кэш объектов связанных моделей */
         protected $relation_cache = [];
 
@@ -51,10 +48,18 @@
         public function __construct(Model $model, array $data = [])
         {
             $this->model = $model;
+            $this->fields = $model->scheme();
             $this->table = $model->table_name();
             $this->data = $data;
             $this->pk_name = $model->primary_key();
-            $this->pk = $data[$model->primary_key()];
+            // Для еще не созданных записей значение первичного ключа всегда будет null
+            if (isset($this->data[$this->pk_name])) {
+                $this->pk = $this->data[$this->pk_name];
+            } else {
+                $this->pk = null;
+                // Если запись еще не сохранена, то указываем, что она была изменена
+                $this->is_modified = true;
+            }
         }
 
         /**
@@ -64,8 +69,62 @@
         {
             // Если сущность не была изменена, то игнорируем ее сохранение
             if ($this->is_modified) {
-                $this->model->update_by_pk($this->pk, $this->data);
+                $model = $this->model;
+                // Валидация значений полей
+                $this->validate_all();
+                // Если сущность уже была сохранена, то обновляем запись в БД
+                // В противном случае сохраняем запись и получаем ее id
+                if (!is_null($this->pk)) {
+                    $model->update_by_pk($this->pk, $this->data);
+                } else {
+                    $this->id = $model->create($this->data);
+                }
             }
+            // После обновления записи ставим отметку, что запись не изменена, чтобы избежать повторных пересохранений
+            $this->is_modified = false;
+        }
+
+        /**
+         * Валидация всех полей сущности
+         */
+        public function validate_all()
+        {
+            $fields = $this->fields;
+            /** @var $field \DMF\Core\Model\Field\BaseField */
+            foreach ($fields as $field_name => $field) {
+                $this->validate($field_name, $field);
+            }
+        }
+
+        /**
+         * Валидация значения поля
+         * @param string                          $name Имя поля
+         * @param \DMF\Core\Model\Field\BaseField $field Объект поля
+         * @throws \DMF\Core\Model\Exception\RequiredFieldNotExists
+         */
+        protected function validate($name, $field)
+        {
+            // Проверка, что присутствует значение для полей, обязательных к заполнению
+            if (!isset($this->data[$name]) && $field->is_required()) {
+                throw new RequiredFieldNotExists(
+                    sprintf(
+                        'Поле %s.%s обязательно к заполнению, но не содержит значения,'
+                        . ' либо не указано значение по умолчанию!',
+                        $this->model->class_name(),
+                        $name
+                    )
+                );
+            }
+        }
+
+        /**
+         * Проверка существования у сущности поля с указанным значением
+         * @param string $name Имя поля
+         * @return bool
+         */
+        public function has_field($name)
+        {
+            return isset($this->fields[$name]);
         }
 
         /**
@@ -163,9 +222,8 @@
          */
         public function get_field_by_name($name)
         {
-            $scheme = $this->model->scheme();
-            if (isset($scheme[$name])) {
-                return $scheme[$name];
+            if (isset($this->fields[$name])) {
+                return $this->fields[$name];
             }
             return false;
         }
@@ -212,6 +270,12 @@
         {
             /** @var $field \DMF\Core\Model\Field\ForeignkeyField */
             $field = $this->get_field_by_name($name);
+
+            // При установке значения id обновляем также значение pk
+            if ($name == $this->pk_name || $name == 'pk') {
+                $this->pk = $value;
+                $this->data[$this->pk_name] = $value;
+            }
 
             // Для полей со связью требуется проверить существование связанного объекта
             if ($field instanceof \DMF\Core\Model\Field\ForeignKeyField) {
