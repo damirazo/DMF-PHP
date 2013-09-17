@@ -10,6 +10,7 @@
     namespace DMF\Core\Event;
 
     use DMF\Core\Component\Component;
+    use DMF\Core\Event\Exception\EventExists;
 
     /**
      * Class Event
@@ -17,34 +18,49 @@
      *
      * @package DMF\Core\Event
      */
-    class Event extends Component
+    class Event
     {
 
         /** @var array Список зарегистрированных событий */
-        private static $_events = [];
+        private static $listeners = [];
 
         /**
-         * Регистрация нового слушателя событий
-         * @param string $event_name Имя события
-         * @param string $callable Имя класса и метода события
+         * Регистрация события с указанным именен и привязка к нему коллбека
+         * @param string          $name Имя события
+         * @param string|callable $callback Вызываемое действие
+         * @throws \DMF\Core\Event\Exception\EventExists
          */
-        public static function on($event_name, $callable)
+        public static function register($name, $callback)
         {
-            self::$_events[$event_name][] = new Listener($callable);
+            if (isset(self::$listeners[$name])) {
+                throw new EventExists(sprintf('Событие с именем %s уже было ранее зарегистрировано!', $name));
+            }
+            self::$listeners[$name] = new Listener($name, $callback);
         }
 
         /**
-         * Активация события
-         * @param string $event_name Имя события
+         * Вызов события с указанным именем
+         * @param string $name Имя события
+         * @param array  $params Список параметров, передаваемых слушателю события
+         * @return mixed
          */
-        public static function trigger($event_name)
+        public static function send($name, $params = [])
         {
-            if (isset(self::$_events[$event_name]) && count(self::$_events[$event_name]) > 0) {
-                /** @var $listener \DMF\Core\Event\Listener */
-                foreach (self::$_events[$event_name] as $listener) {
-                    $listener->load();
-                }
+            $listener = self::get_listener_by_name($name);
+            if ($listener) {
+                return $listener->call($params);
             }
+            return $listener;
+        }
+
+        /**
+         * Возвращает слушателя события по его имени
+         * @param string $name Имя слушателя события
+         * @return bool|\DMF\Core\Event\Listener
+         */
+        protected static function get_listener_by_name($name)
+        {
+            return isset(self::$listeners[$name]) ? self::$listeners[$name] : false;
         }
 
     }

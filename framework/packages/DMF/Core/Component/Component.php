@@ -10,6 +10,7 @@
     namespace DMF\Core\Component;
 
     use DMF\Core\Application\Application;
+    use DMF\Core\Application\Exception\IllegalArgument;
     use DMF\Core\Document\Array2XML;
     use DMF\Core\Http\Request;
     use DMF\Core\Http\Response;
@@ -92,6 +93,16 @@
         public function form($name)
         {
             return self::$app->get_component($name, ComponentTypes::Form);
+        }
+
+        /**
+         * Возвращает объект события
+         * @param string $name Имя события
+         * @return mixed
+         */
+        public function event($name)
+        {
+            return self::$app->get_component($name, ComponentTypes::Event);
         }
 
         /**
@@ -250,6 +261,30 @@
                 // Работа с псевдонеймспейсами пока не поддерживается
                 return [];
             }
+        }
+
+        /**
+         * Парсер строки для вызова метода из требуемого модуля и класса
+         * @param string $string Строка с параметрами для вызова
+         * @return string
+         * @throws \DMF\Core\Application\Exception\IllegalArgument
+         */
+        public function parse_callable($string)
+        {
+            $segments = explode('.', $string);
+            if (count($segments) == 3) {
+                $module_name = $segments[0];
+                $class_name = $segments[1];
+                $action_name = $segments[2];
+            } elseif (count($segments) == 2) {
+                $module_name = $this->loaded_module()->name;
+                $class_name = $segments[0];
+                $action_name = $segments[1];
+            } else {
+                throw new IllegalArgument(sprintf('Некорректный формат строки для вызова. '.
+                'Требуется [ИмяМодуля.]ИмяКласса.ИмяМетода, получено %s', $string));
+            }
+            return [$module_name, $class_name, $action_name];
         }
 
         /**

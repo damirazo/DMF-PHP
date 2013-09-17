@@ -24,5 +24,7 @@
         const Form = 'Form';
         /** Контроллеры */
         const Controller = 'Controller';
+        /** События */
+        const Event = 'Event';
 
     }
