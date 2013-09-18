@@ -385,8 +385,17 @@
                 . $this->route->pattern->controller_name;
             /** @var $controller \DMF\Core\Controller\Controller */
             $controller = new $controller_namespace();
+            // Выбрасывание события после инициализации контроллера
+            Event::trigger('DMF.controller', [
+                'request'    => $this->request,
+                'controller' => $controller,
+            ]);
             if (method_exists($controller, 'proxy')) {
                 $data = $controller->proxy($this->route->pattern->action_name, $this->route->arguments);
+                Event::trigger('DMF.response', [
+                    'request'  => $this->request,
+                    'response' => $data,
+                ]);
                 if (!$data instanceof Response) {
                     throw new IncorrectResponseFormat(
                         sprintf(

@@ -27,12 +27,12 @@
         private static $event_class_cache = [];
 
         /**
-         * Регистрация события с указанным именен и привязка к нему коллбека
-         * @param string          $name Имя события
-         * @param string|callable $callback Вызываемое действие
+         * Подписка на событие с указанным именем и указание обработчика события
+         * @param string $name Имя события
+         * @param string $callback Обработчик события
          * @throws \DMF\Core\Event\Exception\EventExists
          */
-        public static function register($name, $callback)
+        public static function on($name, $callback)
         {
             if (isset(self::$listeners[$name])) {
                 throw new EventExists(sprintf('Событие с именем %s уже было ранее зарегистрировано!', $name));
@@ -46,7 +46,7 @@
          * @param array  $params Список параметров, передаваемых слушателю события
          * @return mixed
          */
-        public static function send($name, $params = [])
+        public static function trigger($name, $params = [])
         {
             $listener = self::get_listener_by_name($name);
             if ($listener) {
