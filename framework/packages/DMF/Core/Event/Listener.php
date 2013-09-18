@@ -28,6 +28,8 @@
         protected $name;
         /** @var string|callback Вызываемое при инициализации действие */
         protected $callback;
+        /** @var null|callable */
+        protected $callable_class_instance = null;
 
         /**
          * Инициализация слушателя
@@ -48,9 +50,11 @@
          */
         public function call($params = [])
         {
-            list($module, $class, $action) = $this->parse_callable($this->callback);
-            $event = $this->event(sprintf('%s.%s', $module, $class));
-            return $event->{$action}($params);
+            list($module_name, $class_name, $action_name) = $this->parse_callable($this->callback);
+            $module = self::$app->get_module_by_name($module_name);
+            $class_namespace = sprintf('%s\\Event\\%s', $module->namespace, $class_name);
+            $class = Event::get_or_create_class($class_namespace);
+            return $class->{$action_name}($params);
         }
 
     }

@@ -23,6 +23,8 @@
 
         /** @var array Список зарегистрированных событий */
         private static $listeners = [];
+        /** @var array Кэш для экземпляров классов-обработчиков событий */
+        private static $event_class_cache = [];
 
         /**
          * Регистрация события с указанным именен и привязка к нему коллбека
@@ -51,6 +53,21 @@
                 return $listener->call($params);
             }
             return $listener;
+        }
+
+        /**
+         * Возвращает или создает экземпляр класса обработчика событий
+         * @param string $namespace Пространство имен класса
+         * @return mixed
+         */
+        public static function get_or_create_class($namespace)
+        {
+            if (isset(self::$event_class_cache[$namespace])) {
+                return self::$event_class_cache[$namespace];
+            }
+            $instance = new $namespace();
+            self::$event_class_cache[$namespace] = $instance;
+            return $instance;
         }
 
         /**
