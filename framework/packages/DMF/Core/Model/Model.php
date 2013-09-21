@@ -12,6 +12,7 @@
     use DMF\Core\Component\Component;
     use DMF\Core\Model\Exception\DBError;
     use DMF\Core\Model\Exception\RecordDoesNotExists;
+    use DMF\Core\Model\Exception\UndefinedField;
     use DMF\Core\OS\File;
     use DMF\Core\OS\OS;
     use DMF\Core\Storage\Config;
@@ -614,6 +615,7 @@
         /**
          * Создание нового объекта в БД
          * @param array $data Данные для создания объекта
+         * @throws \DMF\Core\Model\Exception\UndefinedField
          * @return int ID созданной записи
          */
         public function create($data)
@@ -625,6 +627,8 @@
                 if (in_array($key, $fields)) {
                     $sql[] = $key . '=:u_' . $key;
                     $params['u_' . $key] = $value;
+                } else {
+                    throw new UndefinedField(sprintf('Поле %s отсутствует в таблице %s!', $key, $this->table_name()));
                 }
             }
             $result_code = 'INSERT INTO ' . $this->table_name() . ' SET ' . implode(', ', $sql);
