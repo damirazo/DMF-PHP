@@ -7,9 +7,6 @@
     use DMF\Core\Storage\Config;
     use DMF\Core\OS\OS;
 
-    /** Активация дебагового режима */
-    Config::set('debug', DEBUG);
-
     /** Список ip адресов, для которых будет доступна дебаговая информация */
     Config::set('allowed_ips', [
         '127.0.0.1'
@@ -43,9 +40,6 @@
 
     /** Секретный ключ для алгоритмов шифрования */
     Config::set('secret_key', 'Kdl39&34m<dfk)fkd3sdfLSD)ds73mf,,sdf');
-
-    /** Кодовое слово для активации скаффолдинга в демонстрационных приложениях */
-    Config::set('scaffolding_password', '123456qwerty');
 
     /** Импортирование локального конфига для переопределения системных настроек */
     OS::import(CONFIG_PATH . 'config.local.php', false);

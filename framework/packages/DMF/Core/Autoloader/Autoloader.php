@@ -22,6 +22,8 @@
 
         /** @var array Список корневых пространств имен */
         private static $_namespaces = [];
+        /** @var array Список рассчитанных путей до файлов с классами */
+        private static $classes = [];
 
         /**
          * Возвращает список зарегистрированных пространств имен
@@ -50,7 +52,7 @@
         protected static function parse_namespace($namespace)
         {
             // Реализация обратной совместимости с PSR-0 стандартом загрузки классов
-            return (!mb_strpos($namespace, '\\')) ? explode('_', $namespace) : explode('\\', $namespace);
+            return !mb_strpos($namespace, '\\') ? explode('_', $namespace) : explode('\\', $namespace);
         }
 
         /**
@@ -92,8 +94,15 @@
          */
         public static function get_path($namespace)
         {
+            // Если путь до указанного файла есть в кэше, то возвращаем его
+            if (isset(self::$classes[$namespace])) {
+                return self::$classes[$namespace];
+            }
+            // В противном случае рассчитываем путь
             $root_path = self::get_root_path($namespace);
-            return $root_path . implode(_SEP, array_slice(self::parse_namespace($namespace), 1));
+            $path = $root_path . implode(_SEP, array_slice(self::parse_namespace($namespace), 1));
+            self::$classes[$namespace] = $path;
+            return $path;
         }
 
         /**
@@ -108,8 +117,7 @@
             if (is_readable($class_path)) {
                 require_once $class_path;
                 return true;
-            }
-            else {
+            } else {
                 throw new ClassNotFound('Класс ' . $namespace . ' не обнаружен или недоступен для чтения!');
             }
         }
