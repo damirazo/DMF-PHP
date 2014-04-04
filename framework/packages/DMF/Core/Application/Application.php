@@ -9,12 +9,10 @@
 
     namespace DMF\Core\Application;
 
-    use DMF\Core\Application\Exception\BaseException;
     use DMF\Core\Application\Exception\ControllerProxyNotFound;
     use DMF\Core\Application\Exception\IllegalArgument;
     use DMF\Core\Application\Exception\IncorrectResponseFormat;
     use DMF\Core\Application\Exception\ModuleNotFound;
-    use DMF\Core\Application\RoutePattern;
     use DMF\Core\Autoloader\Autoloader;
     use DMF\Core\Event\Event;
     use DMF\Core\Http\Exception\Http404;
@@ -24,7 +22,6 @@
     use DMF\Core\OS\File;
     use DMF\Core\OS\OS;
     use DMF\Core\Application\Exception\RouteExists;
-    use DMF\Core\Storage\Config;
 
     /**
      * Class Application

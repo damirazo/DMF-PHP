@@ -10,5 +10,5 @@
     format('Список доступных команд:');
 
     foreach ($commands as $command_name => $command_info) {
-        format('"%s": %s', [$command_name, $command_info[1]]);
+        format('"%s": %s', $command_name, $command_info[1]);
     }

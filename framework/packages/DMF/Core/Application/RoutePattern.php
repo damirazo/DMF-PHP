@@ -51,8 +51,9 @@
                 $this->controller_name = $data[1];
                 $this->action_name = $data[2];
             } else {
-                throw new IllegalArgument('Неверный формат строки вызова контроллера! ' .
-                'Правильный формат: "module.controller.action"');
+                throw new IllegalArgument(
+                    'Неверный формат строки вызова контроллера! ' .
+                    'Правильный формат: "module.controller.action"');
             }
         }
 

@@ -8,9 +8,6 @@
      * @author damirazo <me@damirazo.ru>
      */
 
-    // Загрузка компонента активации фреймворка
-    use DMF\Core\OS\OS;
-
     require_once '../public/index.php';
     require_once 'utils.php';
 
