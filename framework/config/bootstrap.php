@@ -26,6 +26,8 @@
         'App'  => APP_PATH,
         // Дефолтное пространство имен фреймворка
         'DMF'  => DMF_PATH,
+        // Пространство имен ORM фреймворка
+        'ORM'  => PACKAGES_PATH . 'ORM' . _SEP . 'src',
         // Пространство имен шаблонизатора Twig
         'Twig' => PACKAGES_PATH . 'Twig' . _SEP . 'lib' . _SEP . 'Twig',
     ]);
